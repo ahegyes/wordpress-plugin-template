@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6f6652ea87876e7819888f91d1b88948",
+    "content-hash": "740b0a06309c523951f5ce937579f773",
     "packages": [
         {
             "name": "psr/container",
@@ -64,10 +64,16 @@
         {
             "name": "ahegyes/wordpress-configs",
             "version": "dev-trunk",
-            "dist": {
-                "type": "path",
-                "url": "../wordpress-configs",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ahegyes/wordpress-configs.git",
                 "reference": "14544764d73f176b96e5eeb7775fdad40a8674fa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ahegyes/wordpress-configs/zipball/14544764d73f176b96e5eeb7775fdad40a8674fa",
+                "reference": "14544764d73f176b96e5eeb7775fdad40a8674fa",
+                "shasum": ""
             },
             "require": {
                 "ext-json": "*",
@@ -90,6 +96,7 @@
                 "infection/infection": "^0.32",
                 "phpunit/phpunit": "^13"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -136,10 +143,11 @@
                 }
             ],
             "description": "A collection of shared configuration files for DWS WordPress projects.",
-            "transport-options": {
-                "symlink": false,
-                "relative": true
-            }
+            "support": {
+                "source": "https://github.com/ahegyes/wordpress-configs/tree/trunk",
+                "issues": "https://github.com/ahegyes/wordpress-configs/issues"
+            },
+            "time": "2026-05-03T15:43:12+00:00"
         },
         {
             "name": "ahegyes/wp-framework-bootstrap",
@@ -147,12 +155,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ahegyes/wp-framework-bootstrap.git",
-                "reference": "12ba5293467b71a44ca3d0e22d66316292f54704"
+                "reference": "f4f91e995d3056b6a8fa258f3a6ed2f759f671d9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ahegyes/wp-framework-bootstrap/zipball/12ba5293467b71a44ca3d0e22d66316292f54704",
-                "reference": "12ba5293467b71a44ca3d0e22d66316292f54704",
+                "url": "https://api.github.com/repos/ahegyes/wp-framework-bootstrap/zipball/f4f91e995d3056b6a8fa258f3a6ed2f759f671d9",
+                "reference": "f4f91e995d3056b6a8fa258f3a6ed2f759f671d9",
                 "shasum": ""
             },
             "require": {
@@ -227,7 +235,7 @@
                 "issues": "https://github.com/ahegyes/wordpress-framework/issues",
                 "source": "https://github.com/ahegyes/wordpress-framework"
             },
-            "time": "2026-05-03T13:32:21+00:00"
+            "time": "2026-05-03T15:43:51+00:00"
         },
         {
             "name": "ahegyes/wp-framework-core",

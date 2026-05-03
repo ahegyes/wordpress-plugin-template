@@ -21,9 +21,8 @@
       "url": "https://github.com/ahegyes/wp-framework-core"
     },
     {
-      "type": "path",
-      "url": "../wordpress-configs",
-      "options": { "symlink": false }
+      "type": "vcs",
+      "url": "https://github.com/ahegyes/wordpress-configs"
     },
     {
       "type": "composer",
