@@ -1,0 +1,57 @@
+name: Tests
+
+on:
+  push:
+    branches: [trunk]
+  pull_request:
+
+jobs:
+  unit:
+    name: Unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          tools: composer:v2
+      - uses: ramsey/composer-install@v3
+      - run: composer test:unit
+
+  integration:
+    name: Integration (${{ matrix.label }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Happy path — WP nightly meets the plugin's WP 7.0+ floor.
+          - label: 'WP nightly (compatible)'
+            php-version: '8.5'
+            wp-env-core: 'https://wordpress.org/nightly-builds/wordpress-latest.zip'
+          # Graceful-failure path — WP 6.9.4 is below the plugin's 7.0 floor.
+          # `RequirementsCheckTest::test_check_requirements_matches_runtime`
+          # asserts WP_Error with `plugin_wp_incompatible` code on this entry.
+          - label: 'WP 6.9.4 (below floor)'
+            php-version: '8.5'
+            wp-env-core: 'WordPress/WordPress#tags/6.9.4'
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@trunk
+    with:
+      php-version: ${{ matrix.php-version }}
+      wp-env-core: ${{ matrix.wp-env-core }}
+      composer-script: 'test:integration'
+      node-version: '24'
+      wp-env-config-file: '.wp-env.tests.json'
+
+  e2e:
+    name: E2E
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-playwright-e2e.yml@trunk
+    with:
+      plugin-slug: 'dws-plugin-template'
+      php-version: '8.5'
+      node-version: '24'
+      # Include dev deps so the framework + PHP-DI install and the
+      # post-autoload-dump scoping pipeline populates dependencies/.
+      composer-options: '--prefer-dist'
+      build-script: ''
+      wp-env-config-file: '.wp-env.tests.json'

@@ -1,0 +1,71 @@
+name: Bug report
+description: Report a defect in the plugin template (the unmodified template, not a forked plugin).
+labels: [bug, triage]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Plugin runtime (Plugin singleton, AdminNotice, framework wiring)
+        - Composer scoping pipeline (scoper.inc.php, post-autoload-dump)
+        - Changelog tooling (composer changelog:* scripts)
+        - CI workflows (quality.yml, tests.yml)
+        - wp-env / integration test infrastructure
+        - Documentation / readme
+        - Other / unsure
+    validations:
+      required: true
+
+  - type: input
+    id: commit
+    attributes:
+      label: Plugin template commit / SHA
+      placeholder: 'trunk@<sha>'
+    validations:
+      required: true
+
+  - type: input
+    id: php-version
+    attributes:
+      label: PHP version
+      placeholder: '8.5.0'
+    validations:
+      required: true
+
+  - type: input
+    id: wp-version
+    attributes:
+      label: WordPress version
+      placeholder: '7.0'
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Use this template via "Use this template" or git clone
+        2. Run `composer install` / `npm install` / `npm run wp-env:start`
+        3. Observe Z
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs / stack traces / CI run URL
+      render: text
