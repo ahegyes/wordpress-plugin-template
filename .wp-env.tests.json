@@ -8,7 +8,7 @@
         "wp-content/plugins/dws-plugin-template": "."
     },
     "lifecycleScripts": {
-        "afterStart": "wp-env --config .wp-env.tests.json run cli wp plugin activate dws-plugin-template"
+        "afterStart": "wp-env --config .wp-env.tests.json run cli wp plugin activate dws-plugin-template || true"
     },
     "config": {
         "WP_DEBUG": true,
