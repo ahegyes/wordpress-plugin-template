@@ -16,7 +16,7 @@ jobs:
     name: Changelog fragments
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
@@ -29,7 +29,7 @@ jobs:
     name: readme.txt lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: thetwopct/wporg-plugin-readme-linter@v1
         with:
           path: readme.txt
