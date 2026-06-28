@@ -2,7 +2,7 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
-use DeepWebSolutions\PluginTemplate\AdminNotice;
+use DeepWebSolutions\PluginTemplate\Component\AdminNotice;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 

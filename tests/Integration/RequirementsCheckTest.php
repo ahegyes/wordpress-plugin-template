@@ -4,8 +4,8 @@ namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
 
-use function DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\check_requirements;
-use function DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\get_plugin_metadata;
+use function DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Plugin\get_plugin_metadata;
+use function DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Requirements\check_requirements;
 
 final class RequirementsCheckTest extends TestCase {
 	private string $basename = 'dws-plugin-template/dws-plugin-template.php';

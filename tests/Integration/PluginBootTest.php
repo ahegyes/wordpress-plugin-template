@@ -2,11 +2,20 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
+use DeepWebSolutions\PluginTemplate\Component\AdminNotice;
+use DeepWebSolutions\PluginTemplate\Feature\GenericFeature;
+use DeepWebSolutions\PluginTemplate\Feature\WooCommerceFeature;
+use DeepWebSolutions\PluginTemplate\Installer\Installer;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass( Plugin::class )]
+#[UsesClass( GenericFeature::class )]
+#[UsesClass( WooCommerceFeature::class )]
+#[UsesClass( Installer::class )]
+#[UsesClass( AdminNotice::class )]
 final class PluginBootTest extends TestCase {
 	public function test_get_instance_returns_singleton(): void {
 		$first  = Plugin::get_instance();
@@ -16,11 +25,14 @@ final class PluginBootTest extends TestCase {
 	}
 
 	public function test_boot_registers_admin_notices_hook(): void {
+		// The plugin already boots on plugins_loaded during the WordPress load; this confirms the boot is
+		// idempotent and that a generic component registered its admin_notices callback. WooCommerce is not
+		// installed here, so the WooCommerce Feature stays gated out.
 		Plugin::get_instance()->boot();
 
 		self::assertNotFalse(
 			has_action( 'admin_notices' ),
-			'AdminNotice component should register at least one admin_notices callback after boot.'
+			'A generic component should register at least one admin_notices callback after boot.'
 		);
 	}
 }

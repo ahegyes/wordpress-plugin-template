@@ -34,27 +34,3 @@ function dws_plugin_template_instance(): \DeepWebSolutions\PluginTemplate\Plugin
 function dws_plugin_template_boot(): void {
 	dws_plugin_template_instance()->boot();
 }
-
-/**
- * Plugin activation hook callback.
- *
- * @since   2.0.0
- * @version 2.0.0
- *
- * @return  void
- */
-function dws_plugin_template_activate(): void {
-	dws_plugin_template_instance()->activate();
-}
-
-/**
- * Plugin deactivation hook callback.
- *
- * @since   2.0.0
- * @version 2.0.0
- *
- * @return  void
- */
-function dws_plugin_template_deactivate(): void {
-	dws_plugin_template_instance()->deactivate();
-}

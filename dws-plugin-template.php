@@ -36,11 +36,11 @@ if ( ! defined( 'DWS_PLUGIN_TEMPLATE_VERSION' ) ) {
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/functions.php';
 
-$dws_plugin_template_requirements = \DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\check_requirements(
+$dws_plugin_template_requirements = \DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Requirements\check_requirements(
 	plugin_basename( __FILE__ )
 );
-if ( true !== $dws_plugin_template_requirements ) {
-	\DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\output_requirements_error(
+if ( $dws_plugin_template_requirements instanceof \WP_Error ) {
+	\DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Notice\output_requirements_error(
 		plugin_basename( __FILE__ ),
 		$dws_plugin_template_requirements
 	);
@@ -48,6 +48,8 @@ if ( true !== $dws_plugin_template_requirements ) {
 }
 unset( $dws_plugin_template_requirements );
 
+// Activation/deactivation must be wired during the include, before the plugins_loaded-deferred boot.
+\DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginKernel::register_lifecycle_hooks(
+	\DeepWebSolutions\PluginTemplate\Plugin::get_instance()
+);
 add_action( 'plugins_loaded', 'dws_plugin_template_boot', 15 );
-register_activation_hook( DWS_PLUGIN_TEMPLATE_FILE, 'dws_plugin_template_activate' );
-register_deactivation_hook( DWS_PLUGIN_TEMPLATE_FILE, 'dws_plugin_template_deactivate' );

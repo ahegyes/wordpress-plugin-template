@@ -1,7 +1,8 @@
 <?php declare( strict_types=1 );
 
 /**
- * Uninstall handler. Runs in stripped context (no autoloader, no DI) — use raw `get_option` / `$wpdb`.
+ * Uninstall handler. Runs in WordPress's cold uninstall bootstrap — no plugin loaded, only
+ * WP_UNINSTALL_PLUGIN defined — so it rebuilds the container and delegates cleanup to the installer.
  *
  * @since   2.0.0
  * @version 2.0.0
@@ -11,5 +12,10 @@
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
-// Plugin-specific cleanup goes here, e.g.:
-// delete_option( 'dws_plugin_template_settings' );
+if ( ! is_file( __DIR__ . '/vendor/autoload.php' ) ) {
+	return;
+}
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+\DeepWebSolutions\PluginTemplate\Plugin::get_instance()->get_installer()->uninstall();
