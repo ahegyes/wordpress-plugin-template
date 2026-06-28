@@ -1,12 +1,12 @@
 <?php declare( strict_types=1 );
 
-namespace DeepWebSolutions\PluginTemplate;
+namespace DeepWebSolutions\PluginTemplate\Component;
 
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Contracts\HookableInterface;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Lifecycle\Hookable\HookableInterface;
 
 /**
- * Demo component — renders an info notice in the WordPress admin to confirm
- * the plugin booted and the framework's HookableInterface dispatch works.
+ * Demo component — renders an info notice in the WordPress admin to confirm the plugin booted and the
+ * framework's Hookable dispatch works.
  *
  * @since   2.0.0
  * @version 2.0.0
@@ -20,6 +20,7 @@ final class AdminNotice implements HookableInterface {
 	 * @since   2.0.0
 	 * @version 2.0.0
 	 */
+	#[\Override]
 	public function register_hooks(): void {
 		add_action( 'admin_notices', array( $this, 'render' ) );
 	}
