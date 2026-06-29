@@ -34,16 +34,6 @@ final class WordPressStubState {
 		self::$deactivation_hooks = array();
 	}
 
-	public static function has_action( string $hook ): bool {
-		foreach ( self::$actions as $action ) {
-			if ( $action['hook'] === $hook ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	public static function has_filter( string $hook ): bool {
 		foreach ( self::$filters as $filter ) {
 			if ( $filter['hook'] === $hook ) {
