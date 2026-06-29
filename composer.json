@@ -18,7 +18,27 @@
     },
     {
       "type": "vcs",
+      "url": "https://github.com/ahegyes/wp-framework-shared"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/ahegyes/wp-framework-storage"
+    },
+    {
+      "type": "vcs",
       "url": "https://github.com/ahegyes/wp-framework-core"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/ahegyes/wp-framework-utilities"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/ahegyes/wp-framework-settings"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/ahegyes/wp-framework-woocommerce"
     },
     {
       "type": "vcs",
@@ -33,18 +53,27 @@
 
   "require": {
     "php": ">=8.5",
-    "psr/container": "^2"
+    "psr/container": "^2",
+    "psr/log": "^3"
   },
   "require-dev": {
     "ahegyes/wordpress-configs": "dev-trunk",
     "ahegyes/wp-framework-bootstrap": "^2.0@dev",
     "ahegyes/wp-framework-core": "^2.0@dev",
+    "ahegyes/wp-framework-settings": "^2.0@dev",
+    "ahegyes/wp-framework-shared": "^2.0@dev",
+    "ahegyes/wp-framework-storage": "^2.0@dev",
+    "ahegyes/wp-framework-utilities": "^2.0@dev",
+    "ahegyes/wp-framework-woocommerce": "^2.0@dev",
     "automattic/jetpack-changelogger": "^6",
     "humbug/php-scoper": "^0.18",
     "johnpbloch/wordpress-core": "^7.0@dev",
     "php-di/php-di": "^7",
+    "php-stubs/woocommerce-stubs": "^10.9",
+    "php-stubs/wordpress-stubs": "7.0.0 as 6.9999.0",
     "phpunit/phpunit": "^13",
-    "pronamic/changelog-md-to-wordpress-plugin-readme-txt": "^1.0"
+    "pronamic/changelog-md-to-wordpress-plugin-readme-txt": "^1.0",
+    "wp-plugin/woocommerce": "^10.9"
   },
 
   "minimum-stability": "dev",
@@ -52,16 +81,10 @@
 
   "autoload": {
     "psr-4": {
-      "DeepWebSolutions\\PluginTemplate\\": "src/",
-
-      "DeepWebSolutions\\PluginTemplate\\Scoped\\DeepWebSolutions\\Framework\\Core\\": "dependencies/ahegyes/wp-framework-core/src",
-      "DeepWebSolutions\\PluginTemplate\\Scoped\\DI\\": "dependencies/php-di/php-di/src",
-      "DeepWebSolutions\\PluginTemplate\\Scoped\\Invoker\\": "dependencies/php-di/invoker/src",
-      "DeepWebSolutions\\PluginTemplate\\Scoped\\Laravel\\SerializableClosure\\": "dependencies/laravel/serializable-closure/src"
+      "DeepWebSolutions\\PluginTemplate\\": "src/"
     },
     "files": [
-      "dependencies/ahegyes/wp-framework-bootstrap/check-requirements.php",
-      "dependencies/php-di/php-di/src/functions.php"
+      "dependencies/scoper-autoload.php"
     ]
   },
   "autoload-dev": {
@@ -101,6 +124,7 @@
     "test": "@php vendor/bin/phpunit",
     "test:unit": "@php vendor/bin/phpunit --testsuite=Unit",
     "test:integration": "npm --prefix=. run test:integration",
+    "test:requirements": "npm --prefix=. run test:requirements",
 
     "quality-check": [
       "@lint:php",
@@ -117,6 +141,8 @@
 
   "extra": {
     "text-domain": "dws-plugin-template",
+    "scoped-dependencies-dir": "dependencies",
+    "scoping-prefix": "DeepWebSolutions\\PluginTemplate\\Scoped",
     "installer-paths": {
       "vendor/{$vendor}/{$name}/": [
         "type:wordpress-plugin",
@@ -141,7 +167,7 @@
 
   "config": {
     "allow-plugins": {
-      "composer/*": true,
+      "composer/installers": true,
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "phpstan/extension-installer": true
     },

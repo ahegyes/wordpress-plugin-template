@@ -4,8 +4,8 @@ namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
 
-use function DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\check_requirements;
-use function DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\get_plugin_metadata;
+use function DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Plugin\get_plugin_metadata;
+use function DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Requirements\check_requirements;
 
 final class RequirementsCheckTest extends TestCase {
 	private string $basename = 'dws-plugin-template/dws-plugin-template.php';
@@ -30,10 +30,14 @@ final class RequirementsCheckTest extends TestCase {
 
 		self::assertInstanceOf( \WP_Error::class, $result );
 		$codes = $result->get_error_codes();
-		self::assertTrue(
-			\in_array( 'plugin_php_incompatible', $codes, true )
-				|| \in_array( 'plugin_wp_incompatible', $codes, true ),
-			'Expected at least one incompat code on an incompatible runtime.'
-		);
+
+		// Assert the code for whichever floor the runtime misses, so the below-floor CI entry (PHP at floor,
+		// WordPress below it) proves specifically a WordPress incompatibility rather than any error at all.
+		if ( ! \is_php_version_compatible( '8.5' ) ) {
+			self::assertContains( 'plugin_php_incompatible', $codes );
+		}
+		if ( ! \is_wp_version_compatible( '7.0' ) ) {
+			self::assertContains( 'plugin_wp_incompatible', $codes );
+		}
 	}
 }

@@ -11,4 +11,4 @@ In scope:
 
 Out of scope:
 - Plugins forked from this template — report to the fork's maintainer.
-- WordPress core, WooCommerce, or upstream Composer / npm dependencies — report upstream. The transitive `roave/security-advisories` constraint already fails `composer install --dev` on any known CVE in the dep graph.
+- WordPress core, WooCommerce, or upstream Composer / npm dependencies — report upstream. The transitive `roave/security-advisories` constraint already fails `composer packages-install` on any known CVE in the dep graph.

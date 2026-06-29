@@ -8,6 +8,7 @@
 .vscode
 .wp-env.tests.json
 
+AGENTS.md
 CHANGELOG.md
 CLAUDE.md
 CONTRIBUTING.md

@@ -18,6 +18,11 @@
 		<testsuite name="Integration">
 			<directory>tests/Integration</directory>
 		</testsuite>
+		<!-- Requirements-only subset run on the below-floor WP matrix entry, where the full Integration
+		     suite would boot components against a runtime the plugin refuses to activate on. -->
+		<testsuite name="Requirements">
+			<file>tests/Integration/RequirementsCheckTest.php</file>
+		</testsuite>
 	</testsuites>
 
 	<source>

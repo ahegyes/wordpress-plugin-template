@@ -21,6 +21,8 @@ Ships with a demo `AdminNotice` component as proof the framework's lifecycle dis
 1. Upload the plugin zip via Plugins → Add New → Upload Plugin.
 2. Activate the plugin.
 
+The plugin boots only with its scoped framework present under `dependencies/`. A distribution zip must bundle that directory; a source checkout does not have it (`dependencies/` is gitignored), so run `composer packages-install` (see the GitHub README) before activating, or the plugin shows a setup notice instead of booting.
+
 == Changelog ==
 
 <!-- Start changelog -->

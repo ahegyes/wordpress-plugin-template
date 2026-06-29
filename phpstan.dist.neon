@@ -9,8 +9,17 @@ parameters:
         - src
         - config
         - tests
+    # The example WooCommerce settings page subclasses \WC_Settings_Page; PHPStan analyses without
+    # bootstrapping WooCommerce, so its symbol comes from the stub catalog. scanFiles, not bootstrapFiles:
+    # requiring the real file would fatal — WooCommerce is not loaded in the PHPStan process.
+    scanFiles:
+        - vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
     excludePaths:
-        - dependencies/*
-        - vendor/*
-        - node_modules/*
-        - tests/bootstrap.php
+        analyseAndScan:
+            - dependencies/*
+            - vendor/*
+            - node_modules/*
+            - tests/bootstrap.php
+            # Guarded mock-WordPress shims; scanning them would shadow the wordpress-stubs signatures.
+            - tests/Unit/bootstrap-wp-stubs.php
+            - tests/Unit/entrypoint-wp-stubs.php
