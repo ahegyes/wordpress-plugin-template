@@ -24,15 +24,20 @@ final class PluginBootTest extends TestCase {
 		self::assertSame( $first, $second );
 	}
 
-	public function test_boot_registers_admin_notices_hook(): void {
-		// The plugin already boots on plugins_loaded during the WordPress load; this re-boot confirms boot is
-		// idempotent and that a generic component registered its admin_notices callback. WooCommerce is active
-		// in this environment, so the WooCommerce Feature gates in too; this asserts only the generic hook.
+	public function test_boot_registers_the_generic_admin_notice_callback(): void {
+		// The plugin boots on plugins_loaded during the WordPress load. Assert GenericFeature dispatched its own
+		// AdminNotice::render onto admin_notices, not merely that some callback exists: WordPress core, the active
+		// WooCommerce, and the pre-kernel notice renderer all register admin_notices handlers, so a bare
+		// has_action() stays green even when component dispatch is broken. The container shares the resolved
+		// component, so this is the instance the kernel hooked.
 		Plugin::get_instance()->boot();
 
+		$notice = Plugin::get_instance()->get_container()->get( AdminNotice::class );
+		self::assertInstanceOf( AdminNotice::class, $notice );
+
 		self::assertNotFalse(
-			has_action( 'admin_notices' ),
-			'A generic component should register at least one admin_notices callback after boot.'
+			has_action( 'admin_notices', array( $notice, 'render' ) ),
+			'GenericFeature must register the AdminNotice render callback.'
 		);
 	}
 }

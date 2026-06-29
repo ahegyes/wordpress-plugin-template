@@ -12,6 +12,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Plugi
 use DeepWebSolutions\PluginTemplate\Scoped\DI\Container;
 use DeepWebSolutions\PluginTemplate\Tests\Unit\Doubles\SpyInstaller;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
@@ -54,6 +56,10 @@ final class PluginBootTest extends TestCase {
 		);
 	}
 
+	// A dedicated process: defining WC_VERSION leaks the constant into sibling tests, which cannot redefine or
+	// unset it; the no-WooCommerce sibling would then pass only because the active-plugin gate runs first.
+	#[RunInSeparateProcess]
+	#[PreserveGlobalState( false )]
 	public function test_boot_registers_the_woocommerce_feature_when_woocommerce_is_active(): void {
 		WordPressStubState::$active_plugins = array( 'woocommerce/woocommerce.php' );
 		if ( ! \defined( 'WC_VERSION' ) ) {

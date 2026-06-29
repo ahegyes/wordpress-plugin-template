@@ -12,6 +12,11 @@ final class ExampleSettingsTest extends TestCase {
 	private const TAB_ID      = 'dws_plugin_template';
 	private const OPTION_KEYS = array( 'dws_plugin_template_enable_feature', 'dws_plugin_template_api_key' );
 
+	/**
+	 * @var array<string, mixed>
+	 */
+	private array $saved_hooks = array();
+
 	protected function setUp(): void {
 		parent::setUp();
 
@@ -23,11 +28,31 @@ final class ExampleSettingsTest extends TestCase {
 		}
 
 		\wp_set_current_user( 1 );
-		$this->reset();
+
+		// Isolate the hooks the example settings path registers on, capturing each so tearDown restores it: the
+		// plugin's own boot-time registration (and any sibling test's) survives instead of being wiped.
+		// woocommerce_get_settings_pages is global to every settings page in the process.
+		global $wp_filter;
+		foreach ( $this->isolated_hooks() as $hook ) {
+			$this->saved_hooks[ $hook ] = $wp_filter[ $hook ] ?? null;
+			unset( $wp_filter[ $hook ] );
+		}
+
+		$this->delete_settings_options();
 	}
 
 	protected function tearDown(): void {
-		$this->reset();
+		$this->delete_settings_options();
+
+		global $wp_filter;
+		foreach ( $this->saved_hooks as $hook => $saved ) {
+			if ( null !== $saved ) {
+				$wp_filter[ $hook ] = $saved;
+			} else {
+				unset( $wp_filter[ $hook ] );
+			}
+		}
+
 		parent::tearDown();
 	}
 
@@ -112,11 +137,19 @@ final class ExampleSettingsTest extends TestCase {
 		return null;
 	}
 
-	private function reset(): void {
-		\remove_all_filters( 'woocommerce_get_settings_pages' );
+	/** @return list<string> */
+	private function isolated_hooks(): array {
+		$hooks = array( 'woocommerce_get_settings_pages' );
 
 		foreach ( self::OPTION_KEYS as $key ) {
-			\remove_all_filters( 'woocommerce_admin_settings_sanitize_option_' . $key );
+			$hooks[] = 'woocommerce_admin_settings_sanitize_option_' . $key;
+		}
+
+		return $hooks;
+	}
+
+	private function delete_settings_options(): void {
+		foreach ( self::OPTION_KEYS as $key ) {
 			\delete_option( $key );
 		}
 	}
