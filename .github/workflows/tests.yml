@@ -31,23 +31,27 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Happy path — WP nightly meets the plugin's WP 7.0+ floor.
-          - label: 'WP nightly (compatible)'
+          # Happy path — stable WP 7.0 (the plugin's floor) runs the full integration suite; pinned, not
+          # nightly, so an unrelated upstream change cannot turn this job red.
+          - label: 'WP 7.0 (compatible)'
             php-version: '8.5'
-            wp-env-core: 'https://wordpress.org/nightly-builds/wordpress-latest.zip'
-          # Graceful-failure path — WP 6.9.4 is below the plugin's 7.0 floor.
-          # `RequirementsCheckTest::test_check_requirements_matches_runtime`
-          # asserts WP_Error with `plugin_wp_incompatible` code on this entry.
+            wp-env-core: 'https://wordpress.org/wordpress-7.0.zip'
+            wp-env-config-file: '.wp-env.tests.json'
+            composer-script: 'test:integration'
+          # Graceful-failure path — WP 6.9.4 is below the 7.0 floor; the requirements-only suite proves the
+          # gate, on a config that skips the activation core would reject below the floor.
           - label: 'WP 6.9.4 (below floor)'
             php-version: '8.5'
             wp-env-core: 'WordPress/WordPress#tags/6.9.4'
+            wp-env-config-file: '.wp-env.belowfloor.json'
+            composer-script: 'test:requirements'
     uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@9764855f54d8c75941667f40326227a8434febbd
     with:
       php-version: ${{ matrix.php-version }}
       wp-env-core: ${{ matrix.wp-env-core }}
-      composer-script: 'test:integration'
+      composer-script: ${{ matrix.composer-script }}
       node-version: '24'
-      wp-env-config-file: '.wp-env.tests.json'
+      wp-env-config-file: ${{ matrix.wp-env-config-file }}
 
   e2e:
     name: E2E

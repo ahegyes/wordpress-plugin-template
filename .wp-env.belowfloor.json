@@ -1,15 +1,12 @@
 {
     "$schema": "https://schemas.wp.org/trunk/wp-env.schema.json",
-    "core": "https://wordpress.org/nightly-builds/wordpress-latest.zip",
+    "core": "WordPress/WordPress#tags/6.9.4",
     "phpVersion": "8.5",
     "port": 8811,
     "testsEnvironment": false,
     "mappings": {
         "wp-content/plugins/dws-plugin-template": ".",
         "wp-content/plugins/woocommerce": "./vendor/wp-plugin/woocommerce"
-    },
-    "lifecycleScripts": {
-        "afterStart": "wp-env --config .wp-env.tests.json run cli wp plugin activate woocommerce && wp-env --config .wp-env.tests.json run cli wp wc hpos enable && wp-env --config .wp-env.tests.json run cli wp plugin activate dws-plugin-template"
     },
     "config": {
         "WP_DEBUG": true,

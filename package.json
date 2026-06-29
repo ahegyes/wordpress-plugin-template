@@ -12,7 +12,8 @@
         "node": ">=24"
     },
     "devDependencies": {
-        "@ahegyes/wordpress-configs": "github:ahegyes/wordpress-configs",
+        "@ahegyes/wordpress-configs": "git+https://github.com/ahegyes/wordpress-configs.git#14544764d73f176b96e5eeb7775fdad40a8674fa",
+        "@playwright/test": "^1",
         "@wordpress/e2e-test-utils-playwright": "^1",
         "@wordpress/env": "^11",
         "@wordpress/scripts": "^32"
@@ -38,6 +39,7 @@
         "check:licenses": "wp-scripts check-licenses",
 
         "test:integration": "wp-env --config .wp-env.tests.json run cli --env-cwd=wp-content/plugins/dws-plugin-template vendor/bin/phpunit --testsuite=Integration",
+        "test:requirements": "wp-env --config .wp-env.belowfloor.json run cli --env-cwd=wp-content/plugins/dws-plugin-template vendor/bin/phpunit --testsuite=Requirements",
         "test:e2e": "playwright test --config=playwright.config.js"
     }
 }

@@ -70,7 +70,7 @@
     "johnpbloch/wordpress-core": "^7.0@dev",
     "php-di/php-di": "^7",
     "php-stubs/woocommerce-stubs": "^10.9",
-    "php-stubs/wordpress-stubs": "*",
+    "php-stubs/wordpress-stubs": "7.0.0 as 6.9999.0",
     "phpunit/phpunit": "^13",
     "pronamic/changelog-md-to-wordpress-plugin-readme-txt": "^1.0",
     "wp-plugin/woocommerce": "^10.9"
@@ -124,6 +124,7 @@
     "test": "@php vendor/bin/phpunit",
     "test:unit": "@php vendor/bin/phpunit --testsuite=Unit",
     "test:integration": "npm --prefix=. run test:integration",
+    "test:requirements": "npm --prefix=. run test:requirements",
 
     "quality-check": [
       "@lint:php",
@@ -166,7 +167,7 @@
 
   "config": {
     "allow-plugins": {
-      "composer/*": true,
+      "composer/installers": true,
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "phpstan/extension-installer": true
     },
