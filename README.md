@@ -2,21 +2,28 @@
 
 Scaffold for WordPress plugins on the DWS framework. Each fork ships its own scoped copy of the framework + PHP-DI (via humbug/php-scoper) so two plugins can't collide on framework versions.
 
+**New here?** Start with [docs/getting-started.md](docs/getting-started.md) — how the reference boots and how to extend it.
+
 ## Architecture
 
 ```
 dws-plugin-template/
-├── dws-plugin-template.php   # WP plugin entry: header → autoload → check_requirements → boot
+├── dws-plugin-template.php   # WP plugin entry: guards → check_requirements → register_lifecycle_hooks → boot
 ├── functions.php             # Global facade (theme/snippet API surface)
-├── uninstall.php             # WP-invoked cleanup on plugin deletion
+├── uninstall.php             # WP-invoked cleanup → Installer::uninstall()
 ├── src/
-│   ├── Plugin.php            # Singleton: container + kernel + lifecycle
-│   └── AdminNotice.php       # Demo HookableInterface component
+│   ├── Plugin.php            # Singleton implementing PluginInterface: container + kernel + lifecycle
+│   ├── Feature/              # GenericFeature (always-on) + WooCommerceFeature (WC-gated)
+│   ├── Installer/            # Installer: stored-version I/O, install/update/uninstall
+│   ├── Component/            # AdminNotice + ExampleSettings (HookableInterface components)
+│   └── Settings/             # ExampleWCSettingsPage (DescriptorBackedWCSettingsPage subclass)
 ├── config/
-│   └── container.php         # PHP-DI definitions
+│   └── container.php         # PHP-DI definitions (the composition root)
+├── docs/
+│   └── getting-started.md    # How the reference boots + how to extend it
 ├── tests/
 │   ├── bootstrap.php         # Composer autoload + (in wp-env) WP load
-│   ├── Unit/                 # Pure PHP, no Docker
+│   ├── Unit/                 # Pure PHP, no Docker (incl. the mock-WP boot smoke)
 │   ├── Integration/          # wp-env Docker, real WP loaded
 │   └── e2e/                  # Playwright + @wordpress/e2e-test-utils-playwright
 ├── scoper.inc.php            # php-scoper config — extends wordpress-configs base
