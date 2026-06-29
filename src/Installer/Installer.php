@@ -4,7 +4,7 @@ namespace DeepWebSolutions\PluginTemplate\Installer;
 
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Installer\InstallerInterface;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Shared\Version\Version;
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Storage\OptionsStore;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Storage\KeyValueStoreInterface;
 
 /**
  * Plugin installer. Owns one wp_options row holding the stored version and the install marker; the kernel
@@ -16,6 +16,17 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Storage\Op
  */
 final class Installer implements InstallerInterface {
 	// region FIELDS AND CONSTANTS
+
+	/**
+	 * Option key of the installer's own wp_options row. Public so the container creates the backing store
+	 * under the same key the uninstall path clears, keeping the row's name in one place.
+	 *
+	 * @since   2.0.0
+	 * @version 2.0.0
+	 *
+	 * @var     string
+	 */
+	public const STORE_KEY = 'dws_plugin_template';
 
 	/**
 	 * Store key holding the recorded plugin version.
@@ -47,10 +58,14 @@ final class Installer implements InstallerInterface {
 	 * @since   2.0.0
 	 * @version 2.0.0
 	 *
-	 * @param   OptionsStore<mixed> $store Backing wp_options store for installer state.
+	 * @param   KeyValueStoreInterface<mixed> $store               Backing store for installer state.
+	 * @param   list<string>                  $footprint_options   wp_options keys, beyond the store's own row, removed on uninstall.
+	 * @param   list<string>                  $footprint_user_meta User-meta keys removed on uninstall (network-global).
 	 */
 	public function __construct(
-		protected OptionsStore $store,
+		protected KeyValueStoreInterface $store,
+		protected array $footprint_options = array(),
+		protected array $footprint_user_meta = array(),
 	) {}
 
 	// endregion
@@ -79,11 +94,12 @@ final class Installer implements InstallerInterface {
 	 */
 	#[\Override]
 	public function update( Version $from_version ): void {
-		// Each step is guarded by the version that introduced it and must converge on re-run: a failed boot
-		// re-runs update() from the same $from_version, since the stored version advances only on success.
-		if ( $from_version->is_less_than( Version::from_string( '2.1.0' ) ) ) {
-			$this->store->set( 'schema', 2 );
-		}
+		// Gate each migration step by the version that introduced it, reading $from_version so a step runs
+		// only for installs older than that version, and keep every step idempotent: a failed boot re-runs
+		// update() from the same $from_version, since the stored version advances only on success. The step
+		// version must be at or below get_current_version() so the step ships in the release that runs it.
+		// This template carries no schema to migrate; a real step guards a one-time idempotent block with
+		// `if ( $from_version->is_less_than( Version::from_string( '1.5.0' ) ) )`.
 	}
 
 	/**
@@ -129,7 +145,8 @@ final class Installer implements InstallerInterface {
 	 */
 	#[\Override]
 	public function activate( bool $network_wide = false ): void {
-		// No activation work: the kernel runs install()/update() on every boot, so first-run setup needs no
+		// No activation work, so $network_wide needs no get_sites() loop: the kernel runs install()/update()
+		// on every boot, and boot runs per-request on each site, so first-run setup happens per site without a
 		// separate activation step. Capability grants, when a plugin has them, would live here and in update().
 	}
 
@@ -152,13 +169,55 @@ final class Installer implements InstallerInterface {
 	 */
 	#[\Override]
 	public function uninstall(): void {
-		// Remove every persistent footprint the plugin creates: the installer's own state, the persistent
-		// admin-notice store, the example WooCommerce settings options, and the per-user dismissal records.
+		// A network uninstall fires once for the whole network, so the per-site option rows must be cleared on
+		// each site in turn; a single-site install clears its one site directly.
+		if ( \is_multisite() ) {
+			$site_ids = \get_sites(
+				array(
+					'fields' => 'ids',
+					'number' => 0,
+				)
+			);
+			if ( \is_array( $site_ids ) ) {
+				foreach ( $site_ids as $site_id ) {
+					\switch_to_blog( (int) $site_id );
+					try {
+						$this->delete_site_footprint();
+					} finally {
+						// restore_current_blog() runs even when a site's deletion throws, so a failed delete
+						// leaves the blog context as it was found rather than stranded on the switched site.
+						\restore_current_blog();
+					}
+				}
+			}
+		} else {
+			$this->delete_site_footprint();
+		}
+
+		// User metadata is network-global, so the per-user dismissal records clear once regardless of multisite.
+		foreach ( $this->footprint_user_meta as $meta_key ) {
+			\delete_metadata( 'user', 0, $meta_key, '', true );
+		}
+	}
+
+	// endregion
+
+	// region HELPERS
+
+	/**
+	 * Removes the plugin's per-site persistent footprint on the current site: the installer's own state row
+	 * and every option declared at construction. Runs once per site under a multisite uninstall.
+	 *
+	 * @since   2.0.0
+	 * @version 2.0.0
+	 *
+	 * @return  void
+	 */
+	protected function delete_site_footprint(): void {
 		$this->store->clear();
-		\delete_option( 'dws_plugin_template_notices' );
-		\delete_option( 'dws_plugin_template_enable_feature' );
-		\delete_option( 'dws_plugin_template_api_key' );
-		\delete_metadata( 'user', 0, 'dws_plugin_template_dismissed_notices', '', true );
+		foreach ( $this->footprint_options as $option_key ) {
+			\delete_option( $option_key );
+		}
 	}
 
 	// endregion

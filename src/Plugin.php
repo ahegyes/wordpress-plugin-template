@@ -70,14 +70,16 @@ final class Plugin implements PluginInterface {
 	protected const INSTALL_FAILURE_NOTICE = 'dws-plugin-template-install-failure';
 
 	/**
-	 * Name of the persistent, cross-request notice store the failure notice lives in.
+	 * Name of the persistent, cross-request notice store the failure notice lives in. Public so the
+	 * container registers the store under the same name the install-failure logger queues into; the logger
+	 * constructor throws on an unregistered store name, so both sides must reference this one constant.
 	 *
 	 * @since   2.0.0
 	 * @version 2.0.0
 	 *
 	 * @var     string
 	 */
-	protected const PERSISTENT_STORE = 'persistent';
+	public const PERSISTENT_STORE = 'persistent';
 
 	// endregion
 

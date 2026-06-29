@@ -15,6 +15,7 @@
  */
 
 use DeepWebSolutions\PluginTemplate\Installer\Installer;
+use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Shared\Version\Version;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Storage\MemoryStore;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Storage\OptionsStore;
@@ -27,25 +28,38 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerc
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Conditionals\Dependencies\WooCommerceVersionConditional;
 use DeepWebSolutions\PluginTemplate\Settings\ExampleWCSettingsPage;
 
+// Persistent storage keys named once here, so the stores that create each row and the installer that
+// removes it on uninstall stay in sync. The WooCommerce settings fields each persist one wp_options row as
+// {slug}_{field}; keep this list aligned with the ExampleSettings descriptor.
+$notices_option         = 'dws_plugin_template_notices';
+$dismissed_notices_meta = 'dws_plugin_template_dismissed_notices';
+$settings_options       = array( 'dws_plugin_template_enable_feature', 'dws_plugin_template_api_key' );
+
 return array(
 
 	// The WooCommerce Feature gates on these; the kernel resolves each from the container before building the Feature.
 	WPPluginActiveConditional::class     => static fn (): WPPluginActiveConditional => new WPPluginActiveConditional( 'woocommerce/woocommerce.php' ),
 	WooCommerceVersionConditional::class => static fn (): WooCommerceVersionConditional => new WooCommerceVersionConditional( Version::from_string( '8.0' ) ),
 
-	// Two stores: a per-request memory store and a wp_options-backed persistent store. The install-failure
-	// logger queues into the persistent store so the notice survives the request that stops the boot.
+	// Two stores: a per-request memory store and an autoload-off wp_options persistent store. The install-failure
+	// logger queues into the persistent store, under Plugin::PERSISTENT_STORE, so the notice survives the request
+	// that stops the boot; the store name is shared with Plugin so the logger and the registration cannot desync.
 	AdminNoticesService::class => static fn (): AdminNoticesService => new AdminNoticesService(
 		array(
 			AdminNoticesService::DEFAULT_STORE => new NoticeStore( new MemoryStore() ),
-			'persistent'                       => new NoticeStore( new OptionsStore( 'dws_plugin_template_notices' ) ),
+			Plugin::PERSISTENT_STORE           => new NoticeStore( new OptionsStore( $notices_option, false ) ),
 		),
-		new DismissedNoticesTracker( new UserMetaStore( 'dws_plugin_template_dismissed_notices' ) ),
+		new DismissedNoticesTracker( new UserMetaStore( $dismissed_notices_meta ) ),
 		'dws_plugin_template_dismiss_notice',
 	),
 
-	// The installer owns one wp_options row holding the stored version and the install marker.
-	Installer::class => static fn (): Installer => new Installer( new OptionsStore( 'dws_plugin_template' ) ),
+	// The installer owns one autoload-off wp_options row (stored version + install marker) and is handed the
+	// full uninstall footprint — the persistent notice option, the settings options, and the dismissal meta.
+	Installer::class => static fn (): Installer => new Installer(
+		new OptionsStore( Installer::STORE_KEY, false ),
+		array_merge( array( $notices_option ), $settings_options ),
+		array( $dismissed_notices_meta ),
+	),
 
 	// One backend per page, bound to the empty WC_Settings_Page subclass WooCommerce recovers by class name.
 	WooCommerceSettingsBackend::class => static fn (): WooCommerceSettingsBackend => new WooCommerceSettingsBackend( ExampleWCSettingsPage::class ),
