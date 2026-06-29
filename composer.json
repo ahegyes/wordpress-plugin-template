@@ -72,7 +72,8 @@
     "php-stubs/woocommerce-stubs": "^10.9",
     "php-stubs/wordpress-stubs": "*",
     "phpunit/phpunit": "^13",
-    "pronamic/changelog-md-to-wordpress-plugin-readme-txt": "^1.0"
+    "pronamic/changelog-md-to-wordpress-plugin-readme-txt": "^1.0",
+    "wp-plugin/woocommerce": "^10.9"
   },
 
   "minimum-stability": "dev",

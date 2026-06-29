@@ -5,10 +5,11 @@
     "port": 8811,
     "testsEnvironment": false,
     "mappings": {
-        "wp-content/plugins/dws-plugin-template": "."
+        "wp-content/plugins/dws-plugin-template": ".",
+        "wp-content/plugins/woocommerce": "./vendor/wp-plugin/woocommerce"
     },
     "lifecycleScripts": {
-        "afterStart": "wp-env --config .wp-env.tests.json run cli wp plugin activate dws-plugin-template || true"
+        "afterStart": "wp-env --config .wp-env.tests.json run cli wp plugin activate woocommerce && wp-env --config .wp-env.tests.json run cli wp wc hpos enable && ( wp-env --config .wp-env.tests.json run cli wp plugin activate dws-plugin-template || true )"
     },
     "config": {
         "WP_DEBUG": true,
