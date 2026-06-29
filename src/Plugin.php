@@ -157,10 +157,6 @@ final class Plugin implements PluginInterface {
 	 */
 	#[\Override]
 	public function get_feature_classes(): array {
-		// php-scoper does not rewrite the FQN inside the inherited docblock's class-string<>, so analysis
-		// reads the return as the unscoped FeatureInterface, which the scoped Feature class-strings cannot
-		// satisfy. Only the scoped framework is loaded at runtime, so the returned list is correct.
-		// @phpstan-ignore return.type
 		return array(
 			GenericFeature::class,
 			WooCommerceFeature::class,
