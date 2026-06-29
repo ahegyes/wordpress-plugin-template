@@ -47,7 +47,7 @@ final class Plugin implements PluginInterface {
 	 *
 	 * @var     ContainerInterface
 	 */
-	protected ContainerInterface $container;
+	protected readonly ContainerInterface $container;
 
 	/**
 	 * Runtime engine, stored once boot() has run so repeat boots are no-ops.
@@ -92,6 +92,8 @@ final class Plugin implements PluginInterface {
 	 * @version 2.0.0
 	 */
 	private function __construct() {
+		// The container runs uncompiled: the demo component graph is small, and compiling autowiring needs a
+		// writable, WP_DEBUG-gated cache directory a forkable template cannot assume is available on every host.
 		$builder = new ContainerBuilder();
 		$builder->addDefinitions( __DIR__ . '/../config/container.php' );
 
@@ -184,8 +186,9 @@ final class Plugin implements PluginInterface {
 	// region METHODS
 
 	/**
-	 * Boots the plugin once. Wires admin-notice rendering before running the kernel — the kernel stops the
-	 * boot when the installer fails, so this must not depend on the boot completing — then boots the kernel.
+	 * Boots the plugin once. In an admin request it wires notice rendering before running the kernel — which
+	 * stops the boot when the installer fails — so a queued failure notice still renders; the kernel then boots
+	 * for every request.
 	 *
 	 * @since   2.0.0
 	 * @version 2.0.0
@@ -197,11 +200,16 @@ final class Plugin implements PluginInterface {
 			return;
 		}
 
-		$this->register_notice_rendering();
+		// Notice rendering and the stale-notice cleanup only matter in the admin, where the notices render and
+		// the dismiss AJAX fires; a front-end request skips both, sparing the wp_options read that remove_notice()
+		// would cost. A failed install still queues into the persistent store, so the next admin request shows it.
+		if ( is_admin() ) {
+			$this->register_notice_rendering();
 
-		// Drop any prior install-failure notice before the kernel runs; build_logger() re-queues it only when
-		// this boot's installer routine fails again, so a recovered install stops surfacing a stale failure.
-		$this->notices()->remove_notice( self::INSTALL_FAILURE_NOTICE, self::PERSISTENT_STORE );
+			// Drop any prior install-failure notice before the kernel runs; build_logger() re-queues it only
+			// when this boot's installer routine fails again, so a recovered install stops surfacing a stale one.
+			$this->notices()->remove_notice( self::INSTALL_FAILURE_NOTICE, self::PERSISTENT_STORE );
+		}
 
 		$this->kernel = PluginKernel::run( $this, $this->build_logger() );
 	}
@@ -211,9 +219,9 @@ final class Plugin implements PluginInterface {
 	// region HELPERS
 
 	/**
-	 * Wires the admin-notice service's render and dismissal hooks unconditionally, before the kernel boots.
-	 * A renderer dispatched as a Feature component would never register when the installer fails the boot,
-	 * leaving a queued install-failure notice unrendered; wiring it here keeps that notice path live.
+	 * Wires the admin-notice service's render and dismissal hooks before the kernel boots, regardless of the
+	 * installer outcome. A renderer dispatched as a Feature component would never register when the installer
+	 * fails the boot, leaving a queued install-failure notice unrendered; wiring it here keeps that path live.
 	 *
 	 * @since   2.0.0
 	 * @version 2.0.0

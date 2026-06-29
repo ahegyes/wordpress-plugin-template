@@ -63,9 +63,9 @@ final class Installer implements InstallerInterface {
 	 * @param   list<string>                  $footprint_user_meta User-meta keys removed on uninstall (network-global).
 	 */
 	public function __construct(
-		protected KeyValueStoreInterface $store,
-		protected array $footprint_options = array(),
-		protected array $footprint_user_meta = array(),
+		protected readonly KeyValueStoreInterface $store,
+		protected readonly array $footprint_options = array(),
+		protected readonly array $footprint_user_meta = array(),
 	) {}
 
 	// endregion

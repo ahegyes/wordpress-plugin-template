@@ -37,6 +37,9 @@ final class WordPressStubState {
 	/** @var list<string> */
 	public static array $blog_switches = array();
 
+	/** @var bool */
+	public static bool $is_admin = true;
+
 	public static function reset(): void {
 		self::$actions            = array();
 		self::$filters            = array();
@@ -48,6 +51,7 @@ final class WordPressStubState {
 		self::$is_multisite       = false;
 		self::$sites              = array();
 		self::$blog_switches      = array();
+		self::$is_admin           = true;
 	}
 
 	public static function has_filter( string $hook ): bool {

@@ -20,6 +20,11 @@
  * @package DeepWebSolutions\PluginTemplate
  */
 
+use DeepWebSolutions\PluginTemplate\Plugin;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginKernel;
+use function DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Notice\output_requirements_error;
+use function DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Requirements\check_requirements;
+
 defined( 'ABSPATH' ) || exit;
 
 $dws_plugin_template_autoload         = __DIR__ . '/vendor/autoload.php';
@@ -55,14 +60,9 @@ if ( ! defined( 'DWS_PLUGIN_TEMPLATE_VERSION' ) ) {
  */
 require_once $dws_plugin_template_scoped_bootstrap;
 
-$dws_plugin_template_requirements = \DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Requirements\check_requirements(
-	plugin_basename( __FILE__ )
-);
+$dws_plugin_template_requirements = check_requirements( plugin_basename( __FILE__ ) );
 if ( $dws_plugin_template_requirements instanceof \WP_Error ) {
-	\DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Notice\output_requirements_error(
-		plugin_basename( __FILE__ ),
-		$dws_plugin_template_requirements
-	);
+	output_requirements_error( plugin_basename( __FILE__ ), $dws_plugin_template_requirements );
 	return;
 }
 unset( $dws_plugin_template_requirements );
@@ -71,9 +71,7 @@ require_once $dws_plugin_template_autoload;
 require_once __DIR__ . '/functions.php';
 
 // Activation/deactivation must be wired during the include, before the plugins_loaded-deferred boot.
-\DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginKernel::register_lifecycle_hooks(
-	\DeepWebSolutions\PluginTemplate\Plugin::get_instance()
-);
+PluginKernel::register_lifecycle_hooks( Plugin::get_instance() );
 add_action( 'plugins_loaded', 'dws_plugin_template_boot', 15 );
 
 /**

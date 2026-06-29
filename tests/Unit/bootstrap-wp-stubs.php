@@ -68,6 +68,12 @@ if ( ! function_exists( 'delete_metadata' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_admin' ) ) {
+	function is_admin() {
+		return WordPressStubState::$is_admin;
+	}
+}
+
 if ( ! function_exists( 'is_multisite' ) ) {
 	function is_multisite() {
 		return WordPressStubState::$is_multisite;

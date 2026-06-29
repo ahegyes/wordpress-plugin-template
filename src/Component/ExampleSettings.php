@@ -27,7 +27,7 @@ final class ExampleSettings implements HookableInterface {
 	 * @param   WooCommerceSettingsBackend $backend Backend that registers the tab and persists each field.
 	 */
 	public function __construct(
-		protected WooCommerceSettingsBackend $backend,
+		protected readonly WooCommerceSettingsBackend $backend,
 	) {}
 
 	// endregion
@@ -84,9 +84,9 @@ final class ExampleSettings implements HookableInterface {
 			capability: 'manage_woocommerce',
 			sections: array(
 				new SettingsSection(
-					'general',
-					\__( 'General', 'dws-plugin-template' ),
-					array(
+					id: 'general',
+					title: \__( 'General', 'dws-plugin-template' ),
+					fields: array(
 						new SettingsField(
 							id: 'enable_feature',
 							type: 'checkbox',
