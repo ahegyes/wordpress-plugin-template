@@ -25,9 +25,9 @@ final class PluginBootTest extends TestCase {
 	}
 
 	public function test_boot_registers_admin_notices_hook(): void {
-		// The plugin already boots on plugins_loaded during the WordPress load; this confirms the boot is
-		// idempotent and that a generic component registered its admin_notices callback. WooCommerce is not
-		// installed here, so the WooCommerce Feature stays gated out.
+		// The plugin already boots on plugins_loaded during the WordPress load; this re-boot confirms boot is
+		// idempotent and that a generic component registered its admin_notices callback. WooCommerce is active
+		// in this environment, so the WooCommerce Feature gates in too; this asserts only the generic hook.
 		Plugin::get_instance()->boot();
 
 		self::assertNotFalse(

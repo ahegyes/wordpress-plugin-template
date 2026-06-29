@@ -52,7 +52,7 @@ The kernel's optional **logger** is chosen lazily in `boot()`: `WooCommerceLogge
 1. Create `src/Feature/MyFeature.php` implementing `FeatureInterface`:
    - `public static function get_conditional_classes(): array` — return `array()` for always-on, or class-strings of `ConditionalInterface` implementations to gate it.
    - `public function get_component_classes(): array` — the component class-strings the kernel resolves.
-2. Create your component(s) under `src/Component/`. A component that hooks WordPress implements `HookableInterface` (`register_hooks()`); one that needs setup before hooks implements `InitializableInterface` (`initialize()`).
+2. Create your component(s) under `src/Component/`. A component that hooks WordPress implements `HookableInterface` (`register_hooks()`); one that needs setup before hooks implements `InitializableInterface` (`initialize()`). The framework also offers `EnabledInterface` (a post-resolution per-component on/off gate) and `CompositeComponentInterface` (a component that owns child components as a kernel-dispatched subtree) — unused in this reference, but there when you need them.
 3. Register the Feature in `Plugin::get_feature_classes()`.
 4. If a class needs a constructor argument PHP-DI can't autowire (a scalar, a value object, a chosen store), add a definition in `config/container.php`. Everything else autowires.
 
@@ -62,14 +62,14 @@ The `tests/Unit/PluginBootTest.php` boot smoke is the pattern for proving your a
 
 This reference is **WooCommerce-flavored**. For a generic (non-WooCommerce) plugin, remove every WooCommerce touchpoint:
 
-- `src/Feature/WooCommerceFeature.php`, `src/Component/ExampleSettings.php`, `src/Settings/ExampleWCSettingsPage.php`;
+- the classes — `src/Feature/WooCommerceFeature.php`, `src/Component/ExampleSettings.php`, `src/Settings/ExampleWCSettingsPage.php`;
 - the `WooCommerceFeature::class` entry in `Plugin::get_feature_classes()`;
+- the `WooCommerceLogger` import + its branch in `Plugin::build_logger()`, leaving only the `AdminNoticeLogger` — **required**, not optional: that branch references a scoped WooCommerce class the next step removes;
 - the `WPPluginActiveConditional`, `WooCommerceVersionConditional`, and `WooCommerceSettingsBackend` bindings in `config/container.php`;
-- `wp-plugin/woocommerce` and `php-stubs/woocommerce-stubs` from `composer.json`;
+- the deps — `ahegyes/wp-framework-woocommerce`, `wp-plugin/woocommerce`, and `php-stubs/woocommerce-stubs` from `composer.json` (and their `repositories` entries), then re-scope with `composer packages-update`;
+- the `php-stubs/woocommerce-stubs` `scanFiles` entry in `phpstan.dist.neon`;
 - the `woocommerce` mapping + activation in `.wp-env.tests.json`;
-- `tests/Integration/ExampleSettingsTest.php`.
-
-The `WooCommerceLogger` branch in `Plugin::build_logger()` is guarded by `function_exists( 'wc_get_logger' )`, so it is harmless to leave — but you can simplify it to just the `AdminNoticeLogger`.
+- the test — `tests/Integration/ExampleSettingsTest.php`.
 
 ## 6. Test it
 

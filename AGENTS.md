@@ -8,7 +8,7 @@ The README ships the full placeholder convention (with two real v1 plugins as si
 
 ## Pre-configured
 
-- **Framework deps** (VCS): `wp-framework-bootstrap`, `wp-framework-core`
+- **Framework deps** (VCS): all seven `wp-framework-*` packages — `bootstrap`, `shared`, `storage`, `core`, `utilities`, `settings`, `woocommerce` — each scoped per-fork
 - **Configs** (VCS): `wordpress-configs`
 - **PHP-DI** scoped via `wordpress-configs/php/php-scoper/contrib/php-di.inc.php`
 - **wp-framework** scoped via `wordpress-configs/php/php-scoper/contrib/wp-framework.inc.php` (auto-detects installed framework packages)
@@ -20,9 +20,9 @@ The README ships the full placeholder convention (with two real v1 plugins as si
 - **wp-env**: `.wp-env.tests.json` single-config on **port 8811** with `"testsEnvironment": false` (per workspace port scheme)
 - **WP Packages registry** + `extra.installer-paths` mapping `wordpress-plugin` / `wordpress-theme` types to `vendor/{$vendor}/{$name}/` — relevant when forks add wp.org plugins as dev deps
 
-## Known transient state
+## Reference engine
 
-`composer test:unit` currently exits with code 1 because `tests/Unit/` is empty (`.gitkeep` only) and `--do-not-fail-on-empty-test-suite` was deliberately dropped. This is expected until real unit tests land — `composer quality-check` (which chains `test:unit`) inherits the failure. Re-add the flag temporarily if you need a green pipeline before landing unit tests.
+The template is a working rev-2 reference plugin, not bare scaffolding: `src/Plugin.php` implements the framework's `PluginInterface`; `src/Feature/` holds an always-on Feature plus a WooCommerce-gated one; `src/Installer/` an `InstallerInterface`; `src/Component/` the hookable components; `config/container.php` is the PHP-DI composition root. `tests/Unit/PluginBootTest.php` is a mock-WP boot smoke; `tests/Integration/` boots it in real WP + WooCommerce. See `docs/getting-started.md`.
 
 ## Cache layout
 
