@@ -6,11 +6,12 @@ on:
   pull_request:
 
 jobs:
-  php-qa:
-    name: PHP QA
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-qa.yml@trunk
+  lint-php:
+    name: PHP Lint
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@trunk
     with:
       php-version: '8.5'
+      scripts: '["lint:php:phpcs", "lint:php:phpstan"]'
 
   changelog:
     name: Changelog fragments
