@@ -25,6 +25,18 @@ final class WordPressStubState {
 	/** @var list<array{file: string, callback: mixed}> */
 	public static array $deactivation_hooks = array();
 
+	/** @var list<string> */
+	public static array $deleted_user_meta = array();
+
+	/** @var bool */
+	public static bool $is_multisite = false;
+
+	/** @var list<int> */
+	public static array $sites = array();
+
+	/** @var list<string> */
+	public static array $blog_switches = array();
+
 	public static function reset(): void {
 		self::$actions            = array();
 		self::$filters            = array();
@@ -32,6 +44,10 @@ final class WordPressStubState {
 		self::$active_plugins     = array();
 		self::$activation_hooks   = array();
 		self::$deactivation_hooks = array();
+		self::$deleted_user_meta  = array();
+		self::$is_multisite       = false;
+		self::$sites              = array();
+		self::$blog_switches      = array();
 	}
 
 	public static function has_filter( string $hook ): bool {

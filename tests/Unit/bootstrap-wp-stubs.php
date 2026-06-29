@@ -54,7 +54,41 @@ if ( ! function_exists( 'update_option' ) ) {
 
 if ( ! function_exists( 'delete_option' ) ) {
 	function delete_option( $option ) {
+		$existed = array_key_exists( $option, WordPressStubState::$options );
 		unset( WordPressStubState::$options[ $option ] );
+		return $existed;
+	}
+}
+
+if ( ! function_exists( 'delete_metadata' ) ) {
+	function delete_metadata( $meta_type, $object_id, $meta_key, $meta_value = '', $delete_all = false ) {
+		WordPressStubState::$deleted_user_meta[] = (string) $meta_key;
+		return true;
+	}
+}
+
+if ( ! function_exists( 'is_multisite' ) ) {
+	function is_multisite() {
+		return WordPressStubState::$is_multisite;
+	}
+}
+
+if ( ! function_exists( 'get_sites' ) ) {
+	function get_sites( $args = array() ) {
+		return WordPressStubState::$sites;
+	}
+}
+
+if ( ! function_exists( 'switch_to_blog' ) ) {
+	function switch_to_blog( $blog_id, $deprecated = false ) {
+		WordPressStubState::$blog_switches[] = 'switch:' . (int) $blog_id;
+		return true;
+	}
+}
+
+if ( ! function_exists( 'restore_current_blog' ) ) {
+	function restore_current_blog() {
+		WordPressStubState::$blog_switches[] = 'restore';
 		return true;
 	}
 }

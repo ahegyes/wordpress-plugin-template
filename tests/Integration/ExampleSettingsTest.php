@@ -68,6 +68,20 @@ final class ExampleSettingsTest extends TestCase {
 		self::assertFalse( $backend->has( 'api_key' ) );
 	}
 
+	public function test_the_checkbox_field_round_trips_its_yes_no_value(): void {
+		$this->register_example_settings();
+		$backend = $this->backend();
+
+		// WooCommerce persists a checkbox as the 'no'/'yes' strings; the backend round-trips them verbatim.
+		$backend->set( 'enable_feature', 'no' );
+		self::assertSame( 'no', $backend->get( 'enable_feature' ) );
+		self::assertSame( 'no', \get_option( 'dws_plugin_template_enable_feature' ) );
+
+		$backend->set( 'enable_feature', 'yes' );
+		self::assertSame( 'yes', $backend->get( 'enable_feature' ) );
+		self::assertTrue( $backend->has( 'enable_feature' ) );
+	}
+
 	private function register_example_settings(): void {
 		$settings = Plugin::get_instance()->get_container()->get( ExampleSettings::class );
 		self::assertInstanceOf( ExampleSettings::class, $settings );
