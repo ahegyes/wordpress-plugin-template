@@ -122,7 +122,7 @@ final class InstallerLifecycleTest extends TestCase {
 			'dws_plugin_template'                => array( 'version' => '2.0.0', 'installed_at' => 123 ),
 			'dws_plugin_template_notices'        => array( 'some-id' => array( 'id' => 'some-id', 'message' => 'x' ) ),
 			'dws_plugin_template_enable_feature' => 'yes',
-			'dws_plugin_template_api_key'        => 'secret',
+			'dws_plugin_template_greeting'       => 'Welcome!',
 			'unrelated_plugin_option'            => 'keep me',
 		);
 
@@ -132,7 +132,7 @@ final class InstallerLifecycleTest extends TestCase {
 			'dws_plugin_template',
 			'dws_plugin_template_notices',
 			'dws_plugin_template_enable_feature',
-			'dws_plugin_template_api_key',
+			'dws_plugin_template_greeting',
 		) as $option ) {
 			self::assertArrayNotHasKey( $option, WordPressStubState::$options, "uninstall() must remove $option." );
 		}
@@ -174,7 +174,7 @@ final class InstallerLifecycleTest extends TestCase {
 			'dws_plugin_template'                => array( 'version' => '2.0.0' ),
 			'dws_plugin_template_notices'        => array( 'n' => array( 'id' => 'n', 'message' => 'x' ) ),
 			'dws_plugin_template_enable_feature' => 'yes',
-			'dws_plugin_template_api_key'        => 'secret',
+			'dws_plugin_template_greeting'       => 'Welcome!',
 		);
 
 		Plugin::get_instance()->get_installer()->uninstall();
@@ -189,7 +189,7 @@ final class InstallerLifecycleTest extends TestCase {
 			'dws_plugin_template',
 			'dws_plugin_template_notices',
 			'dws_plugin_template_enable_feature',
-			'dws_plugin_template_api_key',
+			'dws_plugin_template_greeting',
 		) as $option ) {
 			self::assertArrayNotHasKey( $option, WordPressStubState::$options, "A network uninstall must remove $option." );
 		}

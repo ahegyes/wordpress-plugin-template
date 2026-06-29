@@ -95,9 +95,9 @@ final class ExampleSettings implements HookableInterface {
 							description: \__( 'Turn the example feature on.', 'dws-plugin-template' ),
 						),
 						new SettingsField(
-							id: 'api_key',
+							id: 'greeting',
 							type: 'text',
-							label: \__( 'API key', 'dws-plugin-template' ),
+							label: \__( 'Greeting message', 'dws-plugin-template' ),
 							default_value: '',
 						),
 					),

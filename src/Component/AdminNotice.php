@@ -30,7 +30,7 @@ final class AdminNotice implements HookableInterface {
 	// region HOOKS
 
 	/**
-	 * Renders the admin notice. Hooked on `admin_notices`.
+	 * Renders the admin notice to administrators. Hooked on `admin_notices`.
 	 *
 	 * @since   2.0.0
 	 * @version 2.0.0
@@ -38,6 +38,12 @@ final class AdminNotice implements HookableInterface {
 	 * @return  void
 	 */
 	public function render(): void {
+		// admin_notices fires for every role that can reach the dashboard; gating the output to administrators
+		// keeps plugin chrome away from lower-privileged users and models the capability check a real notice needs.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
 		printf(
 			'<div class="notice notice-info"><p>%s</p></div>',
 			esc_html__( 'DWS Plugin Template is active.', 'dws-plugin-template' )

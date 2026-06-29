@@ -15,7 +15,7 @@ final class UninstallTest extends TestCase {
 		'dws_plugin_template',
 		'dws_plugin_template_notices',
 		'dws_plugin_template_enable_feature',
-		'dws_plugin_template_api_key',
+		'dws_plugin_template_greeting',
 	);
 	private const META_KEY = 'dws_plugin_template_dismissed_notices';
 
@@ -31,7 +31,7 @@ final class UninstallTest extends TestCase {
 		\update_option( 'dws_plugin_template', array( 'version' => '2.0.0', 'installed_at' => 123 ) );
 		\update_option( 'dws_plugin_template_notices', array( 'n' => array( 'id' => 'n', 'message' => 'x' ) ) );
 		\update_option( 'dws_plugin_template_enable_feature', 'yes' );
-		\update_option( 'dws_plugin_template_api_key', 'secret-123' );
+		\update_option( 'dws_plugin_template_greeting', 'Welcome!' );
 		\update_user_meta( 1, self::META_KEY, array( 'n' => true ) );
 
 		Plugin::get_instance()->get_installer()->uninstall();
@@ -84,7 +84,7 @@ final class UninstallTest extends TestCase {
 		\update_option( 'dws_plugin_template', array( 'version' => '2.0.0', 'installed_at' => 123 ) );
 		\update_option( 'dws_plugin_template_notices', array( 'n' => array( 'id' => 'n', 'message' => 'x' ) ) );
 		\update_option( 'dws_plugin_template_enable_feature', 'yes' );
-		\update_option( 'dws_plugin_template_api_key', 'secret-123' );
+		\update_option( 'dws_plugin_template_greeting', 'Welcome!' );
 	}
 
 	/** @return array<string, mixed> */

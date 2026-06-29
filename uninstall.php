@@ -20,7 +20,7 @@ if ( ! is_file( __DIR__ . '/vendor/autoload.php' ) ) {
 	delete_option( 'dws_plugin_template' );
 	delete_option( 'dws_plugin_template_notices' );
 	delete_option( 'dws_plugin_template_enable_feature' );
-	delete_option( 'dws_plugin_template_api_key' );
+	delete_option( 'dws_plugin_template_greeting' );
 	delete_metadata( 'user', 0, 'dws_plugin_template_dismissed_notices', '', true );
 	return;
 }

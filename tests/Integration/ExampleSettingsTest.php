@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 final class ExampleSettingsTest extends TestCase {
 	private const TAB_ID      = 'dws_plugin_template';
-	private const OPTION_KEYS = array( 'dws_plugin_template_enable_feature', 'dws_plugin_template_api_key' );
+	private const OPTION_KEYS = array( 'dws_plugin_template_enable_feature', 'dws_plugin_template_greeting' );
 
 	/**
 	 * @var array<string, mixed>
@@ -77,20 +77,20 @@ final class ExampleSettingsTest extends TestCase {
 		$ids = \array_column( $page->get_settings_for_section( '' ), 'id' );
 
 		self::assertContains( 'dws_plugin_template_enable_feature', $ids );
-		self::assertContains( 'dws_plugin_template_api_key', $ids );
+		self::assertContains( 'dws_plugin_template_greeting', $ids );
 	}
 
 	public function test_a_descriptor_field_value_round_trips_through_its_prefixed_option(): void {
 		$this->register_example_settings();
 		$backend = $this->backend();
 
-		$backend->set( 'api_key', 'secret-123' );
+		$backend->set( 'greeting', 'Welcome!' );
 
-		self::assertSame( 'secret-123', $backend->get( 'api_key' ) );
-		self::assertSame( 'secret-123', \get_option( 'dws_plugin_template_api_key' ) );
-		self::assertTrue( $backend->has( 'api_key' ) );
-		self::assertTrue( $backend->delete( 'api_key' ) );
-		self::assertFalse( $backend->has( 'api_key' ) );
+		self::assertSame( 'Welcome!', $backend->get( 'greeting' ) );
+		self::assertSame( 'Welcome!', \get_option( 'dws_plugin_template_greeting' ) );
+		self::assertTrue( $backend->has( 'greeting' ) );
+		self::assertTrue( $backend->delete( 'greeting' ) );
+		self::assertFalse( $backend->has( 'greeting' ) );
 	}
 
 	public function test_the_checkbox_field_round_trips_its_yes_no_value(): void {

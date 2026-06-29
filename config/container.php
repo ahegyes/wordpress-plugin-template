@@ -33,7 +33,7 @@ use DeepWebSolutions\PluginTemplate\Settings\ExampleWCSettingsPage;
 // {slug}_{field}; keep this list aligned with the ExampleSettings descriptor.
 $notices_option         = 'dws_plugin_template_notices';
 $dismissed_notices_meta = 'dws_plugin_template_dismissed_notices';
-$settings_options       = array( 'dws_plugin_template_enable_feature', 'dws_plugin_template_api_key' );
+$settings_options       = array( 'dws_plugin_template_enable_feature', 'dws_plugin_template_greeting' );
 
 return array(
 
