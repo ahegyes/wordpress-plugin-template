@@ -45,7 +45,7 @@ body:
       label: Steps to reproduce
       placeholder: |
         1. Use this template via "Use this template" or git clone
-        2. Run `composer install` / `npm install` / `npm run wp-env:start`
+        2. Run `composer packages-install` / `npm install` / `npm run wp-env:start`
         3. Observe Z
     validations:
       required: true
