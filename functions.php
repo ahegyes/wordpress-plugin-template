@@ -1,7 +1,8 @@
 <?php declare( strict_types=1 );
 
 /**
- * Plugin facade for theme / snippet developers — thin delegators only, no business logic.
+ * Global plugin functions: the public instance accessor for theme / snippet developers, plus the
+ * internal `plugins_loaded` boot callback. Thin delegators only, no business logic.
  *
  * @since   2.0.0
  * @version 2.0.0
@@ -24,7 +25,7 @@ function dws_plugin_template_instance(): \DeepWebSolutions\PluginTemplate\Plugin
 }
 
 /**
- * Boots the plugin — invoked on `plugins_loaded` priority 15.
+ * Boots the plugin on `plugins_loaded` priority 15. Internal wiring, not a public extension point.
  *
  * @since   2.0.0
  * @version 2.0.0

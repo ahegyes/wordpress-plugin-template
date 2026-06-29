@@ -9,8 +9,9 @@ parameters:
         - src
         - config
         - tests
-    # The example WooCommerce settings page subclasses \WC_Settings_Page; its symbol comes from the stub
-    # catalog (WooCommerce is not installed here). scanFiles, not bootstrapFiles: requiring it would fatal.
+    # The example WooCommerce settings page subclasses \WC_Settings_Page; PHPStan analyses without
+    # bootstrapping WooCommerce, so its symbol comes from the stub catalog. scanFiles, not bootstrapFiles:
+    # requiring the real file would fatal — WooCommerce is not loaded in the PHPStan process.
     scanFiles:
         - vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
     excludePaths:

@@ -17,7 +17,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Plugin entry point — the consumer half of the framework's plugin contract.
+ * Plugin runtime root — the consumer half of the framework's plugin contract.
  *
  * A per-plugin singleton holding the PHP-DI container and the registered Feature classes. Boot resolves
  * the kernel, which runs the installer, gates each Feature on its conditionals, and dispatches the
@@ -186,8 +186,8 @@ final class Plugin implements PluginInterface {
 	// region METHODS
 
 	/**
-	 * Boots the plugin once. In an admin request it wires notice rendering before running the kernel — which
-	 * stops the boot when the installer fails — so a queued failure notice still renders; the kernel then boots
+	 * Boots the plugin once; repeat calls are no-ops. In the admin it wires notice rendering before running
+	 * the kernel — see {@see register_notice_rendering()} for why that ordering matters — then runs the kernel
 	 * for every request.
 	 *
 	 * @since   2.0.0

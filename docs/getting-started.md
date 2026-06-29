@@ -18,12 +18,14 @@ If you only want the map, the [README](../README.md) has the file tree, the plac
 
 ## 2. How it boots
 
-`dws-plugin-template.php` is the entry point and does only four things, in order:
+`dws-plugin-template.php` is the entry point. During the plugin include it runs, in order:
 
-1. **Guards** — `ABSPATH`, then bail if `vendor/autoload.php` is missing.
-2. **Requirements** — `Bootstrap\Requirements\check_requirements()` returns `true` or a `WP_Error`; on error it renders an admin notice via `Bootstrap\Notice\output_requirements_error()` and returns. The framework floors (PHP 8.5 / WP 7.0) are taken together with your plugin header's `Requires` values.
-3. **Lifecycle hooks** — `PluginKernel::register_lifecycle_hooks( Plugin::get_instance() )` runs *during the include* (activation/deactivation hooks must be wired before `plugins_loaded`). It points WordPress's activation/deactivation at your `Installer`.
-4. **Boot** — `add_action( 'plugins_loaded', 'dws_plugin_template_boot', 15 )`. Priority 15 runs after WooCommerce's default-priority init, so WC detection works.
+1. **Build-artifact preflight** — `composer packages-install` produces both the Composer autoloader (`vendor/autoload.php`) and the scoped framework under `dependencies/`. If either is missing — a fresh fork before its first install, or a source zip shipped without them — the entry registers an `admin_notices` callback that points you at `composer packages-install` and returns. That notice uses no framework class, because the scoped framework is exactly what's absent.
+2. **Constants** — defines `DWS_PLUGIN_TEMPLATE_FILE` and `DWS_PLUGIN_TEMPLATE_VERSION`.
+3. **Requirements** — loads *only* the scoped `bootstrap` package (PHP 5.6-safe, so it compiles even below the framework's PHP 8.5 floor) and calls `Bootstrap\Requirements\check_requirements()`. It returns `true` or a `WP_Error`; on error it renders an admin notice via `Bootstrap\Notice\output_requirements_error()` and returns. The floors (PHP 8.5 / WP 7.0) are taken together with your plugin header's `Requires` values. Loading `bootstrap` *before* the full autoloader is deliberate: the rest of the scoped framework uses syntax that won't compile on an unsupported PHP, so the requirements notice has to be reachable without it.
+4. **Full autoload** — only once requirements pass does the entry require `vendor/autoload.php` (the whole scoped framework) and `functions.php`.
+5. **Lifecycle hooks** — `PluginKernel::register_lifecycle_hooks( Plugin::get_instance() )` runs *during the include* (activation/deactivation hooks must be wired before `plugins_loaded`). It points WordPress's activation/deactivation at your `Installer`.
+6. **Boot** — `add_action( 'plugins_loaded', 'dws_plugin_template_boot', 15 )`. WooCommerce defines `WC_VERSION` as it loads and hooks its own `plugins_loaded` init at priority -1; booting at 15 runs after that, so the WooCommerce Feature reliably detects WooCommerce.
 
 On `plugins_loaded`, `Plugin::boot()` runs the kernel **once** (it stores the kernel, so a second `boot()` is a no-op). The kernel then:
 
@@ -43,7 +45,7 @@ On `plugins_loaded`, `Plugin::boot()` runs the kernel **once** (it stores the ke
 | `src/Component/AdminNotice.php` | A `HookableInterface` component. Its `register_hooks()` adds an `admin_notices` callback. |
 | `src/Component/ExampleSettings.php` | A `HookableInterface` component that builds a `SettingsPage` descriptor (one section, two fields) and registers it through `WooCommerceSettingsBackend`. |
 | `src/Settings/ExampleWCSettingsPage.php` | The one empty `DescriptorBackedWCSettingsPage` subclass WooCommerce recovers the tab by. |
-| `config/container.php` | The PHP-DI definitions — the composition root. PHP-DI autowires constructor types, so only the classes needing a scalar / value-object / chosen identifier are declared here (the conditionals, the installer's store, the notice service, the WC backend). |
+| `config/container.php` | The PHP-DI definitions — the composition root. Declares just the classes that need explicit construction: the conditionals, the installer's store, the notice service, the WC backend (step 4 explains when an entry is needed). |
 
 The kernel's optional **logger** is chosen lazily in `boot()`: `WooCommerceLogger` when WooCommerce is active (failures land in WooCommerce's log viewer), otherwise `AdminNoticeLogger` (a failed install/migration surfaces as a persistent admin notice). That is the install-failure UX — wired *before* the kernel runs, so it survives a boot that the installer stops.
 
@@ -52,11 +54,13 @@ The kernel's optional **logger** is chosen lazily in `boot()`: `WooCommerceLogge
 1. Create `src/Feature/MyFeature.php` implementing `FeatureInterface`:
    - `public static function get_conditional_classes(): array` — return `array()` for always-on, or class-strings of `ConditionalInterface` implementations to gate it.
    - `public function get_component_classes(): array` — the component class-strings the kernel resolves.
-2. Create your component(s) under `src/Component/`. A component that hooks WordPress implements `HookableInterface` (`register_hooks()`); one that needs setup before hooks implements `InitializableInterface` (`initialize()`). The framework also offers `EnabledInterface` (a post-resolution per-component on/off gate) and `CompositeComponentInterface` (a component that owns child components as a kernel-dispatched subtree) — unused in this reference, but there when you need them.
+2. Create your component(s) under `src/Component/`. A component that hooks WordPress implements `HookableInterface` (`register_hooks()`); one that needs setup before its hooks run implements `InitializableInterface` (`initialize()`) — the kernel runs every component's `initialize()` before any `register_hooks()`, so a hook callback can safely reach a component in another Feature.
 3. Register the Feature in `Plugin::get_feature_classes()`.
 4. If a class needs a constructor argument PHP-DI can't autowire (a scalar, a value object, a chosen store), add a definition in `config/container.php`. Everything else autowires.
 
 The `tests/Unit/PluginBootTest.php` boot smoke is the pattern for proving your additions boot.
+
+The framework offers more component interfaces this reference deliberately doesn't demonstrate, there when a feature needs them: `EnabledInterface` (a post-resolution, per-component on/off gate — `is_enabled()`), `CompositeComponentInterface` (a component that owns child components as a kernel-dispatched subtree), and the `RenderableInterface` / `OutputtableInterface` markers (for components that produce markup). The reference stays minimal without them.
 
 ## 5. WooCommerce, or not
 

@@ -1,10 +1,8 @@
 # wordpress-plugin-template
 
-GitHub template for WordPress plugins built on the DWS v2 framework. Per-fork scoped framework + PHP-DI (via `humbug/php-scoper`), full test + CI scaffolding.
+GitHub template for WordPress plugins built on the DWS v2 framework: per-fork scoped framework + PHP-DI (via `humbug/php-scoper`), with full test + CI scaffolding. The README explains the scoping/collision model.
 
-Forks: "Use this template" on GitHub → manual placeholder substitution per the README's table → `composer packages-install` populates scoped `dependencies/`.
-
-The README ships the full placeholder convention (with two real v1 plugins as side-by-side examples for WC vs generic) + the fork-reset checklist (version → 1.0.0, CHANGELOG wipe, etc.).
+Forking, the placeholder convention (two real v1 plugins as side-by-side WC-vs-generic examples), and the fork-reset checklist live in the [README](README.md); `docs/getting-started.md` walks through how the reference boots and how to extend it. This file covers what an agent needs beyond those: the as-configured inventory, the cache layout, and the deferred workflows.
 
 ## Pre-configured
 
@@ -15,9 +13,9 @@ The README ships the full placeholder convention (with two real v1 plugins as si
 - **Tests**: PHPUnit (Unit + Integration via wp-env's `cli` container) + Playwright E2E
 - **Quality**: PHPCS + PHPStan
 - **Changelog**: `automattic/jetpack-changelogger` ^6 + `pronamic/changelog-md-to-wordpress-plugin-readme-txt` ^1
-- **CI**: `quality.yml` (php-qa + changelog:validate + readme.txt linter) + `tests.yml` (unit + integration matrix + e2e) + `codeql.yml` (`actions` language only)
+- **CI**: `quality.yml` (php-qa + changelog:validate + readme.txt linter) + `tests.yml` (unit + integration matrix + e2e) + `codeql.yml` (`actions` language only) + `workflow-checks.yml` (actionlint + zizmor)
 - **GitHub** repo files: `dependabot.yml` (composer + npm + github-actions weekly grouped), PR template, bug + feature issue templates
-- **wp-env**: `.wp-env.tests.json` single-config on **port 8811** with `"testsEnvironment": false` (per workspace port scheme)
+- **wp-env**: `.wp-env.tests.json` (default) + `.wp-env.belowfloor.json` (WP 6.9.4, the below-floor requirements job), both on **port 8811** with `"testsEnvironment": false`. Change the port in both configs + `playwright.config.js` together if 8811 collides locally.
 - **WP Packages registry** + `extra.installer-paths` mapping `wordpress-plugin` / `wordpress-theme` types to `vendor/{$vendor}/{$name}/` — relevant when forks add wp.org plugins as dev deps
 
 ## Reference engine
