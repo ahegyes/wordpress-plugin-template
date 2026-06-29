@@ -21,3 +21,4 @@ parameters:
             - tests/bootstrap.php
             # Guarded mock-WordPress shims; scanning them would shadow the wordpress-stubs signatures.
             - tests/Unit/bootstrap-wp-stubs.php
+            - tests/Unit/entrypoint-wp-stubs.php

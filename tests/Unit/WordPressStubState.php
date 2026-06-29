@@ -7,7 +7,7 @@ namespace DeepWebSolutions\PluginTemplate\Tests\Unit;
  * guarded global shims in bootstrap-wp-stubs.php write here; the boot path runs without WordPress loaded.
  */
 final class WordPressStubState {
-	/** @var list<array{hook: string, callback: mixed}> */
+	/** @var list<array{hook: string, callback: mixed, priority: int}> */
 	public static array $actions = array();
 
 	/** @var list<array{hook: string, callback: mixed}> */
@@ -86,5 +86,20 @@ final class WordPressStubState {
 		$value = self::$options[ $key ] ?? null;
 
 		return \is_array( $value ) ? $value : array();
+	}
+
+	/**
+	 * The priority a named-function action was registered with on $hook, or null when no such action exists.
+	 *
+	 * @param callable-string $callback
+	 */
+	public static function action_priority( string $hook, string $callback ): ?int {
+		foreach ( self::$actions as $action ) {
+			if ( $action['hook'] === $hook && $action['callback'] === $callback ) {
+				return $action['priority'];
+			}
+		}
+
+		return null;
 	}
 }

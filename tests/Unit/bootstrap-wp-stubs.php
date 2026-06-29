@@ -22,6 +22,7 @@ if ( ! function_exists( 'add_action' ) ) {
 		WordPressStubState::$actions[] = array(
 			'hook'     => (string) $hook,
 			'callback' => $callback,
+			'priority' => (int) $priority,
 		);
 		return true;
 	}

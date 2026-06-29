@@ -9,6 +9,8 @@ use DeepWebSolutions\PluginTemplate\Feature\WooCommerceFeature;
 use DeepWebSolutions\PluginTemplate\Installer\Installer;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginKernel;
+use DeepWebSolutions\PluginTemplate\Scoped\DI\Container;
+use DeepWebSolutions\PluginTemplate\Tests\Unit\Doubles\SpyInstaller;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
@@ -85,5 +87,35 @@ final class PluginBootTest extends TestCase {
 
 		self::assertCount( 1, WordPressStubState::$activation_hooks );
 		self::assertCount( 1, WordPressStubState::$deactivation_hooks );
+	}
+
+	public function test_the_lifecycle_hooks_route_to_the_installer(): void {
+		$plugin    = Plugin::get_instance();
+		$container = $plugin->get_container();
+		self::assertInstanceOf( Container::class, $container );
+
+		$spy = new SpyInstaller();
+		$container->set( Installer::class, $spy );
+
+		PluginKernel::register_lifecycle_hooks( $plugin );
+
+		$activate = WordPressStubState::$activation_hooks[0]['callback'];
+		self::assertIsCallable( $activate );
+		$activate( true );
+
+		$deactivate = WordPressStubState::$deactivation_hooks[0]['callback'];
+		self::assertIsCallable( $deactivate );
+		$deactivate( true );
+
+		self::assertSame(
+			array( true ),
+			$spy->activations,
+			'The activation hook must invoke the installer activate() with the network flag.'
+		);
+		self::assertSame(
+			array( true ),
+			$spy->deactivations,
+			'The deactivation hook must invoke the installer deactivate() with the network flag.'
+		);
 	}
 }
