@@ -22,7 +22,7 @@ The README ships the full placeholder convention (with two real v1 plugins as si
 
 ## Reference engine
 
-The template is a working rev-2 reference plugin, not bare scaffolding: `src/Plugin.php` implements the framework's `PluginInterface`; `src/Feature/` holds an always-on Feature plus a WooCommerce-gated one; `src/Installer/` an `InstallerInterface`; `src/Component/` the hookable components; `config/container.php` is the PHP-DI composition root. `tests/Unit/PluginBootTest.php` is a mock-WP boot smoke; `tests/Integration/` boots it in real WP + WooCommerce. See `docs/getting-started.md`.
+The template is a working reference plugin, not bare scaffolding: `src/Plugin.php` implements the framework's `PluginInterface`; `src/Feature/` holds an always-on Feature plus a WooCommerce-gated one; `src/Installer/` an `InstallerInterface`; `src/Component/` the hookable components; `config/container.php` is the PHP-DI composition root. `tests/Unit/PluginBootTest.php` is a mock-WP boot smoke; `tests/Integration/` boots it in real WP + WooCommerce. See `docs/getting-started.md`.
 
 ## Cache layout
 
@@ -34,5 +34,5 @@ All generated test/build cache under `tests/.cache/`:
 
 ## Deferred
 
-- **`release.yml`** — calls `wordpress-configs/.github/workflows/reusable-release.yml@trunk` for wp.org publish from the plugin's tag → zip → wp.org upload. Per project memory, blocking for shipping plugin v1.0.0 to wp.org.
-- **`fill-in-scaffold.yml`** — `workflow_dispatch` with display-name / slug / namespace inputs auto-substitutes placeholders. Per project memory's spec, must also handle wp-env port replacement + version reset + CHANGELOG/changelog wipe + readme.txt metadata reset.
+- **`release.yml`** — calls `wordpress-configs/.github/workflows/reusable-release.yml@trunk` for wp.org publish from the plugin's tag → zip → wp.org upload. Required before shipping the plugin v1.0.0 to wp.org.
+- **`fill-in-scaffold.yml`** — `workflow_dispatch` with display-name / slug / namespace inputs auto-substitutes placeholders. Must also handle wp-env port replacement + version reset + CHANGELOG/changelog wipe + readme.txt metadata reset.
