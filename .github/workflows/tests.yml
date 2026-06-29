@@ -45,7 +45,7 @@ jobs:
             wp-env-core: 'WordPress/WordPress#tags/6.9.4'
             wp-env-config-file: '.wp-env.belowfloor.json'
             composer-script: 'test:requirements'
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@9764855f54d8c75941667f40326227a8434febbd
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@db1f56b3c96ae1fae91eb10ec162ba8095b904ad
     with:
       php-version: ${{ matrix.php-version }}
       wp-env-core: ${{ matrix.wp-env-core }}
@@ -55,7 +55,7 @@ jobs:
 
   e2e:
     name: E2E
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-playwright-e2e.yml@9764855f54d8c75941667f40326227a8434febbd
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-playwright-e2e.yml@db1f56b3c96ae1fae91eb10ec162ba8095b904ad
     with:
       plugin-slug: 'dws-plugin-template'
       php-version: '8.5'

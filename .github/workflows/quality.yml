@@ -11,7 +11,7 @@ permissions:
 jobs:
   lint-php:
     name: PHP Lint
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@trunk
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@db1f56b3c96ae1fae91eb10ec162ba8095b904ad
     with:
       php-version: '8.5'
       scripts: '["lint:php:phpcs", "lint:php:phpstan"]'
