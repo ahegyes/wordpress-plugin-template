@@ -63,13 +63,15 @@ The `tests/Unit/PluginBootTest.php` boot smoke is the pattern for proving your a
 This reference is **WooCommerce-flavored**. For a generic (non-WooCommerce) plugin, remove every WooCommerce touchpoint:
 
 - the classes — `src/Feature/WooCommerceFeature.php`, `src/Component/ExampleSettings.php`, `src/Settings/ExampleWCSettingsPage.php`;
-- the `WooCommerceFeature::class` entry in `Plugin::get_feature_classes()`;
+- the `WooCommerceFeature::class` entry (and its `use` import) in `Plugin::get_feature_classes()`;
 - the `WooCommerceLogger` import + its branch in `Plugin::build_logger()`, leaving only the `AdminNoticeLogger` — **required**, not optional: that branch references a scoped WooCommerce class the next step removes;
-- the `WPPluginActiveConditional`, `WooCommerceVersionConditional`, and `WooCommerceSettingsBackend` bindings in `config/container.php`;
-- the deps — `ahegyes/wp-framework-woocommerce`, `wp-plugin/woocommerce`, and `php-stubs/woocommerce-stubs` from `composer.json` (and their `repositories` entries), then re-scope with `composer packages-update`;
+- the `WPPluginActiveConditional` + `WooCommerceVersionConditional` (the WooCommerce Feature gates on both) and `WooCommerceSettingsBackend` bindings in `config/container.php`, and the `use` imports they leave unused (those three plus `ExampleWCSettingsPage`);
+- the deps from `composer.json` — `ahegyes/wp-framework-woocommerce`, `wp-plugin/woocommerce`, `php-stubs/woocommerce-stubs`. Only `ahegyes/wp-framework-woocommerce` has a dedicated `repositories` VCS entry to delete; `wp-plugin/woocommerce` is served by the shared `repo.wp-packages.org` composer repo — keep it, it serves any `wp-plugin/*` / `wp-theme/*` dev dependency — and `php-stubs/woocommerce-stubs` is on Packagist (no entry). Re-scope with `composer packages-update` afterwards;
 - the `php-stubs/woocommerce-stubs` `scanFiles` entry in `phpstan.dist.neon`;
-- the `woocommerce` mapping + activation in `.wp-env.tests.json`;
-- the test — `tests/Integration/ExampleSettingsTest.php`.
+- in `.wp-env.tests.json`, the `woocommerce` plugin mapping and the WooCommerce half of `afterStart` (its `wp plugin activate woocommerce` and `wp wc hpos enable`), leaving the `dws-plugin-template` activation;
+- the WooCommerce-coupled tests. Delete the two WooCommerce-only files — `tests/Integration/ExampleSettingsTest.php` and `tests/Unit/WooCommerceGateTest.php`. In the rest, drop the WooCommerce `use` imports, the `WooCommerceFeature` / `ExampleSettings` `#[UsesClass]` attributes, and any WooCommerce-only test method — `tests/Unit/PluginBootTest.php` (drop its WooCommerce-active boot test), `tests/Unit/InstallerLifecycleTest.php`, `tests/Unit/GettingStartedTutorialTest.php` (drop the `WooCommerceFeature` / `ExampleSettings` class checks and the `ExampleWCSettingsPage` file assertion), and `tests/Integration/PluginBootTest.php`.
+
+Then confirm a green suite — `composer lint:php`, `composer test:unit`, and `composer test:integration` all pass — proving no dangling WooCommerce reference remains.
 
 ## 6. Test it
 

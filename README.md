@@ -39,9 +39,12 @@ Replace these throughout the codebase when forking. Two real v1 plugins shown as
 | `dws-plugin-template` (slug + text-domain)     | `locked-payment-methods-for-woocommerce`     | `internal-comments`                  |
 | `DWS_PLUGIN_TEMPLATE` (constants)              | `DWS_LPMWC`                                  | `DWS_IC`                             |
 | `dws_plugin_template_` (functions)             | `dws_lpmwc_`                                 | `dws_ic_`                            |
+| `dws_plugin_template` (slug / option-key base) | `dws_lpmwc`                                  | `dws_ic`                             |
 | `DeepWebSolutions\PluginTemplate\` (namespace) | `DeepWebSolutions\LockedPaymentMethods\`     | `DeepWebSolutions\InternalComments\` |
 | `DWS Plugin Template` (display)                | `Locked Payment Methods for WooCommerce`     | `Internal Comments`                  |
 | `8811` (wp-env port — 3 spots)                 | any free port (avoid 8888/8889)              | any free port (avoid 8888/8889)      |
+
+The two underscore forms are distinct. `dws_plugin_template` (bare) is the WooCommerce settings-page slug, the installer's `STORE_KEY`, and the base every `{slug}_{field}` option row is built from; `dws_plugin_template_` (trailing) is the function and option-key prefix. Replacing the bare form as a plain substring covers both — the prefix is just the base plus `_` — so renaming only the trailing form leaves the settings options written under the old slug, orphaned on uninstall.
 
 **WC plugins follow extra conventions** (per v1 + WC trademark policy):
 - **Display**: `X for WooCommerce` (WC trademark requirement). NOT "WooCommerce X" or "WC: X".
