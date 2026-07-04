@@ -74,7 +74,7 @@ Template tracks its own version + history; forks start fresh:
 Requires:
 
 - PHP 8.5+.
-- Node.js 24+ (for `@wordpress/env`).
+- Node.js 26+ / npm 11+ (for `@wordpress/env`).
 - Docker (for `@wordpress/env`).
 
 Coverage runs need the `pcov` extension (`pecl install pcov`): CI's unit job collects coverage so the strict coverage-metadata gate enforces, and `composer test:unit -- --coverage-text` does the same locally. Plain test runs don't need it.
@@ -96,6 +96,8 @@ npm run wp-env:stop
 > Use `composer packages-install` / `packages-update` (never bare `composer install` / `update`) — the wrappers pass `--ignore-platform-reqs`, which prevents composer from emitting a `platform_check.php` that would bypass the framework's friendly version-check admin notice.
 
 `wp-env:start` activates the plugin for you (via the `afterStart` script in `.wp-env.json`). Open <http://localhost:8811/wp-admin> and you'll see the "DWS Plugin Template is active." admin notice.
+
+CI pins the integration and E2E jobs to the WP floor; reproduce locally with `WP_ENV_CORE=https://wordpress.org/wordpress-7.0.zip npm run wp-env:start`.
 
 The plugin declares a `dws-plugin-template` text domain and `Domain Path: /languages`. Translation catalogs are generated at release — wp.org builds them for hosted plugins, and forks distributed elsewhere run `wp i18n make-pot . languages/dws-plugin-template.pot` (the shipped `languages/` directory is ready for them).
 

@@ -9,7 +9,8 @@
     },
     "bugs": "https://github.com/ahegyes/wordpress-plugin-template/issues",
     "engines": {
-        "node": ">=24"
+        "node": ">=26",
+        "npm": ">=11"
     },
     "devDependencies": {
         "@ahegyes/wordpress-configs": "git+https://github.com/ahegyes/wordpress-configs.git#14544764d73f176b96e5eeb7775fdad40a8674fa",

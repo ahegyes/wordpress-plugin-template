@@ -13,16 +13,16 @@ jobs:
     name: Unit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: '8.5'
           # A coverage driver is required: the strict coverage-metadata + failOnRisky gate enforces only while coverage is collected.
           coverage: pcov
           tools: composer:v2
-      - uses: ramsey/composer-install@26d8a556604053a9612623447203a691f406fbe6
+      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
       - run: composer test:unit -- --coverage-text
 
   integration:
@@ -44,21 +44,21 @@ jobs:
             wp-env-core: 'WordPress/WordPress#tags/6.9.4'
             wp-env-config-file: '.wp-env.belowfloor.json'
             composer-script: 'test:requirements'
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@db1f56b3c96ae1fae91eb10ec162ba8095b904ad
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@714fc2a66d6ae5011999beb18a4b01fb1992f4bd
     with:
       php-version: ${{ matrix.php-version }}
       wp-env-core: ${{ matrix.wp-env-core }}
       composer-script: ${{ matrix.composer-script }}
-      node-version: '24'
       wp-env-config-file: ${{ matrix.wp-env-config-file }}
 
   e2e:
     name: E2E
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-playwright-e2e.yml@db1f56b3c96ae1fae91eb10ec162ba8095b904ad
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-playwright-e2e.yml@714fc2a66d6ae5011999beb18a4b01fb1992f4bd
     with:
       plugin-slug: 'dws-plugin-template'
       php-version: '8.5'
-      node-version: '24'
+      # Pinned to the WP 7.0 floor, not nightly, so an unrelated upstream change cannot turn the release gate red.
+      wp-env-core: 'https://wordpress.org/wordpress-7.0.zip'
       # Include dev deps so the framework + PHP-DI install and the
       # post-autoload-dump scoping pipeline populates dependencies/.
       composer-options: '--prefer-dist'
