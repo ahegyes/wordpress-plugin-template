@@ -1,8 +1,8 @@
-// E2E — confirms AdminNotice renders in wp-admin when the plugin is active.
+// E2E — confirms WelcomeNotice renders in wp-admin when the plugin is active.
 
 const { test, expect } = require( '@wordpress/e2e-test-utils-playwright' );
 
-test.describe( 'AdminNotice', () => {
+test.describe( 'WelcomeNotice', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
 		await requestUtils.activatePlugin( 'dws-plugin-template' );
 	} );

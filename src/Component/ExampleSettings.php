@@ -80,7 +80,7 @@ final class ExampleSettings implements HookableInterface {
 		return new SettingsPage(
 			slug: 'dws_plugin_template',
 			page_title: \__( 'DWS Plugin Template', 'dws-plugin-template' ),
-			menu_title: \__( 'Plugin Template', 'dws-plugin-template' ),
+			menu_title: \__( 'DWS Plugin Template', 'dws-plugin-template' ),
 			capability: 'manage_woocommerce',
 			sections: array(
 				new SettingsSection(

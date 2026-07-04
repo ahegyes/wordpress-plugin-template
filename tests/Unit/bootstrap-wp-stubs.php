@@ -74,6 +74,13 @@ if ( ! function_exists( 'is_admin' ) ) {
 	}
 }
 
+if ( ! function_exists( 'current_user_can' ) ) {
+	function current_user_can( $capability ) {
+		WordPressStubState::$capability_checks[] = (string) $capability;
+		return WordPressStubState::$user_can;
+	}
+}
+
 if ( ! function_exists( 'is_multisite' ) ) {
 	function is_multisite() {
 		return WordPressStubState::$is_multisite;

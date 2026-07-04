@@ -7,7 +7,7 @@ body:
     attributes:
       label: Target area
       options:
-        - Plugin runtime scaffold (Plugin, AdminNotice, framework wiring)
+        - Plugin runtime scaffold (Plugin, WelcomeNotice, framework wiring)
         - Composer scoping pipeline
         - Changelog tooling
         - CI workflows

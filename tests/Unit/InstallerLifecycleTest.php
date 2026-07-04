@@ -2,8 +2,9 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Unit;
 
-use DeepWebSolutions\PluginTemplate\Component\AdminNotice;
 use DeepWebSolutions\PluginTemplate\Component\ExampleSettings;
+use DeepWebSolutions\PluginTemplate\Component\ExampleWPSettings;
+use DeepWebSolutions\PluginTemplate\Component\WelcomeNotice;
 use DeepWebSolutions\PluginTemplate\Feature\GenericFeature;
 use DeepWebSolutions\PluginTemplate\Feature\WooCommerceFeature;
 use DeepWebSolutions\PluginTemplate\Installer\Installer;
@@ -22,8 +23,9 @@ require_once __DIR__ . '/bootstrap-wp-stubs.php';
 #[UsesClass( GenericFeature::class )]
 #[UsesClass( WooCommerceFeature::class )]
 #[UsesClass( Installer::class )]
-#[UsesClass( AdminNotice::class )]
+#[UsesClass( WelcomeNotice::class )]
 #[UsesClass( ExampleSettings::class )]
+#[UsesClass( ExampleWPSettings::class )]
 final class InstallerLifecycleTest extends TestCase {
 	protected function setUp(): void {
 		WordPressStubState::reset();
@@ -78,7 +80,7 @@ final class InstallerLifecycleTest extends TestCase {
 
 		// The boot stopped before any component: the generic Feature's notice callback never registered.
 		self::assertFalse(
-			WordPressStubState::has_object_action( 'admin_notices', AdminNotice::class, 'render' ),
+			WordPressStubState::has_object_action( 'admin_notices', WelcomeNotice::class, 'render' ),
 			'A failed install must stop the boot before any component registers hooks.'
 		);
 
@@ -123,6 +125,7 @@ final class InstallerLifecycleTest extends TestCase {
 			'dws_plugin_template_notices'        => array( 'some-id' => array( 'id' => 'some-id', 'message' => 'x' ) ),
 			'dws_plugin_template_enable_feature' => 'yes',
 			'dws_plugin_template_greeting'       => 'Welcome!',
+			'dws_plugin_template-general'        => array( 'welcome_text' => 'Hi' ),
 			'unrelated_plugin_option'            => 'keep me',
 		);
 
@@ -133,6 +136,7 @@ final class InstallerLifecycleTest extends TestCase {
 			'dws_plugin_template_notices',
 			'dws_plugin_template_enable_feature',
 			'dws_plugin_template_greeting',
+			'dws_plugin_template-general',
 		) as $option ) {
 			self::assertArrayNotHasKey( $option, WordPressStubState::$options, "uninstall() must remove $option." );
 		}
@@ -175,6 +179,7 @@ final class InstallerLifecycleTest extends TestCase {
 			'dws_plugin_template_notices'        => array( 'n' => array( 'id' => 'n', 'message' => 'x' ) ),
 			'dws_plugin_template_enable_feature' => 'yes',
 			'dws_plugin_template_greeting'       => 'Welcome!',
+			'dws_plugin_template-general'        => array( 'welcome_text' => 'Hi' ),
 		);
 
 		Plugin::get_instance()->get_installer()->uninstall();
@@ -190,6 +195,7 @@ final class InstallerLifecycleTest extends TestCase {
 			'dws_plugin_template_notices',
 			'dws_plugin_template_enable_feature',
 			'dws_plugin_template_greeting',
+			'dws_plugin_template-general',
 		) as $option ) {
 			self::assertArrayNotHasKey( $option, WordPressStubState::$options, "A network uninstall must remove $option." );
 		}

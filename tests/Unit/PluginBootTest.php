@@ -2,8 +2,9 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Unit;
 
-use DeepWebSolutions\PluginTemplate\Component\AdminNotice;
 use DeepWebSolutions\PluginTemplate\Component\ExampleSettings;
+use DeepWebSolutions\PluginTemplate\Component\ExampleWPSettings;
+use DeepWebSolutions\PluginTemplate\Component\WelcomeNotice;
 use DeepWebSolutions\PluginTemplate\Feature\GenericFeature;
 use DeepWebSolutions\PluginTemplate\Feature\WooCommerceFeature;
 use DeepWebSolutions\PluginTemplate\Installer\Installer;
@@ -23,8 +24,9 @@ require_once __DIR__ . '/bootstrap-wp-stubs.php';
 #[UsesClass( GenericFeature::class )]
 #[UsesClass( WooCommerceFeature::class )]
 #[UsesClass( Installer::class )]
-#[UsesClass( AdminNotice::class )]
+#[UsesClass( WelcomeNotice::class )]
 #[UsesClass( ExampleSettings::class )]
+#[UsesClass( ExampleWPSettings::class )]
 final class PluginBootTest extends TestCase {
 	protected function setUp(): void {
 		WordPressStubState::reset();
@@ -43,10 +45,14 @@ final class PluginBootTest extends TestCase {
 		self::assertSame( '2.0.0', $installer_state['version'] ?? null );
 		self::assertArrayHasKey( 'installed_at', $installer_state );
 
-		// The generic Feature's own component registered its callback (not merely the notice renderer).
+		// The generic Feature's own components registered their callbacks (not merely the notice renderer).
 		self::assertTrue(
-			WordPressStubState::has_object_action( 'admin_notices', AdminNotice::class, 'render' ),
-			'GenericFeature must register the AdminNotice render callback.'
+			WordPressStubState::has_object_action( 'admin_notices', WelcomeNotice::class, 'render' ),
+			'GenericFeature must register the WelcomeNotice render callback.'
+		);
+		self::assertTrue(
+			WordPressStubState::has_object_action( 'init', ExampleWPSettings::class, 'register_settings_page' ),
+			'GenericFeature must register the native WordPress settings example without WooCommerce.'
 		);
 
 		// The WooCommerce Feature gated out: its settings tab is never registered.

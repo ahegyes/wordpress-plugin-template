@@ -14,7 +14,7 @@ Starting point for WordPress plugins built on the DWS framework.
 
 Scaffold for WordPress plugins built on the DWS framework. Each fork ships its own scoped copy of the framework + PHP-DI so plugins can't collide on framework versions.
 
-Ships with a demo `AdminNotice` component as proof the framework's lifecycle dispatch is wired. See the GitHub README for the placeholder convention + fork reset checklist.
+Ships as a working reference: a two-Feature graph (always-on + WooCommerce-gated), a versioned installer with a single-sourced uninstall footprint, a welcome notice, a native WordPress settings page, and a WooCommerce settings tab. See the GitHub README for the placeholder convention + fork setup.
 
 == Installation ==
 
@@ -32,7 +32,7 @@ The plugin boots only with its scoped framework present under `dependencies/`. A
 ### Added
 - Initial release.
 - Per-plugin scoped dependencies (framework + PHP-DI bundled under a plugin-specific namespace prefix).
-- Demo `AdminNotice` component implementing `HookableInterface`.
+- Reference plugin: a two-Feature graph (always-on `GenericFeature` + gated `WooCommerceFeature`), a versioned `Installer` with a single-sourced uninstall footprint, a `WelcomeNotice` component, a native WordPress settings page (`ExampleWPSettings`), and a WooCommerce settings tab (`ExampleSettings`).
 
 <!-- End changelog -->
 

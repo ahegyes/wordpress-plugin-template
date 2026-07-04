@@ -16,6 +16,7 @@ final class UninstallTest extends TestCase {
 		'dws_plugin_template_notices',
 		'dws_plugin_template_enable_feature',
 		'dws_plugin_template_greeting',
+		'dws_plugin_template-general',
 	);
 	private const META_KEY = 'dws_plugin_template_dismissed_notices';
 
@@ -32,6 +33,7 @@ final class UninstallTest extends TestCase {
 		\update_option( 'dws_plugin_template_notices', array( 'n' => array( 'id' => 'n', 'message' => 'x' ) ) );
 		\update_option( 'dws_plugin_template_enable_feature', 'yes' );
 		\update_option( 'dws_plugin_template_greeting', 'Welcome!' );
+		\update_option( 'dws_plugin_template-general', array( 'welcome_text' => 'Hi' ) );
 		\update_user_meta( 1, self::META_KEY, array( 'n' => true ) );
 
 		Plugin::get_instance()->get_installer()->uninstall();
@@ -85,6 +87,7 @@ final class UninstallTest extends TestCase {
 		\update_option( 'dws_plugin_template_notices', array( 'n' => array( 'id' => 'n', 'message' => 'x' ) ) );
 		\update_option( 'dws_plugin_template_enable_feature', 'yes' );
 		\update_option( 'dws_plugin_template_greeting', 'Welcome!' );
+		\update_option( 'dws_plugin_template-general', array( 'welcome_text' => 'Hi' ) );
 	}
 
 	/** @return array<string, mixed> */

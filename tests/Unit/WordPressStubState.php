@@ -40,6 +40,12 @@ final class WordPressStubState {
 	/** @var bool */
 	public static bool $is_admin = true;
 
+	/** @var bool */
+	public static bool $user_can = true;
+
+	/** @var list<string> */
+	public static array $capability_checks = array();
+
 	public static function reset(): void {
 		self::$actions            = array();
 		self::$filters            = array();
@@ -52,6 +58,8 @@ final class WordPressStubState {
 		self::$sites              = array();
 		self::$blog_switches      = array();
 		self::$is_admin           = true;
+		self::$user_can           = true;
+		self::$capability_checks  = array();
 	}
 
 	public static function has_filter( string $hook ): bool {

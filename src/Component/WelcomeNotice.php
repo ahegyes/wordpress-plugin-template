@@ -5,13 +5,14 @@ namespace DeepWebSolutions\PluginTemplate\Component;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Lifecycle\Hookable\HookableInterface;
 
 /**
- * Demo component — renders an info notice in the WordPress admin to confirm the plugin booted and the
- * framework's Hookable dispatch works.
+ * Demo component — renders a welcome notice in the WordPress admin to confirm the plugin booted and the
+ * framework's Hookable dispatch works. Named for its role so it never shadows the framework's AdminNotice
+ * descriptor, which the same reader meets in the notice service.
  *
  * @since   2.0.0
  * @version 2.0.0
  */
-final class AdminNotice implements HookableInterface {
+final class WelcomeNotice implements HookableInterface {
 	// region INHERITED METHODS
 
 	/**
@@ -30,7 +31,7 @@ final class AdminNotice implements HookableInterface {
 	// region HOOKS
 
 	/**
-	 * Renders the admin notice to administrators. Hooked on `admin_notices`.
+	 * Renders the welcome notice to administrators. Hooked on `admin_notices`.
 	 *
 	 * @since   2.0.0
 	 * @version 2.0.0
@@ -44,9 +45,9 @@ final class AdminNotice implements HookableInterface {
 			return;
 		}
 
-		printf(
-			'<div class="notice notice-info"><p>%s</p></div>',
-			esc_html__( 'DWS Plugin Template is active.', 'dws-plugin-template' )
+		wp_admin_notice(
+			esc_html__( 'DWS Plugin Template is active.', 'dws-plugin-template' ),
+			array( 'type' => 'info' )
 		);
 	}
 

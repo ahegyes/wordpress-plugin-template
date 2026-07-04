@@ -7,7 +7,7 @@ body:
     attributes:
       label: Affected area
       options:
-        - Plugin runtime (Plugin singleton, AdminNotice, framework wiring)
+        - Plugin runtime (Plugin singleton, WelcomeNotice, framework wiring)
         - Composer scoping pipeline (scoper.inc.php, post-autoload-dump)
         - Changelog tooling (composer changelog:* scripts)
         - CI workflows (quality.yml, tests.yml)

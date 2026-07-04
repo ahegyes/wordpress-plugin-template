@@ -2,12 +2,13 @@
 
 namespace DeepWebSolutions\PluginTemplate\Feature;
 
-use DeepWebSolutions\PluginTemplate\Component\AdminNotice;
+use DeepWebSolutions\PluginTemplate\Component\ExampleWPSettings;
+use DeepWebSolutions\PluginTemplate\Component\WelcomeNotice;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Feature\FeatureInterface;
 
 /**
- * Always-on Feature. Declares no conditionals, so it boots everywhere; carries the demo admin notice and
- * proves the plugin runs without WooCommerce.
+ * Always-on Feature. Declares no conditionals, so it boots everywhere; carries the welcome notice and the
+ * native WordPress settings example, proving the plugin runs without WooCommerce.
  *
  * @since   2.0.0
  * @version 2.0.0
@@ -35,7 +36,8 @@ final class GenericFeature implements FeatureInterface {
 	#[\Override]
 	public function get_component_classes(): array {
 		return array(
-			AdminNotice::class,
+			WelcomeNotice::class,
+			ExampleWPSettings::class,
 		);
 	}
 

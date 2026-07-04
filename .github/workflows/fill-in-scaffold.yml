@@ -1,0 +1,157 @@
+name: Fill in scaffold
+
+# Fork-only, one-shot: substitutes every template placeholder, renames the entry file, resets the
+# version/changelog/metadata, and pushes the result back to the ref the workflow ran on.
+#
+# Placeholder inventory the sweep covers (each swept as a plain case-sensitive substring):
+#   dws-plugin-template          slug + text-domain (also inside ahegyes/dws-plugin-template + the npm name)
+#   dws_plugin_template          option-key base + settings-page slug (the trailing-underscore function
+#                                prefix is this base plus `_`, so one substitution covers both forms)
+#   DWS_PLUGIN_TEMPLATE          constants
+#   PluginTemplate               namespace segment — covers DeepWebSolutions\PluginTemplate, the doubled-
+#                                backslash JSON forms (DeepWebSolutions\\PluginTemplate\\ in composer.json),
+#                                and the scoper prefix, since only the segment between backslashes changes
+#   DWS Plugin Template          display name (plugin header, readme.txt, translated strings, e2e spec)
+#   ahegyes/wordpress-plugin-template  repository-metadata URLs (composer homepage/authors, package.json
+#                                repository/bugs, SECURITY.md advisory link, readme.txt changelog link,
+#                                plugin header URI) — rewritten to the fork's own repository
+#   wordpress-plugin-template    bare repo name — only as the AGENTS.md h1, so the rule is anchored to that
+#                                heading (a blanket rule would re-match inside a fork repo name that itself
+#                                contains the template name)
+#   8811                         wp-env port (.wp-env*.json, playwright.config.js, README, agent docs)
+#   2.0.0 → 0.1.0                version reset (plugin header, _VERSION constant, readme Stable tag,
+#                                @since/@version docblocks, test literals; the 1.0.0 pre-update seed in
+#                                tests becomes 0.0.1 so the update-path test still seeds an older version)
+
+on:
+  workflow_dispatch:
+    inputs:
+      plugin-name:
+        description: 'Display name (e.g. "Acme Orders")'
+        required: true
+        type: string
+      plugin-slug:
+        description: 'Kebab-case slug (e.g. "acme-orders")'
+        required: true
+        type: string
+      php-namespace:
+        description: 'PHP namespace segment (e.g. "AcmeOrders")'
+        required: true
+        type: string
+      wp-env-port:
+        description: 'wp-env port'
+        required: false
+        type: string
+        default: '8811'
+
+# contents: write + persisted credentials are the point: the job commits the filled-in scaffold and pushes it back.
+permissions:
+  contents: write
+
+jobs:
+  fill-in:
+    name: Fill in scaffold
+    # One-shot fork bootstrap — running it on the template would destroy the placeholders it exists to substitute.
+    if: github.repository != 'ahegyes/wordpress-plugin-template'
+    runs-on: ubuntu-latest
+    env:
+      PLUGIN_NAME: ${{ inputs.plugin-name }}
+      SLUG: ${{ inputs.plugin-slug }}
+      NS: ${{ inputs.php-namespace }}
+      PORT: ${{ inputs.wp-env-port }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Explain the template-repo guard
+        run: echo "Running on $REPO — the job-level guard refuses the template repo itself, where the sweep would destroy the placeholders."
+
+      - name: Validate inputs
+        run: |
+          # The slug feeds PHP constants and the entry-file rename — it must start with a letter and stay clean kebab-case.
+          echo "$SLUG" | grep -Eq '^[a-z][a-z0-9]*(-[a-z0-9]+)*$' || { echo "::error::plugin-slug must be kebab-case starting with a letter (no leading/trailing/double hyphen)"; exit 1; }
+          echo "$NS" | grep -Eq '^[A-Za-z][A-Za-z0-9]*$' || { echo "::error::php-namespace must match ^[A-Za-z][A-Za-z0-9]*$"; exit 1; }
+          # The port lands in JSON numeric fields, where a leading zero is invalid JSON.
+          { echo "$PORT" | grep -Eq '^[1-9][0-9]{0,4}$' && [ "$PORT" -le 65535 ]; } || { echo "::error::wp-env-port must be 1-65535 with no leading zero"; exit 1; }
+          # The display name lands in perl replacements and in single-quoted PHP/JS string literals.
+          if printf '%s' "$PLUGIN_NAME" | grep -q "['\\\$/]"; then echo "::error::plugin-name must not contain \\, \$, /, or '"; exit 1; fi
+
+      # persist-credentials stays on: this job's whole purpose is pushing the filled-in scaffold back.
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: true
+
+      - name: Compute derived forms
+        run: |
+          {
+            echo "SNAKE=$(echo "$SLUG" | tr '-' '_')"
+            echo "SCREAMING=$(echo "$SLUG" | tr '-' '_' | tr '[:lower:]' '[:upper:]')"
+            echo "REPO_NAME=${REPO#*/}"
+          } >> "$GITHUB_ENV"
+
+      - name: Substitute placeholders
+        # The sweep skips this workflow file so the repo guard keeps its literal template name; a re-run
+        # after fill-in finds nothing left to substitute.
+        run: |
+          # $ENV{...} is perl, resolved inside the single-quoted program on purpose. The BEGIN filter drops
+          # symlinks (CLAUDE.md -> AGENTS.md): in-place editing through one would replace it with a regular file.
+          # shellcheck disable=SC2016
+          git ls-files -z | grep -zv '^.github/workflows/fill-in-scaffold.yml$' | xargs -0 perl -pi -e '
+            BEGIN { @ARGV = grep { ! -l $_ } @ARGV }
+            s{ahegyes/wordpress-plugin-template}{$ENV{REPO}}g;
+            s/^# wordpress-plugin-template$/# $ENV{REPO_NAME}/;
+            s/dws-plugin-template/$ENV{SLUG}/g;
+            s/dws_plugin_template/$ENV{SNAKE}/g;
+            s/DWS_PLUGIN_TEMPLATE/$ENV{SCREAMING}/g;
+            s/PluginTemplate/$ENV{NS}/g;
+            s/DWS Plugin Template/$ENV{PLUGIN_NAME}/g;
+          '
+
+      - name: Substitute the wp-env port
+        # CLAUDE.md is a symlink to AGENTS.md, so sweeping AGENTS.md covers both.
+        run: |
+          perl -pi -e 's/8811/$ENV{PORT}/g' .wp-env.json .wp-env.belowfloor.json playwright.config.js README.md AGENTS.md
+
+      - name: Rename the entry file
+        run: git mv dws-plugin-template.php "$SLUG.php"
+
+      - name: Reset the version to 0.1.0
+        run: |
+          # ${1} is a perl backreference inside the single-quoted program.
+          # shellcheck disable=SC2016
+          # Docblock lines first (all tracked text files except the lockfiles, whose 2.0.0 hits are foreign packages).
+          git ls-files -z | grep -zv -e '^composer.lock$' -e '^package-lock.json$' | xargs -0 perl -pi -e 'BEGIN { @ARGV = grep { ! -l $_ } @ARGV } s/^(\s*\*\s*\@(?:since|version)\s+)2\.0\.0$/${1}0.1.0/'
+          # Entry file: plugin header Version + the _VERSION constant line.
+          perl -pi -e 's/\b2\.0\.0\b/0.1.0/g' "$SLUG.php"
+          # readme.txt Stable tag.
+          perl -pi -e 's/^(Stable tag:\s*)2\.0\.0$/${1}0.1.0/' readme.txt
+          # Tests assert against the constant's value; the 1.0.0 pre-update seed must stay below the new version.
+          git ls-files -z 'tests/*' | xargs -0 perl -pi -e 's/\b2\.0\.0\b/0.1.0/g; s/\b1\.0\.0\b/0.0.1/g'
+
+      - name: Reset the changelog
+        run: |
+          perl -0pi -e 's/<!-- Start changelog -->.*<!-- End changelog -->/<!-- Start changelog -->\n\n## 0.1.0 - unreleased\n\n<!-- End changelog -->/s' CHANGELOG.md readme.txt
+          find changelog -type f ! -name '.gitkeep' -delete
+
+      - name: Reset readme.txt prose to placeholders
+        run: |
+          perl -0pi -e 's/== Description ==.*?== Installation ==/== Description ==\n\nTODO: Describe the plugin for the wp.org listing.\n\n== Installation ==/s' readme.txt
+          perl -pi -e 's/^(Tags:\s*).*$/${1}TODO/' readme.txt
+
+      - name: Verify the result
+        run: |
+          composer validate --no-check-lock
+          php -l "$SLUG.php"
+          php -l uninstall.php
+          # The sweep rewrote these as text — prove they are still valid JSON before anything is pushed.
+          # shellcheck disable=SC2016
+          for swept_json in .wp-env.json .wp-env.belowfloor.json composer.json package.json package-lock.json; do
+            php -r 'json_decode( (string) file_get_contents( $argv[1] ), false, 512, JSON_THROW_ON_ERROR );' "$swept_json"
+          done
+
+      # Pushes back to the ref the workflow ran on — run it on trunk for the standard fork flow.
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Fill in scaffold: $SLUG"
+          git push

@@ -15,10 +15,11 @@ dws-plugin-template/
 │   ├── Plugin.php            # Singleton implementing PluginInterface: container + kernel + lifecycle
 │   ├── Feature/              # GenericFeature (always-on) + WooCommerceFeature (WC-gated)
 │   ├── Installer/            # Installer: stored-version I/O, install/update/uninstall
-│   ├── Component/            # AdminNotice + ExampleSettings (HookableInterface components)
+│   ├── Component/            # WelcomeNotice + ExampleWPSettings + ExampleSettings (HookableInterface components)
 │   └── Settings/             # ExampleWCSettingsPage (DescriptorBackedWCSettingsPage subclass)
 ├── config/
-│   └── container.php         # PHP-DI definitions (the composition root)
+│   ├── container.php         # PHP-DI definitions (the composition root)
+│   └── footprint.php         # Single source of the persistent option/meta keys (container + uninstall fallback)
 ├── docs/
 │   └── getting-started.md    # How the reference boots + how to extend it
 ├── tests/
@@ -30,9 +31,21 @@ dws-plugin-template/
 └── dependencies/             # Generated: scoped framework + PHP-DI (gitignored)
 ```
 
+## Fork Setup
+
+Step 1 in a fork is the **Fill in scaffold** workflow (Actions → "Fill in scaffold" → Run workflow). It takes the plugin's display name, slug, PHP namespace, and wp-env port, then substitutes every placeholder below, renames the entry file, resets the version to `0.1.0` and the changelog to a single Unreleased heading, rewrites the repository-metadata URLs to the fork, and pushes the result back to the ref you ran it on (run it on trunk for the standard flow). The workflow refuses to run on the template repo itself.
+
+What the workflow can't do — review by hand afterwards:
+
+- Write real `readme.txt` prose: the workflow resets Description and Tags to TODO placeholders; Contributors stays.
+- Adjust the Composer package name when it should follow the `wc-*` / `wp-*` convention instead of the slug — the workflow sets `ahegyes/<slug>`.
+- wp.org listing assets (banners, screenshots) when publishing there.
+- Review the `.github/ISSUE_TEMPLATE/` forms — their wording targets the unmodified template, not a forked plugin — and `SECURITY.md`'s scope prose.
+- Prose in `README.md` / `docs/` that describes the example components you replace.
+
 ## Placeholder Convention
 
-Replace these throughout the codebase when forking. Two real v1 plugins shown as examples — pick the column matching your fork:
+The rename surface the workflow substitutes (the manual list for forks without Actions). Pick the column matching your fork:
 
 | Placeholder                                    | WC plugin example                            | Generic WP plugin example            |
 |------------------------------------------------|----------------------------------------------|--------------------------------------|
@@ -42,19 +55,22 @@ Replace these throughout the codebase when forking. Two real v1 plugins shown as
 | `dws_plugin_template` (slug / option-key base) | `dws_lpmwc`                                  | `dws_ic`                             |
 | `DeepWebSolutions\PluginTemplate\` (namespace) | `DeepWebSolutions\LockedPaymentMethods\`     | `DeepWebSolutions\InternalComments\` |
 | `DWS Plugin Template` (display)                | `Locked Payment Methods for WooCommerce`     | `Internal Comments`                  |
+| `ahegyes/dws-plugin-template` (Composer name)  | `ahegyes/wc-locked-payment-methods`          | `ahegyes/wp-internal-comments`       |
 | `8811` (wp-env port)                           | any free port (avoid 8888/8889)              | any free port (avoid 8888/8889)      |
 
-The two underscore forms are distinct. `dws_plugin_template` (bare) is the WooCommerce settings-page slug, the installer's `STORE_KEY`, and the base every `{slug}_{field}` option row is built from; `dws_plugin_template_` (trailing) is the function and option-key prefix. Replacing the bare form as a plain substring covers both — the prefix is just the base plus `_` — so renaming only the trailing form leaves the settings options written under the old slug, orphaned on uninstall.
+The two underscore forms are distinct. `dws_plugin_template` (bare) is the settings-page slug and the option-key base every persistent row in `config/footprint.php` is built from; `dws_plugin_template_` (trailing) is the function and option-key prefix. Replacing the bare form as a plain substring covers both — the prefix is just the base plus `_` — so renaming only the trailing form leaves the settings options written under the old slug, orphaned on uninstall.
 
-**WC plugins follow extra conventions** (per v1 + WC trademark policy):
+**WC plugins follow these conventions** (WC trademark policy included):
 - **Display**: `X for WooCommerce` (WC trademark requirement). NOT "WooCommerce X" or "WC: X".
 - **Slug** + **text-domain**: end in `-for-woocommerce`.
 - **Constant + function abbreviations** end in `WC` (`LPMWC` = Locked Payment Methods + WooCommerce). Keeps `DWS_` prefix.
-- **Composer package name** convention is `deep-web-solutions/wc-<short-name>` (e.g., `wc-locked-payment-methods`).
+- **Composer package name**: `ahegyes/wc-<short-name>` (e.g., `ahegyes/wc-locked-payment-methods`).
 
-**Generic WP plugins** drop the `WC` everything: plain slug, plain abbreviation, `wp-` composer prefix (e.g., `deep-web-solutions/wp-internal-comments`).
+**Generic WP plugins** drop the `WC` everything: plain slug, plain abbreviation, `wp-` Composer prefix (e.g., `ahegyes/wp-internal-comments`).
 
-**Both variants share v2's flat namespace** — `DeepWebSolutions\PluginName\` only. v1's `\WC_Plugins\` and `\Plugins\` middle segments are dropped in v2.
+The Composer **package** name (`ahegyes/wc-*` / `ahegyes/wp-*`) and the GitHub **repository** name are separate identifiers: the repository keeps the plugin slug (e.g., `github.com/ahegyes/locked-payment-methods-for-woocommerce`), while the Composer name is what `composer.json` declares and other manifests `require`.
+
+**Both variants use a flat namespace** — `DeepWebSolutions\PluginName\` only, no grouping segments between the vendor and the plugin name.
 
 The port appears in `.wp-env.json` and `.wp-env.belowfloor.json` (`"port"`), `playwright.config.js` (`WP_BASE_URL`), and this README's "Open localhost" line below — keep them in sync.
 
@@ -62,12 +78,13 @@ Scoped deps land under `\Scoped\` inside the plugin's namespace (`DeepWebSolutio
 
 ## Fork Reset Checklist
 
-Template tracks its own version + history; forks start fresh:
+The mechanical reset the workflow performs — the manual list for forks without Actions:
 
-- Reset `2.0.0` → `1.0.0` everywhere (plugin header, `_VERSION` constant, all `@since` / `@version`, `readme.txt` Stable tag, `CHANGELOG.md` heading). Don't touch the SemVer / Keep-a-Changelog URLs.
-- Wipe `CHANGELOG.md` body to a single empty `## 1.0.0 - unreleased` block (keep prologue + markers).
+- Reset `2.0.0` → `0.1.0` everywhere (plugin header, `_VERSION` constant, all `@since` / `@version`, `readme.txt` Stable tag, `CHANGELOG.md` heading). Don't touch the SemVer / Keep-a-Changelog URLs.
+- Wipe `CHANGELOG.md` body to a single empty `## 0.1.0 - unreleased` block (keep prologue + markers).
 - Delete `changelog/*.md` (keep `.gitkeep`).
 - Rewrite `readme.txt` Description / Tags / Contributors / etc.
+- Repoint every repository-metadata URL at the fork: `composer.json` `homepage` + `authors.homepage`, `package.json` `repository` + `bugs`, `SECURITY.md`'s advisory link, and `readme.txt`'s full-changelog link all reference this template's GitHub repository until reset.
 
 ## Local Development
 

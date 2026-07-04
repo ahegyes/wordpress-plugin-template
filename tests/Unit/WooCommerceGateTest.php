@@ -2,8 +2,9 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Unit;
 
-use DeepWebSolutions\PluginTemplate\Component\AdminNotice;
 use DeepWebSolutions\PluginTemplate\Component\ExampleSettings;
+use DeepWebSolutions\PluginTemplate\Component\ExampleWPSettings;
+use DeepWebSolutions\PluginTemplate\Component\WelcomeNotice;
 use DeepWebSolutions\PluginTemplate\Feature\GenericFeature;
 use DeepWebSolutions\PluginTemplate\Feature\WooCommerceFeature;
 use DeepWebSolutions\PluginTemplate\Installer\Installer;
@@ -20,8 +21,9 @@ require_once __DIR__ . '/bootstrap-wp-stubs.php';
 #[UsesClass( GenericFeature::class )]
 #[UsesClass( WooCommerceFeature::class )]
 #[UsesClass( Installer::class )]
-#[UsesClass( AdminNotice::class )]
+#[UsesClass( WelcomeNotice::class )]
 #[UsesClass( ExampleSettings::class )]
+#[UsesClass( ExampleWPSettings::class )]
 final class WooCommerceGateTest extends TestCase {
 	// A dedicated process: WC_VERSION is a constant a sibling test defines at 9.0.0 and cannot be redefined,
 	// so the below-floor version is only assertable in isolation.

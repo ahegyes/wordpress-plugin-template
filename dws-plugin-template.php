@@ -54,7 +54,7 @@ if ( ! defined( 'DWS_PLUGIN_TEMPLATE_VERSION' ) ) {
 }
 
 /*
- * The scoped framework uses PHP 8.0+ syntax that fails to compile below the framework floor, so the
+ * The scoped framework uses PHP 8.5+ syntax that fails to compile below the framework floor, so the
  * requirements gate runs from the PHP 5.6-safe bootstrap package first; the full autoloader loads only once
  * PHP and WordPress clear the floor, keeping the requirements notice reachable on an unsupported runtime.
  */
@@ -103,6 +103,11 @@ function dws_plugin_template_dependencies_missing( $autoload, $scoped, $bootstra
  * @return  void
  */
 function dws_plugin_template_render_setup_notice() {
+	// The build state is operator information: only users who could act on it (plugin managers) see it.
+	if ( ! current_user_can( 'activate_plugins' ) ) {
+		return;
+	}
+
 	printf(
 		'<div class="notice notice-error"><p>%s</p></div>',
 		esc_html__(

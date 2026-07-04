@@ -28,12 +28,15 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerc
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Conditionals\Dependencies\WooCommerceVersionConditional;
 use DeepWebSolutions\PluginTemplate\Settings\ExampleWCSettingsPage;
 
-// Persistent storage keys named once here, so the stores that create each row and the installer that
-// removes it on uninstall stay in sync. The WooCommerce settings fields each persist one wp_options row as
-// {slug}_{field}; keep this list aligned with the ExampleSettings descriptor.
-$notices_option         = 'dws_plugin_template_notices';
-$dismissed_notices_meta = 'dws_plugin_template_dismissed_notices';
-$settings_options       = array( 'dws_plugin_template_enable_feature', 'dws_plugin_template_greeting' );
+// Persistent storage keys single-sourced in config/footprint.php, so the stores that create each row, the
+// installer that removes them, and uninstall.php's no-build fallback can never desync.
+/** @var array{installer_option: string, notices_option: string, settings_options: list<string>, dismissed_notices_meta: string} $footprint */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- inline @var type assertion, no description applies.
+$footprint = require __DIR__ . '/footprint.php';
+
+$installer_option       = $footprint['installer_option'];
+$notices_option         = $footprint['notices_option'];
+$dismissed_notices_meta = $footprint['dismissed_notices_meta'];
+$settings_options       = $footprint['settings_options'];
 
 return array(
 
@@ -56,7 +59,7 @@ return array(
 	// The installer owns one autoload-off wp_options row (stored version + install marker) and is handed the
 	// full uninstall footprint — the persistent notice option, the settings options, and the dismissal meta.
 	Installer::class => static fn (): Installer => new Installer(
-		new OptionsStore( Installer::STORE_KEY, false ),
+		new OptionsStore( $installer_option, false ),
 		array_merge( array( $notices_option ), $settings_options ),
 		array( $dismissed_notices_meta ),
 	),

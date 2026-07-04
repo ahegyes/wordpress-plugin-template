@@ -18,17 +18,6 @@ final class Installer implements InstallerInterface {
 	// region FIELDS AND CONSTANTS
 
 	/**
-	 * Option key of the installer's own wp_options row. Public so the container creates the backing store
-	 * under the same key the uninstall path clears, keeping the row's name in one place.
-	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
-	 *
-	 * @var     string
-	 */
-	public const STORE_KEY = 'dws_plugin_template';
-
-	/**
 	 * Store key holding the recorded plugin version.
 	 *
 	 * @since   2.0.0
@@ -84,6 +73,9 @@ final class Installer implements InstallerInterface {
 		if ( ! $this->store->has( self::INSTALLED_AT_KEY ) ) {
 			$this->store->set( self::INSTALLED_AT_KEY, time() );
 		}
+
+		// Capability grants, when a plugin has them, live here and in update() (revoked on uninstall()) —
+		// capabilities persist across a deactivate/reactivate cycle, so they are never tied to activate().
 	}
 
 	/**
@@ -147,7 +139,7 @@ final class Installer implements InstallerInterface {
 	public function activate( bool $network_wide = false ): void {
 		// No activation work, so $network_wide needs no get_sites() loop: the kernel runs install()/update()
 		// on every boot, and boot runs per-request on each site, so first-run setup happens per site without a
-		// separate activation step. Capability grants, when a plugin has them, would live here and in update().
+		// separate activation step.
 	}
 
 	/**

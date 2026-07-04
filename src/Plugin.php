@@ -11,6 +11,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Plugi
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\ValueObjects\PluginHeader;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Utilities\AdminNotices\AdminNoticeLogger;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Utilities\AdminNotices\AdminNoticesService;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Utilities\Logging\CompositeLogger;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Logging\WooCommerceLogger;
 use DeepWebSolutions\PluginTemplate\Scoped\DI\ContainerBuilder;
 use Psr\Container\ContainerInterface;
@@ -233,7 +234,7 @@ final class Plugin implements PluginInterface {
 
 		add_action( 'admin_notices', array( $notices, 'render_notices' ) );
 
-		$dismiss_action = $notices->get_dismiss_action();
+		$dismiss_action = $notices->dismiss_action;
 		if ( null !== $dismiss_action ) {
 			add_action( 'admin_footer', array( $notices, 'print_dismiss_script' ) );
 			add_action( 'wp_ajax_' . $dismiss_action, array( $notices, 'handle_dismiss' ) );
@@ -242,8 +243,8 @@ final class Plugin implements PluginInterface {
 
 	/**
 	 * Builds the kernel's diagnostic logger, chosen at boot (plugins_loaded) when WooCommerce's presence is
-	 * known: WooCommerce's logging stack when active, otherwise a persistent admin notice so a failed install
-	 * or migration stays visible to administrators on a later request.
+	 * known. A persistent admin notice keeps a failed install or migration visible to administrators on a later
+	 * request; WooCommerce's logging stack is added as the diagnostic sink when active.
 	 *
 	 * @since   2.0.0
 	 * @version 2.0.0
@@ -251,15 +252,20 @@ final class Plugin implements PluginInterface {
 	 * @return  LoggerInterface
 	 */
 	protected function build_logger(): LoggerInterface {
-		if ( function_exists( 'wc_get_logger' ) ) {
-			return new WooCommerceLogger( 'dws-plugin-template' );
-		}
-
-		return new AdminNoticeLogger(
+		$notice_logger = new AdminNoticeLogger(
 			$this->notices(),
 			self::INSTALL_FAILURE_NOTICE,
 			self::PERSISTENT_STORE,
 		);
+
+		if ( function_exists( 'wc_get_logger' ) ) {
+			return new CompositeLogger(
+				$notice_logger,
+				new WooCommerceLogger( 'dws-plugin-template' ),
+			);
+		}
+
+		return $notice_logger;
 	}
 
 	/**

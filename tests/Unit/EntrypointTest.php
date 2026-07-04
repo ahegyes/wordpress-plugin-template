@@ -2,7 +2,7 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Unit;
 
-use DeepWebSolutions\PluginTemplate\Component\AdminNotice;
+use DeepWebSolutions\PluginTemplate\Component\WelcomeNotice;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
@@ -30,7 +30,7 @@ final class EntrypointTest extends TestCase {
 			WordPressStubState::$actions,
 			'An incompatible runtime must register exactly the requirements notice and nothing else.'
 		);
-		self::assertSame( 'admin_notices', WordPressStubState::$actions[0]['hook'] );
+		self::assertSame( 'all_admin_notices', WordPressStubState::$actions[0]['hook'] );
 		self::assertSame(
 			array(),
 			WordPressStubState::$activation_hooks,
@@ -67,7 +67,7 @@ final class EntrypointTest extends TestCase {
 			'Boot must be deferred to plugins_loaded priority 15, after WooCommerce loads.'
 		);
 		self::assertFalse(
-			WordPressStubState::has_object_action( 'admin_notices', AdminNotice::class, 'render' ),
+			WordPressStubState::has_object_action( 'admin_notices', WelcomeNotice::class, 'render' ),
 			'The include must schedule boot, not run it: no component hook registers yet.'
 		);
 	}
@@ -99,6 +99,17 @@ final class EntrypointTest extends TestCase {
 			$output,
 			'The setup notice must render as a WordPress error notice.'
 		);
+
+		WordPressStubState::$user_can = false;
+		\ob_start();
+		dws_plugin_template_render_setup_notice();
+		$gated_output = (string) \ob_get_clean();
+
+		self::assertSame(
+			'',
+			$gated_output,
+			'The setup notice must stay silent for users who cannot act on the build state.'
+		);
 	}
 
 	public function test_the_requirements_gate_runs_before_the_full_autoloader(): void {
@@ -115,7 +126,7 @@ final class EntrypointTest extends TestCase {
 		self::assertLessThan(
 			$autoload_position,
 			$gate_position,
-			'The requirements gate must run before the full autoloader, so the scoped framework (PHP 8.0+ '
+			'The requirements gate must run before the full autoloader, so the scoped framework (PHP 8.5+ '
 				. 'syntax) is never required on a runtime below the floor where it would fatal before the notice renders.'
 		);
 	}
