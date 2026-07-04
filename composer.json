@@ -109,8 +109,9 @@
       "@composer update --prefer-stable --ignore-platform-reqs --no-interaction"
     ],
 
-    "scope-php-dependencies": [
-      "@php vendor/bin/php-scoper add-prefix --prefix='DeepWebSolutions\\PluginTemplate\\Scoped' --output-dir=./dependencies --config=./scoper.inc.php --force --quiet"
+    "scope-php-dependencies": "DeepWebSolutions\\Config\\Composer\\ScopePhpDependencies::run",
+    "scope-php-dependencies:raw": [
+      "@php vendor/bin/php-scoper add-prefix --prefix='DeepWebSolutions\\PluginTemplate\\Scoped' --config=./scoper.inc.php --force --quiet"
     ],
 
     "format:php": "phpcbf --standard=./phpcs.dist.xml --basepath=. ./ -v",

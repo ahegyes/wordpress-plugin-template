@@ -6,7 +6,9 @@
 .gitignore
 .idea
 .vscode
-.wp-env.tests.json
+.wp-env.belowfloor.json
+.wp-env.json
+.wp-env.override.json
 
 AGENTS.md
 CHANGELOG.md
@@ -16,6 +18,7 @@ README.md
 SECURITY.md
 
 changelog/
+docs/
 
 node_modules/
 tests/

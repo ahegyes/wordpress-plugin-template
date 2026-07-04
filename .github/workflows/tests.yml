@@ -36,7 +36,6 @@ jobs:
           - label: 'WP 7.0 (compatible)'
             php-version: '8.5'
             wp-env-core: 'https://wordpress.org/wordpress-7.0.zip'
-            wp-env-config-file: '.wp-env.tests.json'
             composer-script: 'test:integration'
           # Graceful-failure path — WP 6.9.4 is below the 7.0 floor; the requirements-only suite proves the
           # gate, on a config that skips the activation core would reject below the floor.
@@ -64,4 +63,3 @@ jobs:
       # post-autoload-dump scoping pipeline populates dependencies/.
       composer-options: '--prefer-dist'
       build-script: ''
-      wp-env-config-file: '.wp-env.tests.json'

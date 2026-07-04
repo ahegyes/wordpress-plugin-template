@@ -56,7 +56,7 @@ The two underscore forms are distinct. `dws_plugin_template` (bare) is the WooCo
 
 **Both variants share v2's flat namespace** — `DeepWebSolutions\PluginName\` only. v1's `\WC_Plugins\` and `\Plugins\` middle segments are dropped in v2.
 
-The port appears in `.wp-env.tests.json` and `.wp-env.belowfloor.json` (`"port"`), `playwright.config.js` (`WP_BASE_URL`), and this README's "Open localhost" line below — keep them in sync.
+The port appears in `.wp-env.json` and `.wp-env.belowfloor.json` (`"port"`), `playwright.config.js` (`WP_BASE_URL`), and this README's "Open localhost" line below — keep them in sync.
 
 Scoped deps land under `\Scoped\` inside the plugin's namespace (`DeepWebSolutions\PluginTemplate\Scoped\DI\...`). The `\Scoped\` segment is invariant; renaming the namespace placeholder above is enough.
 
@@ -95,7 +95,7 @@ npm run wp-env:stop
 
 > Use `composer packages-install` / `packages-update` (never bare `composer install` / `update`) — the wrappers pass `--ignore-platform-reqs`, which prevents composer from emitting a `platform_check.php` that would bypass the framework's friendly version-check admin notice.
 
-`wp-env:start` activates the plugin for you (via the `afterStart` script in `.wp-env.tests.json`). Open <http://localhost:8811/wp-admin> and you'll see the "DWS Plugin Template is active." admin notice.
+`wp-env:start` activates the plugin for you (via the `afterStart` script in `.wp-env.json`). Open <http://localhost:8811/wp-admin> and you'll see the "DWS Plugin Template is active." admin notice.
 
 The plugin declares a `dws-plugin-template` text domain and `Domain Path: /languages`. Translation catalogs are generated at release — wp.org builds them for hosted plugins, and forks distributed elsewhere run `wp i18n make-pot . languages/dws-plugin-template.pot` (the shipped `languages/` directory is ready for them).
 

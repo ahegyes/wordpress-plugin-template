@@ -1,0 +1,24 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Release
+    # A reusable workflow can't elevate above the caller's token; grant the GitHub Release scope here.
+    permissions:
+      contents: write
+    # @trunk on purpose: the release reusable rides the dev-trunk propagation model (see wordpress-configs SECURITY.md).
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-release.yml@trunk # zizmor: ignore[unpinned-uses]
+    with:
+      project-path: '.'
+      plugin-slug: 'dws-plugin-template'
