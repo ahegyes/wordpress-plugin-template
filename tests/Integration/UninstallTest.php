@@ -18,7 +18,7 @@ final class UninstallTest extends TestCase {
 		'dws_plugin_template_greeting',
 		'dws_plugin_template-general',
 	);
-	private const META_KEY = 'dws_plugin_template_dismissed_notices';
+	private const META_KEY    = 'dws_plugin_template_dismissed_notices';
 
 	protected function tearDown(): void {
 		foreach ( self::OPTION_KEYS as $key ) {
@@ -29,8 +29,22 @@ final class UninstallTest extends TestCase {
 	}
 
 	public function test_uninstall_removes_every_persistent_footprint_on_a_single_site(): void {
-		\update_option( 'dws_plugin_template', array( 'version' => '2.0.0', 'installed_at' => 123 ) );
-		\update_option( 'dws_plugin_template_notices', array( 'n' => array( 'id' => 'n', 'message' => 'x' ) ) );
+		\update_option(
+			'dws_plugin_template',
+			array(
+				'version'      => '2.0.0',
+				'installed_at' => 123,
+			)
+		);
+		\update_option(
+			'dws_plugin_template_notices',
+			array(
+				'n' => array(
+					'id'      => 'n',
+					'message' => 'x',
+				),
+			)
+		);
 		\update_option( 'dws_plugin_template_enable_feature', 'yes' );
 		\update_option( 'dws_plugin_template_greeting', 'Welcome!' );
 		\update_option( 'dws_plugin_template-general', array( 'welcome_text' => 'Hi' ) );
@@ -83,8 +97,22 @@ final class UninstallTest extends TestCase {
 	}
 
 	protected function seed_site_footprint(): void {
-		\update_option( 'dws_plugin_template', array( 'version' => '2.0.0', 'installed_at' => 123 ) );
-		\update_option( 'dws_plugin_template_notices', array( 'n' => array( 'id' => 'n', 'message' => 'x' ) ) );
+		\update_option(
+			'dws_plugin_template',
+			array(
+				'version'      => '2.0.0',
+				'installed_at' => 123,
+			)
+		);
+		\update_option(
+			'dws_plugin_template_notices',
+			array(
+				'n' => array(
+					'id'      => 'n',
+					'message' => 'x',
+				),
+			)
+		);
 		\update_option( 'dws_plugin_template_enable_feature', 'yes' );
 		\update_option( 'dws_plugin_template_greeting', 'Welcome!' );
 		\update_option( 'dws_plugin_template-general', array( 'welcome_text' => 'Hi' ) );

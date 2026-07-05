@@ -121,8 +121,16 @@ final class InstallerLifecycleTest extends TestCase {
 
 	public function test_uninstall_removes_the_full_single_site_footprint(): void {
 		WordPressStubState::$options = array(
-			'dws_plugin_template'                => array( 'version' => '2.0.0', 'installed_at' => 123 ),
-			'dws_plugin_template_notices'        => array( 'some-id' => array( 'id' => 'some-id', 'message' => 'x' ) ),
+			'dws_plugin_template'                => array(
+				'version'      => '2.0.0',
+				'installed_at' => 123,
+			),
+			'dws_plugin_template_notices'        => array(
+				'some-id' => array(
+					'id'      => 'some-id',
+					'message' => 'x',
+				),
+			),
 			'dws_plugin_template_enable_feature' => 'yes',
 			'dws_plugin_template_greeting'       => 'Welcome!',
 			'dws_plugin_template-general'        => array( 'welcome_text' => 'Hi' ),
@@ -176,7 +184,12 @@ final class InstallerLifecycleTest extends TestCase {
 		WordPressStubState::$sites        = array( 1, 2 );
 		WordPressStubState::$options      = array(
 			'dws_plugin_template'                => array( 'version' => '2.0.0' ),
-			'dws_plugin_template_notices'        => array( 'n' => array( 'id' => 'n', 'message' => 'x' ) ),
+			'dws_plugin_template_notices'        => array(
+				'n' => array(
+					'id'      => 'n',
+					'message' => 'x',
+				),
+			),
 			'dws_plugin_template_enable_feature' => 'yes',
 			'dws_plugin_template_greeting'       => 'Welcome!',
 			'dws_plugin_template-general'        => array( 'welcome_text' => 'Hi' ),

@@ -47,7 +47,7 @@ return array(
 	// Two stores: a per-request memory store and an autoload-off wp_options persistent store. The install-failure
 	// logger queues into the persistent store, under Plugin::PERSISTENT_STORE, so the notice survives the request
 	// that stops the boot; the store name is shared with Plugin so the logger and the registration cannot desync.
-	AdminNoticesService::class => static fn (): AdminNoticesService => new AdminNoticesService(
+	AdminNoticesService::class           => static fn (): AdminNoticesService => new AdminNoticesService(
 		array(
 			AdminNoticesService::DEFAULT_STORE => new NoticeStore( new MemoryStore() ),
 			Plugin::PERSISTENT_STORE           => new NoticeStore( new OptionsStore( $notices_option, false ) ),
@@ -58,12 +58,12 @@ return array(
 
 	// The installer owns one autoload-off wp_options row (stored version + install marker) and is handed the
 	// full uninstall footprint — the persistent notice option, the settings options, and the dismissal meta.
-	Installer::class => static fn (): Installer => new Installer(
+	Installer::class                     => static fn (): Installer => new Installer(
 		new OptionsStore( $installer_option, false ),
 		array_merge( array( $notices_option ), $settings_options ),
 		array( $dismissed_notices_meta ),
 	),
 
 	// One backend per page, bound to the empty WC_Settings_Page subclass WooCommerce recovers by class name.
-	WooCommerceSettingsBackend::class => static fn (): WooCommerceSettingsBackend => new WooCommerceSettingsBackend( ExampleWCSettingsPage::class ),
+	WooCommerceSettingsBackend::class    => static fn (): WooCommerceSettingsBackend => new WooCommerceSettingsBackend( ExampleWCSettingsPage::class ),
 );
