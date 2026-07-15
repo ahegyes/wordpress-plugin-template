@@ -102,11 +102,11 @@
       "DeepWebSolutions\\Config\\Composer\\ScopePhpDependencies::postAutoloadDump"
     ],
 
-    "generate-autoloader": "@composer dump-autoload --ignore-platform-reqs -o",
-    "packages-install": "@composer install --ignore-platform-reqs --no-interaction",
+    "generate-autoloader": "@composer dump-autoload -o",
+    "packages-install": "@composer install --ignore-platform-req=php+ --no-interaction",
     "packages-update": [
       "@composer clear-cache",
-      "@composer update --prefer-stable --ignore-platform-reqs --no-interaction"
+      "@composer update --prefer-stable --ignore-platform-req=php+ --no-interaction"
     ],
 
     "scope-php-dependencies": "DeepWebSolutions\\Config\\Composer\\ScopePhpDependencies::run",
@@ -172,6 +172,7 @@
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "phpstan/extension-installer": true
     },
+    "platform-check": false,
     "sort-packages": true
   }
 }
