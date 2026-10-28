@@ -31,13 +31,14 @@ jobs:
         with:
           persist-credentials: false
 
-      # The floor is the plugin's Requires at least header, and WordPress's version API offers the newest release of every branch, so new releases and floors join without an edit here.
+      # The floor is the Requires at least header of the entry file composer.json's text domain names, and WordPress's version API offers the newest release of every branch, so new releases, floors and a filled-in slug join without an edit here.
       - name: List the newest release of every branch from the floor up
         id: versions
         run: |
-          floor=$(sed -nE 's|^[[:space:]/*#@]*Requires at least:[[:space:]]*([0-9]+(\.[0-9]+)*).*$|\1|p' dws-plugin-template.php | head -n 1)
+          entry="$(jq -r '.extra["text-domain"] // empty' composer.json).php"
+          floor=$(sed -nE 's|^[[:space:]/*#@]*Requires at least:[[:space:]]*([0-9]+(\.[0-9]+)*).*$|\1|p' "$entry" | head -n 1)
           if [ -z "$floor" ]; then
-            echo "::error::dws-plugin-template.php declares no Requires at least header."
+            echo "::error::$entry declares no Requires at least header."
             exit 1
           fi
           offers=$(curl -fsS https://api.wordpress.org/core/version-check/1.7/)
