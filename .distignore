@@ -22,6 +22,7 @@ docs/
 
 node_modules/
 tests/
+vendor/bin/
 
 composer.json
 composer.lock

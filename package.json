@@ -13,7 +13,8 @@
         "npm": ">=11"
     },
     "devDependencies": {
-        "@ahegyes/wordpress-configs": "git+https://github.com/ahegyes/wordpress-configs.git#88710a71e2bcc7db7cb81b4eb96411438369ce0f",
+        "@ahegyes/wordpress-configs": "git+https://github.com/ahegyes/wordpress-configs.git#a6a70735ba7a94628011b9856bf99159c490f7b5",
+        "@axe-core/playwright": "^4.14.0",
         "@playwright/test": "^1.64.1",
         "@types/react": "^19.3.0",
         "@wordpress/block-editor": "^19.0.0",
@@ -46,7 +47,7 @@
         "start:blocks": "wp-scripts start --webpack-src-dir=blocks/src --output-path=blocks/build --blocks-manifest",
         "start:assets": "wp-scripts start editor=./assets/src/editor.ts greeting=./assets/src/greeting.scss --output-path=assets/build",
 
-        "lint:scripts": "wp-scripts lint-js blocks/src assets/src",
+        "lint:scripts": "wp-scripts lint-js blocks/src assets/src tests/e2e",
         "lint:styles": "wp-scripts lint-style 'blocks/src/**/*.scss' 'assets/src/**/*.scss'",
         "lint:types": "tsc",
 

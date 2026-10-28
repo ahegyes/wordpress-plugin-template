@@ -28,14 +28,15 @@ composer quality-check       # manifest and changelog validation, PHPCS (both pr
 npm run setup                # packages-install for Composer and npm, the scripts' build, then the development environment
 npm run build                # blocks and assets, through wp-scripts; npm run start watches them
 npm run lint:scripts         # ESLint, with lint:styles (Stylelint) and lint:types (tsc) beside it
+npm run test:e2e             # Playwright on .wp-env.tests.json, starting it if needed; the scripts must be built
 ```
 
 ## Environments
 
 - `.wp-env.json`: development, as `local`, on port 8811, behind `npm run setup` and `wp-env:*`. The framework rethrows boot and migration failures there.
-- `.wp-env.tests.json`: Integration, as production, on port 8812, behind `wp-env:tests:*` and `composer test:integration`.
+- `.wp-env.tests.json`: Integration and E2E, as production, on port 8812, behind `wp-env:tests:*`, `composer test:integration` and `npm run test:e2e`. The E2E suite deactivates and reactivates WooCommerce there.
 
-Both run WordPress 7.1.3 on PHP 8.5, with WooCommerce from `vendor/` and HPOS on.
+Both run WordPress 7.1.3 on PHP 8.5, with WooCommerce from `vendor/` and HPOS on; CI runs Integration and E2E on every WordPress branch from the entry's `Requires at least` up, and nightly on WordPress trunk.
 
 ## Cache layout
 
