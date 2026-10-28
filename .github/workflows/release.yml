@@ -42,7 +42,7 @@ jobs:
     permissions:
       actions: read
       contents: write
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-release.yml@3f49ee71edc29034e413446e8f214720201115a3
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-release.yml@9f64dc77b25727130884eaf427d2bd75493557ce
     with:
       project-path: '.'
       plugin-slug: ${{ needs.slug.outputs.slug }}
