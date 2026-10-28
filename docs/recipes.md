@@ -413,7 +413,7 @@ Read the stored value with `ProductMeta::get_value( $product, '_dws_tpl_box' )`.
 'meta_prefixes' => array( 'post' => array( '_' . Plugin::PREFIX . '_' ) ),
 ```
 
-A field with its own `render` callable returns its control as inline markup, escapes, names and describes it, and prints a hidden empty input before it unless the field is disabled. Without that input, a cleared control posts nothing, and the save leaves the stored value untouched.
+A field with its own `render` callable returns its control as inline markup, escapes, names and describes it, and prints a hidden empty input before it unless the field is disabled. Without that input, a cleared control posts nothing, and the save leaves the stored value untouched. It also takes a `validate` callable that returns the value to store or a `WP_Error`, since the framework refuses to save a custom control's value that nothing validates.
 
 ## A form on an edit screen
 
@@ -493,7 +493,7 @@ final class PostNote implements ComponentInterface, ObjectFormDefinitionInterfac
 }
 ```
 
-The host checks that the user can edit the post itself, and the form's `capability` is one more capability the user needs, checked without an object, so it names a primitive capability such as `edit_posts` rather than `edit_post`. The form verifies its own nonce before it asks for the definition on a save. Declare the meta for uninstall in `includes/footprint.php`, as the product data tab does. A field with its own `render` callable prints a hidden empty input before its control unless the field is disabled, for the reason that recipe gives.
+The host checks that the user can edit the post itself, and the form's `capability` is one more capability the user needs, checked without an object, so it names a primitive capability such as `edit_posts` rather than `edit_post`. The form verifies its own nonce before it asks for the definition on a save. Declare the meta for uninstall in `includes/footprint.php`, as the product data tab does. A field with its own `render` callable prints a hidden empty input before its control unless the field is disabled, and takes a `validate` callable, for the reasons that recipe gives.
 
 ## A section on WooCommerce's Payments tab
 
