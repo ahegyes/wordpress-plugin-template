@@ -41,7 +41,7 @@ jobs:
             exit 1
           fi
           offers=$(curl -fsS https://api.wordpress.org/core/version-check/1.7/)
-          versions=$(printf '%s' "$offers" | jq -c --arg floor "$floor" '[.offers[].version | select((split(".")[0:2] | map(tonumber)) >= ($floor | split(".") | map(tonumber)))] | unique | if length == 0 then error("No WordPress release at or above \($floor).") else . end')
+          versions=$(printf '%s' "$offers" | jq -c --arg floor "$floor" '[.offers[].version | select((split(".")[0:2] | map(tonumber)) >= ($floor | split(".")[0:2] | map(tonumber)))] | unique | if length == 0 then error("No WordPress release at or above \($floor).") else . end')
           echo "versions=$versions" >> "$GITHUB_OUTPUT"
 
   integration:
