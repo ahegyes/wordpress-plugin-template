@@ -11,24 +11,24 @@ permissions:
 jobs:
   lint-php:
     name: PHP Lint
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@88710a71e2bcc7db7cb81b4eb96411438369ce0f
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
     with:
       php-version: '8.5'
       scripts: '["lint:php:phpcs", "lint:php:phpcs:tests", "lint:php:phpstan"]'
 
   lint-scripts-styles:
     name: Scripts and styles lint
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-scripts-styles-lint.yml@88710a71e2bcc7db7cb81b4eb96411438369ce0f
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-scripts-styles-lint.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
     with:
       scripts: '["lint:scripts", "lint:styles", "lint:types"]'
 
   block-json:
     name: block.json schema
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-block-json-check.yml@88710a71e2bcc7db7cb81b4eb96411438369ce0f
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-block-json-check.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
 
   php-syntax:
     name: PHP syntax
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-syntax-check.yml@88710a71e2bcc7db7cb81b4eb96411438369ce0f
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-syntax-check.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
     with:
       php-versions: '["7.4"]'
       paths: '["dws-plugin-template.php", "uninstall.php", "includes"]'
