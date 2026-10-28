@@ -18,3 +18,12 @@ jobs:
       wp-env-core: 'https://wordpress.org/nightly-builds/wordpress-latest.zip'
       composer-script: 'test:integration:run'
       wp-env-config-file: '.wp-env.tests.json'
+
+  e2e:
+    name: E2E
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-playwright-e2e.yml@88710a71e2bcc7db7cb81b4eb96411438369ce0f
+    with:
+      artifact-slug: nightly
+      php-version: '8.5'
+      wp-env-core: 'https://wordpress.org/nightly-builds/wordpress-latest.zip'
+      wp-env-config-file: '.wp-env.tests.json'

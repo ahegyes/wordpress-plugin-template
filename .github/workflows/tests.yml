@@ -57,3 +57,17 @@ jobs:
       wp-version: ${{ matrix.wp }}
       composer-script: 'test:integration:run'
       wp-env-config-file: '.wp-env.tests.json'
+
+  e2e:
+    name: E2E
+    needs: wordpress
+    strategy:
+      fail-fast: false
+      matrix:
+        wp: ${{ fromJSON(needs.wordpress.outputs.versions) }}
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-playwright-e2e.yml@88710a71e2bcc7db7cb81b4eb96411438369ce0f
+    with:
+      artifact-slug: wp-${{ matrix.wp }}
+      php-version: '8.5'
+      wp-version: ${{ matrix.wp }}
+      wp-env-config-file: '.wp-env.tests.json'
