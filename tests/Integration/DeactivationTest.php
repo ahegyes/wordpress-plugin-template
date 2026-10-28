@@ -2,7 +2,6 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
-use DeepWebSolutions\PluginTemplate\Footprint;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Scheduling\ScheduledHook;
 use PHPUnit\Framework\Attributes\After;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -12,14 +11,14 @@ use PHPUnit\Framework\TestCase;
 final class DeactivationTest extends TestCase {
 	#[After]
 	protected function unschedule_hooks(): void {
-		foreach ( Footprint::DATA['cron_hooks'] as $hook ) {
+		foreach ( dws_tpl_get_footprint()['cron_hooks'] as $hook ) {
 			dws_tpl_plugin()->scheduler->unschedule_hook( $hook );
 		}
 	}
 
 	public function test_deactivation_unschedules_every_hook_of_the_footprint(): void {
 		$scheduler = dws_tpl_plugin()->scheduler;
-		$hooks     = \array_map( static fn ( string $hook ): ScheduledHook => new ScheduledHook( $hook ), Footprint::DATA['cron_hooks'] );
+		$hooks     = \array_map( static fn ( string $hook ): ScheduledHook => new ScheduledHook( $hook ), dws_tpl_get_footprint()['cron_hooks'] );
 		foreach ( $hooks as $hook ) {
 			self::assertTrue( $scheduler->enqueue( $hook ) );
 		}

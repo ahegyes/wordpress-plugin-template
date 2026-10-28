@@ -2,7 +2,6 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
-use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
@@ -15,7 +14,7 @@ final class UninstallTest extends TestCase {
 	#[RunInSeparateProcess]
 	public function test_a_consenting_uninstall_removes_a_row_of_every_kind_the_framework_roots_store(): void {
 		$prefix = Plugin::PREFIX . '_';
-		update_option( Options::DELETE_DATA, 'yes' );
+		update_option( DWS_TPL_OPTION_DELETE_DATA, 'yes' );
 		update_option( "{$prefix}notices", array( 'seeded' ) );
 		update_network_option( null, "{$prefix}network_notices", array( 'seeded' ) );
 		set_transient( "{$prefix}boot_failure_seeded", 1, HOUR_IN_SECONDS );
@@ -27,7 +26,7 @@ final class UninstallTest extends TestCase {
 		self::assertTrue( uninstall_plugin( plugin_basename( DWS_TPL_FILE ) ) );
 		wp_cache_flush();
 
-		self::assertFalse( get_option( Options::DELETE_DATA ) );
+		self::assertFalse( get_option( DWS_TPL_OPTION_DELETE_DATA ) );
 		self::assertFalse( get_option( "{$prefix}notices" ) );
 		self::assertFalse( get_network_option( null, "{$prefix}network_notices" ) );
 		self::assertFalse( get_transient( "{$prefix}boot_failure_seeded" ) );
@@ -44,5 +43,9 @@ final class UninstallTest extends TestCase {
 				'ids'
 			)
 		);
+
+		// The other tests share the database, so the runner stores again what a new site starts with.
+		dws_tpl_plugin()->migrations?->run();
+		self::assertSame( 'no', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
 	}
 }

@@ -55,6 +55,9 @@ final class Plugin {
 	public const array COMPONENTS = array(
 		Scheduler::class,
 		AdminNotices::class,
+		Settings::class,
+		Blocks::class,
+		Feature\Feature::class,
 	);
 
 	/**
@@ -149,7 +152,7 @@ final class Plugin {
 	 */
 	public function deactivate(): void {
 		foreach ( array( 'cron_hooks', 'as_hooks' ) as $kind ) {
-			foreach ( Footprint::DATA[ $kind ] ?? array() as $hook ) {
+			foreach ( dws_tpl_get_footprint()[ $kind ] ?? array() as $hook ) {
 				$unscheduled = $this->scheduler->unschedule_hook( $hook );
 				if ( true !== $unscheduled ) {
 					$this->logger->warning(
@@ -183,7 +186,7 @@ final class Plugin {
 			return false;
 		}
 
-		$this->migrations = new MigrationRunner( DWS_TPL_FILE, self::PREFIX . '_revision', Migrations::STEPS, $this->logger, $this->scheduler );
+		$this->migrations = new MigrationRunner( DWS_TPL_FILE, self::PREFIX . '_revision', dws_tpl_get_migration_steps(), $this->logger, $this->scheduler );
 		$this->migrations->register_hooks();
 
 		$this->kernel = new PluginKernel( new ContainerBuilder()->addDefinitions( $this->get_definitions( $this->logger, $this->scheduler ) )->build() );

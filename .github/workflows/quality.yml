@@ -16,6 +16,16 @@ jobs:
       php-version: '8.5'
       scripts: '["lint:php:phpcs", "lint:php:phpcs:tests", "lint:php:phpstan"]'
 
+  lint-scripts-styles:
+    name: Scripts and styles lint
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-scripts-styles-lint.yml@88710a71e2bcc7db7cb81b4eb96411438369ce0f
+    with:
+      scripts: '["lint:scripts", "lint:styles", "lint:types"]'
+
+  block-json:
+    name: block.json schema
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-block-json-check.yml@88710a71e2bcc7db7cb81b4eb96411438369ce0f
+
   php-syntax:
     name: PHP syntax
     uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-syntax-check.yml@88710a71e2bcc7db7cb81b4eb96411438369ce0f

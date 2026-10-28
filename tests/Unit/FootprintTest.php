@@ -2,8 +2,6 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Unit;
 
-use DeepWebSolutions\PluginTemplate\Footprint;
-use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Uninstall\Uninstaller;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -23,7 +21,7 @@ final class FootprintTest extends TestCase {
 		self::assertSame( 1, \preg_match( '/@phpstan-type Footprint (.+)$/m', $doc, $type ) );
 		\preg_match_all( '/(\w+)\?:/', $type[1], $kinds );
 
-		self::assertSame( array(), \array_diff( \array_keys( Footprint::DATA ), $kinds[1] ) );
+		self::assertSame( array(), \array_diff( \array_keys( dws_tpl_get_footprint() ), $kinds[1] ) );
 	}
 
 	public function test_every_entry_is_in_the_plugin_prefix_family(): void {
@@ -35,7 +33,7 @@ final class FootprintTest extends TestCase {
 			...self::LEGACY_FAMILIES,
 		);
 
-		foreach ( Footprint::DATA as $kind => $entries ) {
+		foreach ( dws_tpl_get_footprint() as $kind => $entries ) {
 			$entries = \in_array( $kind, array( 'meta', 'meta_prefixes' ), true ) ? \array_merge( ...\array_values( $entries ) ) : $entries;
 			foreach ( $entries as $entry ) {
 				$covered = 'as_groups' === $kind ? Plugin::PREFIX === $entry : \array_any( $family, static fn ( string $start ): bool => \str_starts_with( $entry, $start ) );
@@ -47,22 +45,22 @@ final class FootprintTest extends TestCase {
 	public function test_it_covers_what_the_framework_roots_store(): void {
 		$prefix = Plugin::PREFIX . '_';
 
-		self::assertContains( $prefix, Footprint::DATA['option_prefixes'] );
-		self::assertContains( '_transient_' . $prefix, Footprint::DATA['option_prefixes'] );
-		self::assertContains( '_transient_timeout_' . $prefix, Footprint::DATA['option_prefixes'] );
-		self::assertContains( $prefix, Footprint::DATA['user_meta_site_prefixes'] );
-		self::assertContains( $prefix, Footprint::DATA['user_meta_global_prefixes'] );
-		self::assertContains( $prefix . 'network_notices', Footprint::DATA['network_options'] );
-		self::assertContains( $prefix . 'revision_run', Footprint::DATA['cron_hooks'] );
-		self::assertContains( Plugin::PREFIX, Footprint::DATA['as_groups'] );
+		self::assertContains( $prefix, dws_tpl_get_footprint()['option_prefixes'] );
+		self::assertContains( '_transient_' . $prefix, dws_tpl_get_footprint()['option_prefixes'] );
+		self::assertContains( '_transient_timeout_' . $prefix, dws_tpl_get_footprint()['option_prefixes'] );
+		self::assertContains( $prefix, dws_tpl_get_footprint()['user_meta_site_prefixes'] );
+		self::assertContains( $prefix, dws_tpl_get_footprint()['user_meta_global_prefixes'] );
+		self::assertContains( $prefix . 'network_notices', dws_tpl_get_footprint()['network_options'] );
+		self::assertContains( $prefix . 'revision_run', dws_tpl_get_footprint()['cron_hooks'] );
+		self::assertContains( Plugin::PREFIX, dws_tpl_get_footprint()['as_groups'] );
 	}
 
-	public function test_it_covers_every_options_key(): void {
-		$keys = \array_filter( ( new \ReflectionClass( Options::class ) )->getConstants(), \is_string( ... ) );
+	public function test_it_covers_every_option_key(): void {
+		$keys = \array_filter( \get_defined_constants( true )['user'], static fn ( mixed $value, string $name ): bool => \str_starts_with( $name, 'DWS_TPL_OPTION_' ) && \is_string( $value ), \ARRAY_FILTER_USE_BOTH );
 
 		self::assertNotSame( array(), $keys );
 		foreach ( $keys as $key ) {
-			$covered = \in_array( $key, Footprint::DATA['options'] ?? array(), true ) || \array_any( Footprint::DATA['option_prefixes'], static fn ( string $prefix ): bool => \str_starts_with( $key, $prefix ) );
+			$covered = \in_array( $key, dws_tpl_get_footprint()['options'] ?? array(), true ) || \array_any( dws_tpl_get_footprint()['option_prefixes'], static fn ( string $prefix ): bool => \str_starts_with( $key, $prefix ) );
 			self::assertTrue( $covered, "The option $key is outside the footprint." );
 		}
 	}
