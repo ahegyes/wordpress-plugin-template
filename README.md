@@ -26,10 +26,10 @@ The workflow:
 ## Naming
 
 - A WooCommerce plugin's display name reads `X for WooCommerce`, as WooCommerce's trademark guidelines ask, and its slug ends in `-for-woocommerce`.
-- The prefix is `dws_` and one segment of lowercase letters and digits, such as `dws_lpmwc`, so no plugin's prefix starts with another's; a WooCommerce plugin's segment ends in `wc`.
+- The prefix is `dws_` and one segment of up to 28 lowercase letters and digits, such as `dws_lpmwc`, so no plugin's prefix starts with another's; the framework's admin notices refuse `dws_network` and `dws_hidden`; a WooCommerce plugin's segment ends in `wc`.
 - The namespace is flat: `DeepWebSolutions\<Name>\`, with no segment in between.
 - The Composer package is `ahegyes/wc-<name>` for a WooCommerce plugin and `ahegyes/wp-<name>` otherwise, while the repository keeps the plugin's slug; the fill-in sets `ahegyes/<slug>`, which the author changes by hand.
-- Each plugin takes its own pair of wp-env ports, apart from 8888 and 8889, which wp-env uses by default.
+- Each plugin takes its own pair of wp-env ports, apart from 8888 and 8889, which wp-env uses by default, and the template's own 8811 and 8812.
 
 ## Working on the template
 
