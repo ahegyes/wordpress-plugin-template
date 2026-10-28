@@ -139,6 +139,32 @@ final class Plugin {
 		$this->boot->run( $this->compose( ... ) );
 	}
 
+	/**
+	 * Unschedules the footprint's jobs on the current site, logging each one that could not be unscheduled.
+	 *
+	 * @since   2.0.0
+	 * @version 2.0.0
+	 *
+	 * @return  void
+	 */
+	public function deactivate(): void {
+		foreach ( array( 'cron_hooks', 'as_hooks' ) as $kind ) {
+			foreach ( Footprint::DATA[ $kind ] ?? array() as $hook ) {
+				$unscheduled = $this->scheduler->unschedule_hook( $hook );
+				if ( true !== $unscheduled ) {
+					$this->logger->warning(
+						'Could not unschedule {hook} on deactivation: {error}',
+						array(
+							'hook'      => $hook,
+							'error'     => $unscheduled->get_error_message(),
+							'exception' => $unscheduled->get_error_data(),
+						)
+					);
+				}
+			}
+		}
+	}
+
 	// endregion
 
 	// region HELPERS

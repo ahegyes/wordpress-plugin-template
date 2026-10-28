@@ -1,6 +1,6 @@
 <?php declare( strict_types=1 );
 /**
- * Defines the plugin's accessor, boots it on plugins_loaded, declares its WooCommerce feature compatibility and loads the files in includes/.
+ * Defines the plugin's accessor, boots it on plugins_loaded, unschedules its jobs on deactivation, declares its WooCommerce feature compatibility and loads the files in includes/.
  *
  * @since   2.0.0
  * @version 2.0.0
@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit;
 
 add_action( 'plugins_loaded', 'dws_tpl_boot', 15 );
 add_action( 'before_woocommerce_init', 'dws_tpl_declare_compatibility' );
+register_deactivation_hook( DWS_TPL_FILE, 'dws_tpl_deactivate' );
 
 $dws_tpl_includes = glob( __DIR__ . '/includes/*.php' );
 if ( false === $dws_tpl_includes ) {
@@ -59,6 +60,18 @@ function dws_tpl_boot(): void {
 	} catch ( Throwable $error ) {
 		dws_tpl_handle_build_error( $error );
 	}
+}
+
+/**
+ * Unschedules the plugin's jobs on the site it is deactivated on.
+ *
+ * @since   2.0.0
+ * @version 2.0.0
+ *
+ * @return  void
+ */
+function dws_tpl_deactivate(): void {
+	dws_tpl_plugin()->deactivate();
 }
 
 /**
