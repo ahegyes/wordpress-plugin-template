@@ -182,12 +182,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ahegyes/wp-framework-core.git",
-                "reference": "905ae475b8992dc3acac4679d7e89b8fa75d61c8"
+                "reference": "a48e2cdf1ff8a1be44c614adba77ed6e8240877b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ahegyes/wp-framework-core/zipball/905ae475b8992dc3acac4679d7e89b8fa75d61c8",
-                "reference": "905ae475b8992dc3acac4679d7e89b8fa75d61c8",
+                "url": "https://api.github.com/repos/ahegyes/wp-framework-core/zipball/a48e2cdf1ff8a1be44c614adba77ed6e8240877b",
+                "reference": "a48e2cdf1ff8a1be44c614adba77ed6e8240877b",
                 "shasum": ""
             },
             "require": {
@@ -222,7 +222,7 @@
             "support": {
                 "source": "https://github.com/ahegyes/wp-framework-core/tree/trunk"
             },
-            "time": "2026-10-27T20:21:17+00:00"
+            "time": "2026-10-28T12:51:23+00:00"
         },
         {
             "name": "ahegyes/wp-framework-settings",

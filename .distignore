@@ -27,6 +27,9 @@ composer.json
 composer.lock
 package.json
 package-lock.json
+tsconfig.json
+eslint.config.mjs
+stylelint.config.js
 phpcs.dist.xml
 phpcs.tests.dist.xml
 phpstan.dist.neon

@@ -71,6 +71,9 @@
     "psr-4": {
       "DeepWebSolutions\\PluginTemplate\\": "src/"
     },
+    "classmap": [
+      "models/"
+    ],
     "files": [
       "vendor-prefixed/scoper-autoload.php"
     ]
@@ -118,6 +121,7 @@
     "test:integration:run": [
       "Composer\\Config::disableProcessTimeout",
       "@putenv CI=1",
+      "npm --prefix=. run build",
       "node_modules/.bin/wp-env --config .wp-env.tests.json run cli --env-cwd=wp-content/plugins/dws-plugin-template vendor/bin/phpunit --testsuite=Integration"
     ],
 

@@ -59,7 +59,26 @@ final class FeatureDetailTest extends TestCase {
 		$detail->register_hooks();
 
 		self::assertSame( 10, has_action( 'woocommerce_account_dashboard', array( $detail, 'print_greeting' ) ) );
+		self::assertSame( 10, has_action( 'wp_enqueue_scripts', array( $detail, 'enqueue_style' ) ) );
 		remove_action( 'woocommerce_account_dashboard', array( $detail, 'print_greeting' ) );
+		remove_action( 'wp_enqueue_scripts', array( $detail, 'enqueue_style' ) );
+	}
+
+	public function test_the_greeting_style_loads_on_the_account_dashboard_only(): void {
+		( new FeatureDetail() )->enqueue_style();
+		self::assertFalse( wp_style_is( 'dws-plugin-template-greeting' ) );
+
+		add_filter( 'woocommerce_is_account_page', '__return_true' );
+		try {
+			( new FeatureDetail() )->enqueue_style();
+		} finally {
+			remove_filter( 'woocommerce_is_account_page', '__return_true' );
+		}
+
+		self::assertTrue( wp_style_is( 'dws-plugin-template-greeting' ) );
+		self::assertSame( plugins_url( 'assets/build/greeting.css', DWS_TPL_FILE ), wp_styles()->registered['dws-plugin-template-greeting']->src );
+		wp_dequeue_style( 'dws-plugin-template-greeting' );
+		wp_deregister_style( 'dws-plugin-template-greeting' );
 	}
 
 	public function test_a_customer_whose_orders_reach_the_set_number_is_greeted_as_text(): void {
@@ -70,6 +89,7 @@ final class FeatureDetailTest extends TestCase {
 		$notice = \Dom\HTMLDocument::createFromString( '<!DOCTYPE html><html><body>' . $this->print() . '</body></html>', \LIBXML_NOERROR )->querySelector( '[role="status"]' );
 
 		self::assertNotNull( $notice );
+		self::assertSame( 'greeting', $notice->getAttribute( 'data-dws-plugin-template' ) );
 		self::assertSame( 'Hi & <b>welcome</b>', \trim( (string) $notice->textContent ) ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- A DOM property.
 	}
 

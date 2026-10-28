@@ -1,4 +1,6 @@
 vendor-prefixed
+blocks/build
+assets/build
 tests/.cache
 .wp-env.override.json
 
