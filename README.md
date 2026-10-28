@@ -1,8 +1,6 @@
 # DWS Plugin Template
 
-Scaffold for WordPress plugins on the DWS framework. Each fork ships its own scoped copy of the framework + PHP-DI (via humbug/php-scoper) so two plugins can't collide on framework versions.
-
-**New here?** Start with [docs/getting-started.md](docs/getting-started.md) — how the reference boots and how to extend it.
+WordPress plugins on the wp-framework packages start here, from one tested anatomy, so all are built alike and a fix found in one applies to all.
 
 ## Architecture
 

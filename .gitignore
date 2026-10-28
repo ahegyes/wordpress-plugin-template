@@ -1,5 +1,4 @@
-dependencies
-scoping-exclusions.json
+vendor-prefixed
 tests/.cache
 .wp-env.override.json
 

@@ -2,85 +2,110 @@
 
 namespace DeepWebSolutions\PluginTemplate;
 
-use DeepWebSolutions\PluginTemplate\Feature\GenericFeature;
-use DeepWebSolutions\PluginTemplate\Feature\WooCommerceFeature;
-use DeepWebSolutions\PluginTemplate\Installer\Installer;
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Installer\InstallerInterface;
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginInterface;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\AdminNotice\AdminNotices;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migration\MigrationRunner;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginBoot;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginKernel;
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\ValueObjects\PluginHeader;
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Utilities\AdminNotices\AdminNoticeLogger;
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Utilities\AdminNotices\AdminNoticesService;
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Utilities\Logging\CompositeLogger;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Scheduling\Scheduler;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Scheduling\SchedulerInterface;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Logging\WooCommerceLogger;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\WooCommerceRequirement;
 use DeepWebSolutions\PluginTemplate\Scoped\DI\ContainerBuilder;
-use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
+use DeepWebSolutions\PluginTemplate\Scoped\Psr\Log\LoggerInterface as PsrLoggerInterface;
+
+\defined( 'ABSPATH' ) || exit;
 
 /**
- * Plugin runtime root — the consumer half of the framework's plugin contract.
- *
- * A per-plugin singleton holding the PHP-DI container and the registered Feature classes. Boot resolves
- * the kernel, which runs the installer, gates each Feature on its conditionals, and dispatches the
- * surviving components through the initialize then register_hooks lifecycle.
+ * Composes the plugin from its logger, scheduler, migrations and components, inside the framework's boot boundary.
  *
  * @since   2.0.0
  * @version 2.0.0
  */
-final class Plugin implements PluginInterface {
+final class Plugin {
 	// region FIELDS AND CONSTANTS
 
 	/**
-	 * Singleton instance.
+	 * The plugin's slug, which is also its text domain and its log source.
 	 *
 	 * @since   2.0.0
 	 * @version 2.0.0
 	 *
-	 * @var     self|null
+	 * @var     string
 	 */
-	private static ?self $instance = null;
+	public const string SLUG = 'dws-plugin-template';
 
 	/**
-	 * PSR-11 container resolving Features, components, conditionals, and the installer.
+	 * The prefix of the plugin's hook names, options, transients and scheduled jobs.
 	 *
 	 * @since   2.0.0
 	 * @version 2.0.0
 	 *
-	 * @var     ContainerInterface
+	 * @var     string
 	 */
-	protected readonly ContainerInterface $container;
+	public const string PREFIX = 'dws_tpl';
 
 	/**
-	 * Runtime engine, stored once boot() has run so repeat boots are no-ops.
+	 * The top-level components, in hook-registration order.
+	 *
+	 * @since   2.0.0
+	 * @version 2.0.0
+	 *
+	 * @var     list<class-string>
+	 */
+	public const array COMPONENTS = array(
+		Scheduler::class,
+		AdminNotices::class,
+	);
+
+	/**
+	 * The boot boundary, whose status tells whether the plugin booted.
+	 *
+	 * @since   2.0.0
+	 * @version 2.0.0
+	 *
+	 * @var     PluginBoot
+	 */
+	public readonly PluginBoot $boot;
+
+	/**
+	 * The scheduler, which registers its WP-Cron schedules even while the plugin is blocked.
+	 *
+	 * @since   2.0.0
+	 * @version 2.0.0
+	 *
+	 * @var     Scheduler
+	 */
+	public readonly Scheduler $scheduler;
+
+	/**
+	 * The migration runner, once the composition built it.
+	 *
+	 * @since   2.0.0
+	 * @version 2.0.0
+	 *
+	 * @var     MigrationRunner|null
+	 */
+	public protected(set) ?MigrationRunner $migrations = null;
+
+	/**
+	 * The kernel, once the composition built it, which tells which components loaded and which were gated off.
 	 *
 	 * @since   2.0.0
 	 * @version 2.0.0
 	 *
 	 * @var     PluginKernel|null
 	 */
-	protected ?PluginKernel $kernel = null;
+	public protected(set) ?PluginKernel $kernel = null;
 
 	/**
-	 * Notice id the install-failure logger queues under.
+	 * The logger every part of the plugin writes to.
 	 *
 	 * @since   2.0.0
 	 * @version 2.0.0
 	 *
-	 * @var     string
+	 * @var     PsrLoggerInterface
 	 */
-	protected const INSTALL_FAILURE_NOTICE = 'dws-plugin-template-install-failure';
-
-	/**
-	 * Name of the persistent, cross-request notice store the failure notice lives in. Public so the
-	 * container registers the store under the same name the install-failure logger queues into; the logger
-	 * constructor throws on an unregistered store name, so both sides must reference this one constant.
-	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
-	 *
-	 * @var     string
-	 */
-	public const PERSISTENT_STORE = 'persistent';
+	protected readonly PsrLoggerInterface $logger;
 
 	// endregion
 
@@ -92,94 +117,10 @@ final class Plugin implements PluginInterface {
 	 * @since   2.0.0
 	 * @version 2.0.0
 	 */
-	private function __construct() {
-		// The container runs uncompiled: the demo component graph is small, and compiling autowiring needs a
-		// writable, WP_DEBUG-gated cache directory a forkable template cannot assume is available on every host.
-		$builder = new ContainerBuilder();
-		$builder->addDefinitions( __DIR__ . '/../config/container.php' );
-
-		$this->container = $builder->build();
-	}
-
-	// endregion
-
-	// region GETTERS
-
-	/**
-	 * Returns the plugin's singleton instance, creating it on first call.
-	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
-	 *
-	 * @return  self
-	 */
-	public static function get_instance(): self {
-		return self::$instance ??= new self();
-	}
-
-	// endregion
-
-	// region INHERITED METHODS
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
-	 */
-	#[\Override]
-	public function get_plugin_file(): string {
-		return DWS_PLUGIN_TEMPLATE_FILE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
-	 */
-	#[\Override]
-	public function get_plugin_header(): PluginHeader {
-		return new PluginHeader( $this->get_plugin_file() );
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
-	 */
-	#[\Override]
-	public function get_container(): ContainerInterface {
-		return $this->container;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
-	 */
-	#[\Override]
-	public function get_feature_classes(): array {
-		return array(
-			GenericFeature::class,
-			WooCommerceFeature::class,
-		);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
-	 */
-	#[\Override]
-	public function get_installer(): InstallerInterface {
-		/** @var InstallerInterface $installer */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- inline @var type assertion, no description applies.
-		$installer = $this->container->get( Installer::class );
-
-		return $installer;
+	public function __construct() {
+		$this->logger    = new WooCommerceLogger( self::SLUG, \defined( 'DWS_TPL_DEBUG' ) && true === \constant( 'DWS_TPL_DEBUG' ) ? 'debug' : null );
+		$this->scheduler = new Scheduler( self::PREFIX );
+		$this->boot      = new PluginBoot( DWS_TPL_FILE, self::PREFIX, $this->logger );
 	}
 
 	// endregion
@@ -187,9 +128,7 @@ final class Plugin implements PluginInterface {
 	// region METHODS
 
 	/**
-	 * Boots the plugin once; repeat calls are no-ops. In the admin it wires notice rendering before running
-	 * the kernel — see {@see register_notice_rendering()} for why that ordering matters — then runs the kernel
-	 * for every request.
+	 * Runs the composition inside the framework's boot boundary.
 	 *
 	 * @since   2.0.0
 	 * @version 2.0.0
@@ -197,22 +136,33 @@ final class Plugin implements PluginInterface {
 	 * @return  void
 	 */
 	public function boot(): void {
-		if ( null !== $this->kernel ) {
-			return;
+		$this->boot->run( $this->compose( ... ) );
+	}
+
+	/**
+	 * Unschedules the footprint's jobs on the current site, logging each one that could not be unscheduled.
+	 *
+	 * @since   2.0.0
+	 * @version 2.0.0
+	 *
+	 * @return  void
+	 */
+	public function deactivate(): void {
+		foreach ( array( 'cron_hooks', 'as_hooks' ) as $kind ) {
+			foreach ( Footprint::DATA[ $kind ] ?? array() as $hook ) {
+				$unscheduled = $this->scheduler->unschedule_hook( $hook );
+				if ( true !== $unscheduled ) {
+					$this->logger->warning(
+						'Could not unschedule {hook} on deactivation: {error}',
+						array(
+							'hook'      => $hook,
+							'error'     => $unscheduled->get_error_message(),
+							'exception' => $unscheduled->get_error_data(),
+						)
+					);
+				}
+			}
 		}
-
-		// Notice rendering and the stale-notice cleanup only matter in the admin, where the notices render and
-		// the dismiss AJAX fires; a front-end request skips both, sparing the wp_options read that remove_notice()
-		// would cost. A failed install still queues into the persistent store, so the next admin request shows it.
-		if ( is_admin() ) {
-			$this->register_notice_rendering();
-
-			// Drop any prior install-failure notice before the kernel runs; build_logger() re-queues it only
-			// when this boot's installer routine fails again, so a recovered install stops surfacing a stale one.
-			$this->notices()->remove_notice( self::INSTALL_FAILURE_NOTICE, self::PERSISTENT_STORE );
-		}
-
-		$this->kernel = PluginKernel::run( $this, $this->build_logger() );
 	}
 
 	// endregion
@@ -220,67 +170,46 @@ final class Plugin implements PluginInterface {
 	// region HELPERS
 
 	/**
-	 * Wires the admin-notice service's render and dismissal hooks before the kernel boots, regardless of the
-	 * installer outcome. A renderer dispatched as a Feature component would never register when the installer
-	 * fails the boot, leaving a queued install-failure notice unrendered; wiring it here keeps that path live.
+	 * Builds the plugin and boots its components, returning false when WooCommerce is missing or too old.
 	 *
 	 * @since   2.0.0
 	 * @version 2.0.0
 	 *
-	 * @return  void
+	 * @return  bool
 	 */
-	protected function register_notice_rendering(): void {
-		$notices = $this->notices();
-
-		add_action( 'admin_notices', array( $notices, 'render_notices' ) );
-
-		$dismiss_action = $notices->dismiss_action;
-		if ( null !== $dismiss_action ) {
-			add_action( 'admin_footer', array( $notices, 'print_dismiss_script' ) );
-			add_action( 'wp_ajax_' . $dismiss_action, array( $notices, 'handle_dismiss' ) );
+	protected function compose(): bool {
+		$this->scheduler->register_hooks(); // Before the WooCommerce check, so the plugin's recurring WP-Cron events keep their schedules while it is blocked.
+		if ( ! ( new WooCommerceRequirement( DWS_TPL_FILE ) )->check() ) {
+			return false;
 		}
+
+		$this->migrations = new MigrationRunner( DWS_TPL_FILE, self::PREFIX . '_revision', Migrations::STEPS, $this->logger, $this->scheduler );
+		$this->migrations->register_hooks();
+
+		$this->kernel = new PluginKernel( new ContainerBuilder()->addDefinitions( $this->get_definitions( $this->logger, $this->scheduler ) )->build() );
+		$this->kernel->boot( self::COMPONENTS );
+
+		return true;
 	}
 
 	/**
-	 * Builds the kernel's diagnostic logger, chosen at boot (plugins_loaded) when WooCommerce's presence is
-	 * known. A persistent admin notice keeps a failed install or migration visible to administrators on a later
-	 * request; WooCommerce's logging stack is added as the diagnostic sink when active.
+	 * Returns the container's definitions of the services the root builds, which the kernel's components share.
 	 *
 	 * @since   2.0.0
 	 * @version 2.0.0
 	 *
-	 * @return  LoggerInterface
+	 * @param   PsrLoggerInterface $logger    The plugin's logger.
+	 * @param   Scheduler          $scheduler The plugin's scheduler.
+	 *
+	 * @return  array<string, \Closure(): object>
 	 */
-	protected function build_logger(): LoggerInterface {
-		$notice_logger = new AdminNoticeLogger(
-			$this->notices(),
-			self::INSTALL_FAILURE_NOTICE,
-			self::PERSISTENT_STORE,
+	protected function get_definitions( PsrLoggerInterface $logger, Scheduler $scheduler ): array {
+		return array(
+			PsrLoggerInterface::class => static fn (): PsrLoggerInterface => $logger,
+			Scheduler::class          => static fn (): Scheduler => $scheduler,
+			SchedulerInterface::class => static fn (): Scheduler => $scheduler,
+			AdminNotices::class       => static fn (): AdminNotices => new AdminNotices( self::PREFIX, $logger ),
 		);
-
-		if ( function_exists( 'wc_get_logger' ) ) {
-			return new CompositeLogger(
-				$notice_logger,
-				new WooCommerceLogger( 'dws-plugin-template' ),
-			);
-		}
-
-		return $notice_logger;
-	}
-
-	/**
-	 * Resolves the shared admin-notice service from the container.
-	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
-	 *
-	 * @return  AdminNoticesService
-	 */
-	protected function notices(): AdminNoticesService {
-		/** @var AdminNoticesService $service */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- inline @var type assertion, no description applies.
-		$service = $this->container->get( AdminNoticesService::class );
-
-		return $service;
 	}
 
 	// endregion

@@ -2,42 +2,34 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
-use DeepWebSolutions\PluginTemplate\Component\WelcomeNotice;
-use DeepWebSolutions\PluginTemplate\Feature\GenericFeature;
-use DeepWebSolutions\PluginTemplate\Feature\WooCommerceFeature;
-use DeepWebSolutions\PluginTemplate\Installer\Installer;
+use DeepWebSolutions\PluginTemplate\Migrations;
 use DeepWebSolutions\PluginTemplate\Plugin;
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\UsesClass;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\AdminNotice\AdminNotices;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migration\MigrationRunner;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Scheduling\Scheduler;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 
-#[CoversClass( Plugin::class )]
-#[UsesClass( GenericFeature::class )]
-#[UsesClass( WooCommerceFeature::class )]
-#[UsesClass( Installer::class )]
-#[UsesClass( WelcomeNotice::class )]
+#[CoversNothing]
 final class PluginBootTest extends TestCase {
-	public function test_get_instance_returns_singleton(): void {
-		$first  = Plugin::get_instance();
-		$second = Plugin::get_instance();
+	public function test_the_plugin_boots_with_the_scheduler_and_admin_notices_as_its_only_roots(): void {
+		$plugin = dws_tpl_plugin();
 
-		self::assertSame( $first, $second );
+		self::assertSame( 'booted', $plugin->boot->status );
+		self::assertSame( array( Scheduler::class, AdminNotices::class ), $plugin->kernel?->resolved );
+		self::assertSame( array(), $plugin->kernel->skipped );
 	}
 
-	public function test_boot_registers_the_generic_admin_notice_callback(): void {
-		// The plugin boots on plugins_loaded during the WordPress load. Assert GenericFeature dispatched its own
-		// WelcomeNotice::render onto admin_notices, not merely that some callback exists: WordPress core, the active
-		// WooCommerce, and the pre-kernel notice renderer all register admin_notices handlers, so a bare
-		// has_action() stays green even when component dispatch is broken. The container shares the resolved
-		// component, so this is the instance the kernel hooked.
-		Plugin::get_instance()->boot();
+	public function test_the_entry_loads_every_include_but_those_whose_names_start_with_an_underscore(): void {
+		$includes = \dirname( DWS_TPL_FILE ) . '/includes/';
 
-		$notice = Plugin::get_instance()->get_container()->get( WelcomeNotice::class );
-		self::assertInstanceOf( WelcomeNotice::class, $notice );
+		self::assertContains( $includes . 'safeguards.php', \get_included_files() );
+		self::assertContains( $includes . 'index.php', \get_included_files() );
+		self::assertNotContains( $includes . '_disabled-example.php', \get_included_files() );
+	}
 
-		self::assertNotFalse(
-			has_action( 'admin_notices', array( $notice, 'render' ) ),
-			'GenericFeature must register the WelcomeNotice render callback.'
-		);
+	public function test_the_stored_data_is_at_the_revision_of_the_code(): void {
+		self::assertInstanceOf( MigrationRunner::class, dws_tpl_plugin()->migrations );
+		self::assertSame( \count( Migrations::STEPS ), MigrationRunner::get_revision( Plugin::PREFIX . '_revision' ) );
 	}
 }

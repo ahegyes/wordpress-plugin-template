@@ -1,118 +1,90 @@
 <?php declare( strict_types=1 );
-
 /**
- * Plugin Name:       DWS Plugin Template
- * Plugin URI:        https://github.com/ahegyes/wordpress-plugin-template
- * Description:       Starting point for WordPress plugins built on the DWS framework.
- * Version:           2.0.0
- * Requires PHP:      8.5
- * Requires at least: 7.0
- * Author:            Contributors
- * Author URI:        https://github.com/ahegyes
- * License:           GPL-2.0-or-later
- * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       dws-plugin-template
- * Domain Path:       /languages
- *
- * @since   2.0.0
- * @version 2.0.0
+ * Plugin Name:          DWS Plugin Template
+ * Plugin URI:           https://github.com/ahegyes/wordpress-plugin-template
+ * Description:          Starting point for WordPress plugins built on the DWS framework.
+ * Version:              2.0.0
+ * Requires at least:    7.1
+ * Requires PHP:         8.5
+ * Requires Plugins:     woocommerce
+ * WC requires at least: 11.2
+ * WC tested up to:      11.2
+ * Author:               Contributors
+ * Author URI:           https://github.com/ahegyes
+ * License:              GPL-2.0-or-later
+ * License URI:          https://www.gnu.org/licenses/gpl-2.0.html
+ * Update URI:           https://github.com/ahegyes/wordpress-plugin-template
+ * Text Domain:          dws-plugin-template
+ * Domain Path:          /languages
  *
  * @package DeepWebSolutions\PluginTemplate
  */
 
-use DeepWebSolutions\PluginTemplate\Plugin;
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginKernel;
-use function DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Notice\output_requirements_error;
-use function DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Requirements\check_requirements;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Requirements;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Updater;
 
 defined( 'ABSPATH' ) || exit;
 
-$dws_plugin_template_autoload         = __DIR__ . '/vendor/autoload.php';
-$dws_plugin_template_scoped_autoload  = __DIR__ . '/dependencies/scoper-autoload.php';
-$dws_plugin_template_scoped_bootstrap = __DIR__ . '/dependencies/ahegyes/wp-framework-bootstrap/functions.php';
+define( 'DWS_TPL_FILE', __FILE__ );
+load_plugin_textdomain( 'dws-plugin-template', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' ); // phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- WordPress registers languages/ itself only for plugins it does not network-activate.
 
-/*
- * The Composer autoloader and the scoped framework output are both build artifacts of `composer
- * packages-install`. A partial install carrying one but not the other fatals on a require below, so a missing
- * build registers an admin notice — using no framework class, since the scoped framework is exactly what is
- * absent — instead of leaving the activated plugin silently inert.
- */
-if ( dws_plugin_template_dependencies_missing(
-	$dws_plugin_template_autoload,
-	$dws_plugin_template_scoped_autoload,
-	$dws_plugin_template_scoped_bootstrap
-) ) {
-	add_action( 'admin_notices', 'dws_plugin_template_render_setup_notice' );
+$dws_tpl_bootstrap = __DIR__ . '/vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php';
+if ( is_readable( $dws_tpl_bootstrap ) ) {
+	require_once $dws_tpl_bootstrap;
+	Updater::register( __FILE__ ); // Before the floor gate, so a release that lowers the floors still reaches a site below them.
+	if ( ! Requirements::check_floors( __FILE__ ) ) {
+		return;
+	}
+}
+
+require_once __DIR__ . '/includes/safeguards.php';
+
+if ( ! is_readable( $dws_tpl_bootstrap ) ) { // The floor gate never ran, so nothing built may load.
+	add_action( 'all_admin_notices', 'dws_tpl_render_build_notice' );
 	return;
 }
 
-if ( ! defined( 'DWS_PLUGIN_TEMPLATE_FILE' ) ) {
-	define( 'DWS_PLUGIN_TEMPLATE_FILE', __FILE__ );
-}
-if ( ! defined( 'DWS_PLUGIN_TEMPLATE_VERSION' ) ) {
-	define( 'DWS_PLUGIN_TEMPLATE_VERSION', '2.0.0' );
-}
-
-/*
- * The scoped framework uses PHP 8.5+ syntax that fails to compile below the framework floor, so the
- * requirements gate runs from the PHP 5.6-safe bootstrap package first; the full autoloader loads only once
- * PHP and WordPress clear the floor, keeping the requirements notice reachable on an unsupported runtime.
- */
-require_once $dws_plugin_template_scoped_bootstrap;
-
-$dws_plugin_template_requirements = check_requirements( plugin_basename( __FILE__ ) );
-if ( $dws_plugin_template_requirements instanceof \WP_Error ) {
-	output_requirements_error( plugin_basename( __FILE__ ), $dws_plugin_template_requirements );
+try {
+	require_once __DIR__ . '/vendor/autoload.php';
+	require_once __DIR__ . '/functions.php';
+} catch ( Throwable $error ) { // PHP throws an Error for a missing required file, so a partial deploy lands here.
+	dws_tpl_handle_build_error( $error );
 	return;
 }
-unset( $dws_plugin_template_requirements );
-
-require_once $dws_plugin_template_autoload;
-require_once __DIR__ . '/functions.php';
-
-// Activation/deactivation must be wired during the include, before the plugins_loaded-deferred boot.
-PluginKernel::register_lifecycle_hooks( Plugin::get_instance() );
-add_action( 'plugins_loaded', 'dws_plugin_template_boot', 15 );
 
 /**
- * Whether any `composer packages-install` build artifact the boot below requires is absent. A missing artifact
- * means a partial or skipped install, so the boot stops and the setup notice runs in its place. Takes its paths
- * as arguments and uses no framework class, so it stays callable before the autoloader and on any PHP the floor
- * notice must still reach.
+ * Reports a build that could not load, rethrowing in local and development environments and otherwise logging the error and showing the build notice.
  *
  * @since   2.0.0
  * @version 2.0.0
  *
- * @param   string $autoload  Path to the Composer autoloader.
- * @param   string $scoped    Path to the generated scoped-framework autoloader.
- * @param   string $bootstrap Path to the scoped bootstrap package's function aggregator.
+ * @param   Throwable $error The error that stopped the build.
  *
- * @return  bool
+ * @throws  Throwable Thrown in local and development environments.
+ *
+ * @return  void
  */
-function dws_plugin_template_dependencies_missing( $autoload, $scoped, $bootstrap ) {
-	return ! is_file( $autoload ) || ! is_file( $scoped ) || ! is_file( $bootstrap );
+function dws_tpl_handle_build_error( Throwable $error ): void {
+	if ( in_array( wp_get_environment_type(), array( 'local', 'development' ), true ) ) {
+		throw $error;
+	}
+
+	error_log( 'DWS Plugin Template did not finish loading: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- The plugin's logger is part of the build that failed.
+	add_action( 'all_admin_notices', 'dws_tpl_render_build_notice' );
 }
 
 /**
- * Renders the admin notice shown when the plugin is active but its Composer/scoped dependencies are unbuilt.
- * Self-contained — references no framework class — because the scoped framework is precisely what is missing.
+ * Prints the notice that the plugin's build is incomplete to users who can activate plugins.
  *
  * @since   2.0.0
  * @version 2.0.0
  *
  * @return  void
  */
-function dws_plugin_template_render_setup_notice() {
-	// The build state is operator information: only users who could act on it (plugin managers) see it.
+function dws_tpl_render_build_notice(): void {
 	if ( ! current_user_can( 'activate_plugins' ) ) {
 		return;
 	}
 
-	printf(
-		'<div class="notice notice-error"><p>%s</p></div>',
-		esc_html__(
-			'DWS Plugin Template is active but its dependencies are not installed. Run "composer packages-install" from the plugin directory to build them.',
-			'dws-plugin-template'
-		)
-	);
+	printf( '<div class="notice notice-error"><p>%s</p></div>', esc_html__( 'DWS Plugin Template is missing some of its files, so its features are off. Reinstall the plugin to restore them.', 'dws-plugin-template' ) );
 }

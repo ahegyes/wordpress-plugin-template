@@ -1,26 +1,33 @@
 # wordpress-plugin-template
 
-GitHub template for WordPress plugins built on the DWS v2 framework: per-fork scoped framework + PHP-DI (via `humbug/php-scoper`), with full test + CI scaffolding. The README explains the scoping/collision model.
+GitHub template for WordPress plugins built on the five wp-framework packages (`ahegyes/wp-framework-{bootstrap,shared,core,settings,woocommerce}`). Each plugin ships its own copy of the framework, PHP-DI and their dependencies, prefixed under `DeepWebSolutions\PluginTemplate\Scoped` by php-scoper through wordpress-configs on every development install, into `vendor-prefixed/`. This file covers what an agent needs beyond the README.
 
-Forking (step 1: the Fill in scaffold workflow), the placeholder convention (side-by-side WC-vs-generic examples), and the fork-reset checklist live in the [README](README.md); `docs/getting-started.md` walks through how the reference boots and how to extend it. This file covers what an agent needs beyond those: the as-configured inventory and the cache layout.
+## Layout
 
-## Pre-configured
+- `dws-plugin-template.php`: the entry. It requires `vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php`, registers the GitHub updater, checks the PHP and WordPress floors, loads `includes/safeguards.php`, then the autoloader and `functions.php`; a missing or partial build shows a notice instead of booting.
+- `functions.php`: the `dws_tpl_plugin()` accessor, the boot on `plugins_loaded` at priority 15, the deactivation callback, the HPOS declaration (`false` until a plugin's order code is verified) and the loader that requires every `includes/*.php` in name order, except names starting with `_`.
+- `src/Plugin.php`: the composition root, with `SLUG`, `PREFIX` (`dws_tpl`) and `COMPONENTS` (the scheduler and admin notices). It builds the logger and the scheduler, then, once WooCommerce passes its check, the migration runner over `Migrations::STEPS` and the kernel over a PHP-DI container.
+- `src/Footprint.php`: `Footprint::DATA`, every kind of data the plugin stores. Uninstall removes it where the site consents, and deactivation unschedules its jobs.
+- `src/Options.php`: the option keys, their `DEFAULTS`, and `get_bool()`, `get_int()`, `get_string()` and `get_list()`, which guard each stored value.
+- `src/Migrations.php`: the append-only migration steps.
+- `uninstall.php`: runs the framework's uninstall engine over the footprint, with consent from `Options::DELETE_DATA`, once the floors are met.
 
-- **Framework deps** (VCS): all seven `wp-framework-*` packages — `bootstrap`, `shared`, `storage`, `core`, `utilities`, `settings`, `woocommerce` — each scoped per-fork
-- **Configs** (VCS): `wordpress-configs`
-- **PHP-DI** scoped via `wordpress-configs/php/php-scoper/contrib/php-di.inc.php`
-- **wp-framework** scoped via `wordpress-configs/php/php-scoper/contrib/wp-framework.inc.php` (auto-detects installed framework packages)
-- **Tests**: PHPUnit (Unit + Integration via wp-env's `cli` container) + Playwright E2E
-- **Quality**: PHPCS + PHPStan
-- **Changelog**: `automattic/jetpack-changelogger` ^6 + `pronamic/changelog-md-to-wordpress-plugin-readme-txt` ^1
-- **CI**: `quality.yml` (php-qa + changelog:validate + readme.txt linter) + `tests.yml` (unit + integration matrix + e2e) + `release.yml` (version tag → `reusable-release.yml`: build → artifact test → wp.org deploy; needs a `wp-org-release` environment with `SVN_USERNAME`/`SVN_PASSWORD` secrets) + `audit.yml` (blocking supply-chain audit: full-graph composer, production-deps npm) + `codeql.yml` (`actions` language only) + `workflow-checks.yml` (actionlint + blocking zizmor) + `fill-in-scaffold.yml` (fork-only `workflow_dispatch`: placeholder substitution + version/changelog/metadata reset; refuses to run on the template repo)
-- **GitHub** repo files: `dependabot.yml` (composer + npm + github-actions weekly grouped), PR template, bug + feature issue templates
-- **wp-env**: `.wp-env.json` (default) + `.wp-env.belowfloor.json` (WP 6.9.4, the below-floor requirements job), both on **port 8811** with `"testsEnvironment": false`. Change the port in both configs + `playwright.config.js` together if 8811 collides locally.
-- **WP Packages registry** + `extra.installer-paths` mapping `wordpress-plugin` / `wordpress-theme` types to `vendor/{$vendor}/{$name}/` — relevant when forks add wp.org plugins as dev deps
+## Commands
 
-## Reference engine
+```sh
+composer packages-install    # dependencies, then php-scoper into vendor-prefixed/
+composer test:unit
+composer test:integration    # starts .wp-env.tests.json, then runs test:integration:run
+composer quality-check       # manifest and changelog validation, PHPCS (both profiles), PHPStan, Unit and Integration
+npm run setup                # packages-install for Composer and npm, then the development environment
+```
 
-The template is a working reference plugin, not bare scaffolding: `src/Plugin.php` implements the framework's `PluginInterface`; `src/Feature/` holds an always-on Feature plus a WooCommerce-gated one; `src/Installer/` an `InstallerInterface`; `src/Component/` the hookable components; `config/container.php` is the PHP-DI composition root. `tests/Unit/PluginBootTest.php` is a mock-WP boot smoke; `tests/Integration/` boots it in real WP + WooCommerce. See `docs/getting-started.md`.
+## Environments
+
+- `.wp-env.json`: development, as `local`, on port 8811, behind `npm run setup` and `wp-env:*`. The framework rethrows boot and migration failures there.
+- `.wp-env.tests.json`: Integration, as production, on port 8812, behind `wp-env:tests:*` and `composer test:integration`.
+
+Both run WordPress 7.1.3 on PHP 8.5, with WooCommerce from `vendor/` and HPOS on.
 
 ## Cache layout
 
