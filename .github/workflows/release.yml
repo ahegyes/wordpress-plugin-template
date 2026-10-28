@@ -3,10 +3,12 @@ name: Release
 on:
   push:
     tags: ['v*']
+  pull_request:
+  workflow_dispatch:
 
 concurrency:
-  group: release
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -14,11 +16,16 @@ permissions:
 jobs:
   release:
     name: Release
-    # A reusable workflow can't elevate above the caller's token; grant the GitHub Release scope here.
+    # A reusable workflow can't elevate above the caller's token; grant the provenance check's and the GitHub Release's scopes here.
     permissions:
+      actions: read
       contents: write
-    # @trunk on purpose: the release reusable rides the dev-trunk propagation model (see wordpress-configs SECURITY.md).
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-release.yml@trunk # zizmor: ignore[unpinned-uses]
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-release.yml@82ddd00abe623f3a021cedbf2a75ce1038ed891f
     with:
       project-path: '.'
       plugin-slug: 'dws-plugin-template'
+      wp-env-config-file: '.wp-env.tests.json'
+      # Both parse every PHP file with php-parser 4, which stops at PHP 8.4 syntax such as protected(set).
+      exclude-checks: 'prefixing,direct_file_access'
+      # A pull request or a dispatch on a branch rehearses the release without publishing it.
+      publish: ${{ github.ref_type == 'tag' }}
