@@ -6,9 +6,9 @@
 .gitignore
 .idea
 .vscode
-.wp-env.belowfloor.json
 .wp-env.json
 .wp-env.override.json
+.wp-env.tests.json
 
 AGENTS.md
 CHANGELOG.md
@@ -28,8 +28,8 @@ composer.lock
 package.json
 package-lock.json
 phpcs.dist.xml
+phpcs.tests.dist.xml
 phpstan.dist.neon
 phpunit.dist.xml
 playwright.config.js
 scoper.inc.php
-scoping-exclusions.json

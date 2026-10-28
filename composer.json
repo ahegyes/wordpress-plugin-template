@@ -1,6 +1,6 @@
 {
   "name": "ahegyes/dws-plugin-template",
-  "description": "GitHub template for WordPress plugins built on the DWS framework. Each plugin ships with its own scoped copy of the framework + PHP-DI.",
+  "description": "WordPress plugins on the wp-framework packages start here, from one tested anatomy, so all are built alike and a fix found in one applies to all.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "homepage": "https://github.com/ahegyes/wordpress-plugin-template",
@@ -22,15 +22,7 @@
     },
     {
       "type": "vcs",
-      "url": "https://github.com/ahegyes/wp-framework-storage"
-    },
-    {
-      "type": "vcs",
       "url": "https://github.com/ahegyes/wp-framework-core"
-    },
-    {
-      "type": "vcs",
-      "url": "https://github.com/ahegyes/wp-framework-utilities"
     },
     {
       "type": "vcs",
@@ -52,28 +44,24 @@
   ],
 
   "require": {
-    "php": ">=8.5",
-    "psr/container": "^2",
-    "psr/log": "^3"
+    "php": ">=8.5"
   },
   "require-dev": {
     "ahegyes/wordpress-configs": "dev-trunk",
-    "ahegyes/wp-framework-bootstrap": "^2.0@dev",
-    "ahegyes/wp-framework-core": "^2.0@dev",
-    "ahegyes/wp-framework-settings": "^2.0@dev",
-    "ahegyes/wp-framework-shared": "^2.0@dev",
-    "ahegyes/wp-framework-storage": "^2.0@dev",
-    "ahegyes/wp-framework-utilities": "^2.0@dev",
-    "ahegyes/wp-framework-woocommerce": "^2.0@dev",
-    "automattic/jetpack-changelogger": "^6",
+    "ahegyes/wp-framework-bootstrap": "^2.0",
+    "ahegyes/wp-framework-core": "^2.0",
+    "ahegyes/wp-framework-settings": "^2.0",
+    "ahegyes/wp-framework-shared": "^2.0",
+    "ahegyes/wp-framework-woocommerce": "^2.0",
+    "automattic/jetpack-changelogger": "^7",
     "humbug/php-scoper": "^0.18",
-    "johnpbloch/wordpress-core": "^7.0@dev",
-    "php-di/php-di": "^7",
-    "php-stubs/woocommerce-stubs": "^10.9",
-    "php-stubs/wordpress-stubs": "7.0.0 as 6.9999.0",
+    "johnpbloch/wordpress-core": "^7.1",
+    "laravel/serializable-closure": "^2.1",
+    "php-di/php-di": "^7.1.1",
+    "php-stubs/woocommerce-stubs": "^11.2",
     "phpunit/phpunit": "^13",
     "pronamic/changelog-md-to-wordpress-plugin-readme-txt": "^1.0",
-    "wp-plugin/woocommerce": "^10.9"
+    "wp-plugin/woocommerce": "^11.2"
   },
 
   "minimum-stability": "dev",
@@ -84,7 +72,7 @@
       "DeepWebSolutions\\PluginTemplate\\": "src/"
     },
     "files": [
-      "dependencies/scoper-autoload.php"
+      "vendor-prefixed/scoper-autoload.php"
     ]
   },
   "autoload-dev": {
@@ -94,11 +82,7 @@
   },
 
   "scripts": {
-    "pre-autoload-dump": [
-      "DeepWebSolutions\\Config\\Composer\\ScopePhpDependencies::preAutoloadDump"
-    ],
     "post-autoload-dump": [
-      "DeepWebSolutions\\Config\\Composer\\CollectScopingStubs::postAutoloadDump",
       "DeepWebSolutions\\Config\\Composer\\ScopePhpDependencies::postAutoloadDump"
     ],
 
@@ -109,27 +93,39 @@
       "@composer update --prefer-stable --ignore-platform-req=php+ --no-interaction"
     ],
 
-    "scope-php-dependencies": "DeepWebSolutions\\Config\\Composer\\ScopePhpDependencies::run",
-    "scope-php-dependencies:raw": [
-      "@php vendor/bin/php-scoper add-prefix --prefix='DeepWebSolutions\\PluginTemplate\\Scoped' --config=./scoper.inc.php --force --quiet"
-    ],
-
     "format:php": "phpcbf --standard=./phpcs.dist.xml --basepath=. ./ -v",
+    "format:php:tests": "phpcbf --standard=./phpcs.tests.dist.xml --basepath=. ./tests -v",
     "lint:php": [
       "@lint:php:phpcs",
+      "@lint:php:phpcs:tests",
       "@lint:php:phpstan"
     ],
     "lint:php:phpcs": "phpcs --standard=./phpcs.dist.xml --basepath=. ./ -v",
+    "lint:php:phpcs:tests": "phpcs --standard=./phpcs.tests.dist.xml --basepath=. ./tests -v",
     "lint:php:phpstan": "phpstan analyse -v --memory-limit=1G",
 
-    "test": "@php vendor/bin/phpunit",
+    "test": [
+      "@test:unit",
+      "@test:integration"
+    ],
     "test:unit": "@php vendor/bin/phpunit --testsuite=Unit",
-    "test:integration": "npm --prefix=. run test:integration",
-    "test:requirements": "npm --prefix=. run test:requirements",
+    "test:integration": [
+      "Composer\\Config::disableProcessTimeout",
+      "@putenv CI=1",
+      "npm --prefix=. run wp-env:tests:start",
+      "@test:integration:run"
+    ],
+    "test:integration:run": [
+      "Composer\\Config::disableProcessTimeout",
+      "@putenv CI=1",
+      "node_modules/.bin/wp-env --config .wp-env.tests.json run cli --env-cwd=wp-content/plugins/dws-plugin-template vendor/bin/phpunit --testsuite=Integration"
+    ],
 
     "quality-check": [
+      "@composer validate --strict",
+      "@changelog:validate",
       "@lint:php",
-      "@test:unit"
+      "@test"
     ],
 
     "changelog:add": "@php vendor/bin/changelogger add",
@@ -142,12 +138,18 @@
 
   "extra": {
     "text-domain": "dws-plugin-template",
-    "scoped-dependencies-dir": "dependencies",
     "scoping-prefix": "DeepWebSolutions\\PluginTemplate\\Scoped",
     "installer-paths": {
       "vendor/{$vendor}/{$name}/": [
         "type:wordpress-plugin",
         "type:wordpress-theme"
+      ]
+    },
+    "phpstan/extension-installer": {
+      "ignore": [
+        "johnbillion/wp-compat",
+        "swissspidy/phpstan-no-private",
+        "szepeviktor/phpstan-wordpress"
       ]
     },
     "changelogger": {

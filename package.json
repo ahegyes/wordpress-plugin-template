@@ -13,11 +13,11 @@
         "npm": ">=11"
     },
     "devDependencies": {
-        "@ahegyes/wordpress-configs": "git+https://github.com/ahegyes/wordpress-configs.git#14544764d73f176b96e5eeb7775fdad40a8674fa",
-        "@playwright/test": "^1",
-        "@wordpress/e2e-test-utils-playwright": "^1.50.0",
-        "@wordpress/env": "^11.10.0",
-        "@wordpress/scripts": "^32.6.0"
+        "@ahegyes/wordpress-configs": "git+https://github.com/ahegyes/wordpress-configs.git#88710a71e2bcc7db7cb81b4eb96411438369ce0f",
+        "@playwright/test": "^1.64.1",
+        "@wordpress/e2e-test-utils-playwright": "^3.1.0",
+        "@wordpress/env": "^12.0.0",
+        "@wordpress/scripts": "^37.0.0"
     },
     "scripts": {
         "setup": "npm run packages-install:all && npm run wp-env:start",
@@ -34,13 +34,16 @@
         "wp-env:update": "wp-env start --update",
         "wp-env:destroy": "wp-env destroy",
 
+        "wp-env:tests:start": "wp-env --config .wp-env.tests.json start",
+        "wp-env:tests:stop": "wp-env --config .wp-env.tests.json stop",
+        "wp-env:tests:update": "wp-env --config .wp-env.tests.json start --update",
+        "wp-env:tests:destroy": "wp-env --config .wp-env.tests.json destroy",
+
         "audit": "composer audit && npm audit",
         "audit:fix": "npm audit fix",
         "check:engines": "wp-scripts check-engines",
         "check:licenses": "wp-scripts check-licenses",
 
-        "test:integration": "wp-env run cli --env-cwd=wp-content/plugins/dws-plugin-template vendor/bin/phpunit --testsuite=Integration",
-        "test:requirements": "wp-env --config .wp-env.belowfloor.json run cli --env-cwd=wp-content/plugins/dws-plugin-template vendor/bin/phpunit --testsuite=Requirements",
         "test:e2e": "playwright test --config=playwright.config.js"
     }
 }
