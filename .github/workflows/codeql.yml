@@ -20,4 +20,4 @@ jobs:
       actions: read
       contents: read
       security-events: write
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-codeql.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-codeql.yml@9f64dc77b25727130884eaf427d2bd75493557ce

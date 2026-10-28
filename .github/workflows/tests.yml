@@ -12,7 +12,7 @@ permissions:
 jobs:
   unit:
     name: Unit
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@9f64dc77b25727130884eaf427d2bd75493557ce
     with:
       php-version: '8.5'
       composer-script: 'test:unit'
@@ -31,13 +31,14 @@ jobs:
         with:
           persist-credentials: false
 
-      # The floor is the plugin's Requires at least header, and WordPress's version API offers the newest release of every branch, so new releases and floors join without an edit here.
+      # The floor is the Requires at least header of the entry file composer.json's text domain names, and WordPress's version API offers the newest release of every branch, so new releases, floors and a filled-in slug join without an edit here.
       - name: List the newest release of every branch from the floor up
         id: versions
         run: |
-          floor=$(sed -nE 's|^[[:space:]/*#@]*Requires at least:[[:space:]]*([0-9]+(\.[0-9]+)*).*$|\1|p' dws-plugin-template.php | head -n 1)
+          entry="$(jq -r '.extra["text-domain"] // empty' composer.json).php"
+          floor=$(sed -nE 's|^[[:space:]/*#@]*Requires at least:[[:space:]]*([0-9]+(\.[0-9]+)*).*$|\1|p' "$entry" | head -n 1)
           if [ -z "$floor" ]; then
-            echo "::error::dws-plugin-template.php declares no Requires at least header."
+            echo "::error::$entry declares no Requires at least header."
             exit 1
           fi
           offers=$(curl -fsS https://api.wordpress.org/core/version-check/1.7/)
@@ -51,7 +52,7 @@ jobs:
       fail-fast: false
       matrix:
         wp: ${{ fromJSON(needs.wordpress.outputs.versions) }}
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@9f64dc77b25727130884eaf427d2bd75493557ce
     with:
       php-version: '8.5'
       wp-version: ${{ matrix.wp }}
@@ -65,7 +66,7 @@ jobs:
       fail-fast: false
       matrix:
         wp: ${{ fromJSON(needs.wordpress.outputs.versions) }}
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-playwright-e2e.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-playwright-e2e.yml@9f64dc77b25727130884eaf427d2bd75493557ce
     with:
       artifact-slug: wp-${{ matrix.wp }}
       php-version: '8.5'

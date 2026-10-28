@@ -11,27 +11,49 @@ permissions:
 jobs:
   lint-php:
     name: PHP Lint
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@9f64dc77b25727130884eaf427d2bd75493557ce
     with:
       php-version: '8.5'
       scripts: '["lint:php:phpcs", "lint:php:phpcs:tests", "lint:php:phpstan"]'
 
   lint-scripts-styles:
     name: Scripts and styles lint
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-scripts-styles-lint.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-scripts-styles-lint.yml@9f64dc77b25727130884eaf427d2bd75493557ce
     with:
       scripts: '["lint:scripts", "lint:styles", "lint:types"]'
 
   block-json:
     name: block.json schema
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-block-json-check.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-block-json-check.yml@9f64dc77b25727130884eaf427d2bd75493557ce
+
+  slug:
+    name: Plugin slug
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      slug: ${{ steps.slug.outputs.slug }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # GitHub refuses a GITHUB_TOKEN push that changes a workflow, so the fill-in leaves workflows alone and they read the slug the plugin declares.
+      - name: Read the slug from composer.json
+        id: slug
+        run: |
+          slug=$(jq -r '.extra["text-domain"] // empty' composer.json)
+          if ! [[ "$slug" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+            echo "::error::composer.json's extra.text-domain must be the plugin's kebab-case slug — got '$slug'."
+            exit 1
+          fi
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
 
   php-syntax:
     name: PHP syntax
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-syntax-check.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
+    needs: slug
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-syntax-check.yml@9f64dc77b25727130884eaf427d2bd75493557ce
     with:
       php-versions: '["7.4"]'
-      paths: '["dws-plugin-template.php", "uninstall.php", "includes"]'
+      paths: ${{ format('["{0}.php", "uninstall.php", "includes"]', needs.slug.outputs.slug) }}
 
   changelog:
     name: Changelog fragments
@@ -40,10 +62,41 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.5'
           coverage: none
           tools: composer:v2
       - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
       - run: composer changelog:validate
+
+  scaffold:
+    name: Scaffold rehearsal
+    # A plugin generated from the template has filled in its placeholders already, so only the template rehearses the fill-in.
+    if: github.event.repository.is_template
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.5'
+          coverage: none
+          tools: composer:v2
+      - name: Fill in the scaffold
+        env:
+          PLUGIN_NAME: Acme Orders
+          SLUG: acme-orders
+          NS: AcmeOrders
+          PREFIX: dws_ao
+          PORT: '8821'
+          REPO: acme/acme-orders
+        run: .github/scripts/fill-in-scaffold.sh
+      - name: Install and scope the filled-in plugin
+        run: composer packages-install
+      - name: Lint and unit-test the filled-in plugin
+        run: |
+          composer lint:php
+          composer test:unit
