@@ -20,7 +20,7 @@ jobs:
     permissions:
       actions: read
       contents: write
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-release.yml@82ddd00abe623f3a021cedbf2a75ce1038ed891f
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-release.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
     with:
       project-path: '.'
       plugin-slug: 'dws-plugin-template'
