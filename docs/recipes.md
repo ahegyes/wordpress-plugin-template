@@ -1,6 +1,6 @@
 # Recipes
 
-These are the changes most plugins built from this template make, each as the files to add or change. A recipe that stores data lists its keys for `includes/footprint.php`, which no check enforces; anything stored under the plugin's `dws_tpl_` prefix, or `_dws_tpl_` for hidden meta, is in the footprint already.
+These are the changes most plugins built from this template make, each as the files to add or change. A recipe that stores data lists its keys for `includes/footprint.php`, which no check enforces. Options, transients and user meta under the plugin's `dws_tpl_` prefix are in the footprint already; meta on posts, terms, comments or orders needs its own `meta_prefixes` entry per object type.
 
 - [A safeguard](#a-safeguard)
 - [A one-time notice](#a-one-time-notice)
@@ -194,7 +194,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Admin
 	}
 ```
 
-The notice's scope defaults to the current user and its message is HTML, so escape it. A notice for every administrator of the site takes `NoticeScope::Site` and a capability; one that stays until dismissed takes `persistent: true`.
+The notice's scope defaults to the current user and its message is HTML, so escape it. A notice for every administrator of the site takes `NoticeScope::Site`, a capability and `per_viewer: true`, since without it the first administrator's viewing consumes it for everyone; one that stays until dismissed takes `persistent: true`.
 
 ## A WordPress settings page
 
@@ -407,7 +407,7 @@ final class ProductData implements ComponentInterface, ProductDataTabDefinitionI
 }
 ```
 
-Read the stored value with `ProductMeta::get_value( $product, '_dws_tpl_box' )`. The leading underscore hides the key from WordPress's Custom Fields box, and `_dws_tpl_` meta is in the footprint's family; declare it for uninstall in `includes/footprint.php`:
+Read the stored value with `ProductMeta::get_value( $product, '_dws_tpl_box' )`. The leading underscore hides the key from WordPress's Custom Fields box. Post meta is not in the footprint until its type is, so declare the prefix for uninstall in `includes/footprint.php`:
 
 ```php
 'meta_prefixes' => array( 'post' => array( '_' . Plugin::PREFIX . '_' ) ),

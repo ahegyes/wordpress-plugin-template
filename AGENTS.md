@@ -53,7 +53,7 @@ Both run PHP 8.5 with WooCommerce from `vendor/` and its order tables on; CI run
 3. **Request context.** `is_admin()` is false on REST requests and true in admin-ajax ones, so an admin-only feature decides the request context in its callbacks, never in `should_load()`.
 4. **Add-ons.** An add-on extends a base plugin only through the base plugin's documented hooks.
 5. **Request reads.** An integer or boolean is read as `filter_var( wp_unslash( $_POST['key'] ?? '' ), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE ) ?? $default` (`FILTER_VALIDATE_BOOL` for a boolean), and a string through an `is_string()` guard and the field's sanitizer; never `filter_input()`, the `default` filter option or a cast on request input.
-6. **Options and data.** Options are read only through `includes/options.php`'s typed readers, safeguards excepted. Everything stored lives under `dws_tpl_`, or `_dws_tpl_` for hidden meta, which the footprint covers; anything else gets its own footprint entry.
+6. **Options and data.** Options are read only through `includes/options.php`'s typed readers, safeguards excepted. Everything stored lives under `dws_tpl_`, or `_dws_tpl_` for hidden meta. The footprint covers the prefix's options, transients and user meta; object meta needs a `meta_prefixes` entry per type, and anything else its own entry.
 7. **Safeguards** live in `includes/safeguards.php`, call only WordPress and that file, and relax only through their own filter, through `dws_tpl_is_relaxed()` (`docs/recipes.md`).
 8. **Migrations** are append-only: a step converges from any partial state, verifies its writes and throws when one fails.
 
