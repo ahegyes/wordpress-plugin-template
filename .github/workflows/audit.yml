@@ -16,6 +16,6 @@ jobs:
   audit:
     name: Audit
     # npm gate audits production deps only — the dev-tooling graph (wp-scripts/playwright trees) is advisory via dependabot alerts.
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-supply-chain-audit.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-supply-chain-audit.yml@3f49ee71edc29034e413446e8f214720201115a3
     with:
       npm-audit-flags: '--omit=dev --audit-level=high'

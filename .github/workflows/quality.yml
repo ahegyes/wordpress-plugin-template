@@ -11,20 +11,20 @@ permissions:
 jobs:
   lint-php:
     name: PHP Lint
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@3f49ee71edc29034e413446e8f214720201115a3
     with:
       php-version: '8.5'
       scripts: '["lint:php:phpcs", "lint:php:phpcs:tests", "lint:php:phpstan"]'
 
   lint-scripts-styles:
     name: Scripts and styles lint
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-scripts-styles-lint.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-scripts-styles-lint.yml@3f49ee71edc29034e413446e8f214720201115a3
     with:
       scripts: '["lint:scripts", "lint:styles", "lint:types"]'
 
   block-json:
     name: block.json schema
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-block-json-check.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-block-json-check.yml@3f49ee71edc29034e413446e8f214720201115a3
 
   slug:
     name: Plugin slug
@@ -50,7 +50,7 @@ jobs:
   php-syntax:
     name: PHP syntax
     needs: slug
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-syntax-check.yml@a6a70735ba7a94628011b9856bf99159c490f7b5
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-syntax-check.yml@3f49ee71edc29034e413446e8f214720201115a3
     with:
       php-versions: '["7.4"]'
       paths: ${{ format('["{0}.php", "uninstall.php", "includes"]', needs.slug.outputs.slug) }}
@@ -62,7 +62,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.5'
           coverage: none
@@ -80,7 +80,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.5'
           coverage: none
