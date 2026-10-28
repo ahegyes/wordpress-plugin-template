@@ -32,9 +32,10 @@ Run the manifest and changelog checks, PHPCS, PHPStan, and the Unit and Integrat
 composer quality-check
 ```
 
-Run the end-to-end suite against the tests site:
+Install the browser the end-to-end suite runs in, once per machine, then run the suite against the tests site:
 
 ```sh
+npx playwright install chromium
 npm run test:e2e
 ```
 

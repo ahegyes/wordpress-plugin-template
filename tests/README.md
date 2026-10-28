@@ -33,9 +33,10 @@ Start the tests site, build the scripts and run the Integration suite:
 composer test:integration
 ```
 
-Run the end-to-end suite, which starts the tests site when it is down and needs the built scripts:
+Run the end-to-end suite, which starts the tests site when it is down and needs the built scripts and, once per machine, Playwright's Chromium:
 
 ```sh
+npx playwright install chromium
 npm run test:e2e
 ```
 
