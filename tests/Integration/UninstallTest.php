@@ -3,6 +3,7 @@
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
 use DeepWebSolutions\PluginTemplate\Plugin;
+use PHPUnit\Framework\Attributes\AfterClass;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
@@ -10,6 +11,11 @@ use PHPUnit\Framework\TestCase;
 #[CoversNothing]
 final class UninstallTest extends TestCase {
 	protected const int USER = 1;
+
+	#[AfterClass]
+	public static function forget_the_rows_the_uninstall_deleted(): void {
+		wp_cache_flush(); // The uninstall ran in a child process, so this process still caches the rows it deleted, such as a setting the tab saved.
+	}
 
 	#[RunInSeparateProcess]
 	public function test_a_consenting_uninstall_removes_a_row_of_every_kind_the_framework_roots_store(): void {
