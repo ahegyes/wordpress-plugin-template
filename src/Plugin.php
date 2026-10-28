@@ -55,6 +55,8 @@ final class Plugin {
 	public const array COMPONENTS = array(
 		Scheduler::class,
 		AdminNotices::class,
+		Settings::class,
+		Feature\Feature::class,
 	);
 
 	/**

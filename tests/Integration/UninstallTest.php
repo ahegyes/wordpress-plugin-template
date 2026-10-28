@@ -43,5 +43,9 @@ final class UninstallTest extends TestCase {
 				'ids'
 			)
 		);
+
+		// The other tests share the database, so the runner stores again what a new site starts with.
+		dws_tpl_plugin()->migrations?->run();
+		self::assertSame( 'no', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
 	}
 }

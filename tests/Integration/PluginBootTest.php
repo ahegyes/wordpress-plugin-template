@@ -2,21 +2,23 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
+use DeepWebSolutions\PluginTemplate\Feature\Feature;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\AdminNotice\AdminNotices;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migration\MigrationRunner;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Scheduling\Scheduler;
+use DeepWebSolutions\PluginTemplate\Settings;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class PluginBootTest extends TestCase {
-	public function test_the_plugin_boots_with_the_scheduler_and_admin_notices_as_its_only_roots(): void {
+	public function test_the_plugin_boots_with_the_greeting_gated_off_until_a_site_switches_it_on(): void {
 		$plugin = dws_tpl_plugin();
 
 		self::assertSame( 'booted', $plugin->boot->status );
-		self::assertSame( array( Scheduler::class, AdminNotices::class ), $plugin->kernel?->resolved );
-		self::assertSame( array(), $plugin->kernel->skipped );
+		self::assertSame( array( Scheduler::class, AdminNotices::class, Settings::class ), $plugin->kernel?->resolved );
+		self::assertSame( array( Feature::class ), $plugin->kernel->skipped );
 	}
 
 	public function test_the_entry_loads_every_include_but_those_whose_names_start_with_an_underscore(): void {

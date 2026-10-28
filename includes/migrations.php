@@ -19,5 +19,31 @@ defined( 'ABSPATH' ) || exit;
  * @return  list<callable(): void>
  */
 function dws_tpl_get_migration_steps(): array {
-	return array();
+	return array(
+		'dws_tpl_add_settings',
+	);
+}
+
+/**
+ * Stores the defaults of the settings that need no translation, autoloaded, so a site that never saved them reads them without a query; a translated default is never stored, because it would keep the language the site had when the step ran.
+ *
+ * @since   2.0.0
+ * @version 2.0.0
+ *
+ * @throws  RuntimeException Thrown when a default could not be stored.
+ *
+ * @return  void
+ */
+function dws_tpl_add_settings(): void {
+	$defaults = array(
+		DWS_TPL_OPTION_FEATURE         => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_FEATURE ] ),
+		DWS_TPL_OPTION_GREETING_ORDERS => (string) DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_GREETING_ORDERS ],
+		DWS_TPL_OPTION_DELETE_DATA     => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_DELETE_DATA ] ),
+	);
+
+	foreach ( $defaults as $key => $value ) {
+		if ( false === get_option( $key ) && ! add_option( $key, $value, '', true ) ) {
+			throw new RuntimeException( "The option $key could not be stored." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Developer-facing, never rendered.
+		}
+	}
 }
