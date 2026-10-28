@@ -2,7 +2,6 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
-use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use PHPUnit\Framework\Attributes\After;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -58,38 +57,38 @@ final class OptionsTest extends TestCase {
 	#[After]
 	protected function delete_rows(): void {
 		delete_option( self::KEY );
-		delete_option( Options::DELETE_DATA );
+		delete_option( DWS_TPL_OPTION_DELETE_DATA );
 	}
 
 	#[DataProvider( 'stored_bools' )]
 	public function test_a_bool_reads_the_stored_checkbox_value_or_false( mixed $stored, bool $expected ): void {
-		update_option( Options::DELETE_DATA, $stored );
+		update_option( DWS_TPL_OPTION_DELETE_DATA, $stored );
 
-		self::assertSame( $expected, Options::get_bool( Options::DELETE_DATA ) );
+		self::assertSame( $expected, dws_tpl_get_bool_option( DWS_TPL_OPTION_DELETE_DATA ) );
 	}
 
 	public function test_a_missing_option_reads_its_default(): void {
-		self::assertSame( Options::DEFAULTS[ Options::DELETE_DATA ], Options::get_bool( Options::DELETE_DATA ) );
+		self::assertSame( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_DELETE_DATA ], dws_tpl_get_bool_option( DWS_TPL_OPTION_DELETE_DATA ) );
 	}
 
 	#[DataProvider( 'stored_ints' )]
 	public function test_an_int_reads_a_whole_number_or_zero( mixed $stored, int $expected ): void {
 		update_option( self::KEY, $stored );
 
-		self::assertSame( $expected, Options::get_int( self::KEY ) );
+		self::assertSame( $expected, dws_tpl_get_int_option( self::KEY ) );
 	}
 
 	#[DataProvider( 'stored_strings' )]
 	public function test_a_string_reads_a_stored_string_or_the_empty_string( mixed $stored, string $expected ): void {
 		update_option( self::KEY, $stored );
 
-		self::assertSame( $expected, Options::get_string( self::KEY ) );
+		self::assertSame( $expected, dws_tpl_get_string_option( self::KEY ) );
 	}
 
 	#[DataProvider( 'stored_lists' )]
 	public function test_a_list_reads_the_stored_strings_in_order( mixed $stored, array $expected ): void {
 		update_option( self::KEY, $stored );
 
-		self::assertSame( $expected, Options::get_list( self::KEY ) );
+		self::assertSame( $expected, dws_tpl_get_list_option( self::KEY ) );
 	}
 }

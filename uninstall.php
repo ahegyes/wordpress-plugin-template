@@ -8,8 +8,6 @@
  * @package DeepWebSolutions\PluginTemplate
  */
 
-use DeepWebSolutions\PluginTemplate\Footprint;
-use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Requirements;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Uninstall\Uninstaller;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Uninstall\MetaTypes;
@@ -29,8 +27,10 @@ try {
 	}
 
 	require_once __DIR__ . '/vendor/autoload.php';
-	$dws_tpl_footprint  = Footprint::DATA;
-	$dws_tpl_consent    = Options::DELETE_DATA;
+	require_once __DIR__ . '/includes/footprint.php';
+	require_once __DIR__ . '/includes/options.php';
+	$dws_tpl_footprint  = dws_tpl_get_footprint();
+	$dws_tpl_consent    = DWS_TPL_OPTION_DELETE_DATA;
 	$dws_tpl_meta_types = MetaTypes::DEFINITIONS;
 } catch ( Throwable $error ) {
 	// WP-CLI then fails and keeps the files for a rerun on a complete build, while a web request deletes them and leaves the data.
