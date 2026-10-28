@@ -20,6 +20,14 @@ final class PluginBootTest extends TestCase {
 		self::assertSame( array(), $plugin->kernel->skipped );
 	}
 
+	public function test_the_entry_loads_every_include_but_those_whose_names_start_with_an_underscore(): void {
+		$includes = \dirname( DWS_TPL_FILE ) . '/includes/';
+
+		self::assertContains( $includes . 'safeguards.php', \get_included_files() );
+		self::assertContains( $includes . 'index.php', \get_included_files() );
+		self::assertNotContains( $includes . '_disabled-example.php', \get_included_files() );
+	}
+
 	public function test_the_stored_data_is_at_the_revision_of_the_code(): void {
 		self::assertInstanceOf( MigrationRunner::class, dws_tpl_plugin()->migrations );
 		self::assertSame( \count( Migrations::STEPS ), MigrationRunner::get_revision( Plugin::PREFIX . '_revision' ) );
