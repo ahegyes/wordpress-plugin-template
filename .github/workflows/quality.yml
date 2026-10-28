@@ -11,16 +11,23 @@ permissions:
 jobs:
   lint-php:
     name: PHP Lint
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@714fc2a66d6ae5011999beb18a4b01fb1992f4bd
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@88710a71e2bcc7db7cb81b4eb96411438369ce0f
     with:
       php-version: '8.5'
-      scripts: '["lint:php:phpcs", "lint:php:phpstan"]'
+      scripts: '["lint:php:phpcs", "lint:php:phpcs:tests", "lint:php:phpstan"]'
+
+  php-syntax:
+    name: PHP syntax
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-syntax-check.yml@88710a71e2bcc7db7cb81b4eb96411438369ce0f
+    with:
+      php-versions: '["7.4"]'
+      paths: '["dws-plugin-template.php", "uninstall.php", "includes"]'
 
   changelog:
     name: Changelog fragments
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
@@ -35,7 +42,7 @@ jobs:
     name: readme.txt lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: thetwopct/wporg-plugin-readme-linter@1f869aba959265ecc90935b2380c6569d56646ac # v1.0.2
