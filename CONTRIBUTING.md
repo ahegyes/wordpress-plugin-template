@@ -16,4 +16,4 @@ Interactive prompt (Significance + Type + entry); fragment lands in `changelog/<
 composer changelog:write
 ```
 
-Aggregates fragments → new `CHANGELOG.md` version block (semver computed from fragment significance) → mirrors `<!-- Start/End changelog -->` markers into `readme.txt`'s `== Changelog ==`. Don't remove the markers. Commit + tag.
+Aggregates fragments → new `CHANGELOG.md` version block (semver computed from fragment significance). Commit + tag.

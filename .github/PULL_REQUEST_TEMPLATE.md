@@ -16,7 +16,7 @@
 - [ ] Changelog fragment added (`composer changelog:add`)
 - [ ] Tests added/updated
 - [ ] `composer quality-check` passes locally
-- [ ] Plugin header + `readme.txt` updated if runtime requirements changed
+- [ ] Plugin header updated if runtime requirements changed
 
 ## Breaking changes for forks
 
