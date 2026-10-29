@@ -14,14 +14,16 @@ grep -Eq '^[A-Za-z][A-Za-z0-9]*$' <<< "$NS" || { echo "::error::php-namespace mu
 # Both ports land in JSON numbers, where a leading zero is invalid, and the tests environment takes the next one;
 # neither may be the template's own 8811 or 8812, which the leftover check below refuses.
 { grep -Eq '^[1-9][0-9]{0,4}$' <<< "$PORT" && [ "$PORT" -le 65534 ] && { [ "$PORT" -lt 8810 ] || [ "$PORT" -gt 8812 ]; }; } || { echo "::error::wp-env-port must be 1-65534 with no leading zero, and neither it nor the next port may be 8811 or 8812."; exit 1; }
-# The display name lands in single-quoted PHP and JavaScript strings.
-if printf '%s' "$PLUGIN_NAME" | grep -q "['\\\$/]"; then echo "::error::plugin-name must not contain \\, \$, / or '."; exit 1; fi
+# The display name lands in single-quoted PHP and JavaScript strings, and in JSX text.
+if printf '%s' "$PLUGIN_NAME" | grep -q "['\\\$/<>{}]"; then echo "::error::plugin-name must not contain \\, \$, /, ', <, >, { or }."; exit 1; fi
 
 export SCREAMING_PREFIX="${PREFIX^^}"
 export TESTS_PORT=$(( PORT + 1 ))
 export REPO_NAME="${REPO#*/}"
 
 git mv --force README.scaffold.md README.md
+# The scaffold README becomes the plugin's README.md, which .distignore already excludes.
+perl -ni -e 'print unless /^README\.scaffold\.md$/' .distignore
 git rm --quiet includes/_disabled-example.php
 # The template's recipe test loads the recipe's safeguard helper, which a plugin that applies the recipe declares
 # itself, so only the recipe's own test stays.
@@ -64,6 +66,11 @@ php -l uninstall.php
 for swept_json in .wp-env.json .wp-env.tests.json composer.json package.json package-lock.json; do
 	php -r 'json_decode( (string) file_get_contents( $argv[1] ), false, 512, JSON_THROW_ON_ERROR );' "$swept_json"
 done
+
+# A name or slug shorter than the template's leaves wrapped lines that Prettier joins, so the swept scripts are formatted
+# again. Install scripts stay off, because the fill-in job holds a token that can push.
+npm ci --ignore-scripts --no-audit --no-fund
+node_modules/.bin/wp-scripts format '{blocks/src,assets/src,tests/e2e}/**/*.{js,jsx,ts,tsx}'
 
 status=0
 if git grep -n -I -E 'dws-plugin-template|dws_tpl|DWS_TPL|PluginTemplate|DWS Plugin Template|wordpress-plugin-template' -- . ':!.github/scripts/fill-in-scaffold.sh'; then

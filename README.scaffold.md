@@ -1,6 +1,6 @@
 # DWS Plugin Template
 
-TODO: one sentence saying why this plugin exists, its philosophy rather than a list of what it holds. The same sentence is `composer.json`'s `description`, the entry file's `Description` header and the repository's GitHub description.
+TODO: one sentence saying why this plugin exists, its philosophy rather than a list of what it holds. The same sentence is `composer.json`'s and `package.json`'s `description`, the entry file's `Description` header and the repository's GitHub description.
 
 ## Requirements
 

@@ -11,4 +11,4 @@ In scope: the plugin's PHP, JavaScript and CSS, its prefixing configuration (`sc
 Out of scope, reported upstream instead:
 - plugins generated from this repository, to their maintainers;
 - the wp-framework packages, to `ahegyes/wordpress-framework`;
-- WordPress, WooCommerce and the other Composer and npm dependencies, to their projects. Composer refuses to resolve a dependency version with a known advisory through `roave/security-advisories`, and the Supply-Chain Audit workflow fails on one.
+- WordPress, WooCommerce and the other Composer and npm dependencies, to their projects. Composer refuses to resolve a dependency version with a known advisory through `roave/security-advisories`. The Supply-Chain Audit workflow fails on an advisory anywhere in the Composer lock, and on a high-severity one among the npm runtime dependencies, of which the template has none; advisories in the npm development tools reach Dependabot alerts instead.

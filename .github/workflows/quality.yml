@@ -11,20 +11,20 @@ permissions:
 jobs:
   lint-php:
     name: PHP Lint
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@9f64dc77b25727130884eaf427d2bd75493557ce
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@3cbd985255e76f8026644ccdee5be0b2b2da312b
     with:
       php-version: '8.5'
       scripts: '["lint:php:phpcs", "lint:php:phpcs:tests", "lint:php:phpstan"]'
 
   lint-scripts-styles:
     name: Scripts and styles lint
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-scripts-styles-lint.yml@9f64dc77b25727130884eaf427d2bd75493557ce
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-scripts-styles-lint.yml@3cbd985255e76f8026644ccdee5be0b2b2da312b
     with:
       scripts: '["lint:scripts", "lint:styles", "lint:types"]'
 
   block-json:
     name: block.json schema
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-block-json-check.yml@9f64dc77b25727130884eaf427d2bd75493557ce
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-block-json-check.yml@3cbd985255e76f8026644ccdee5be0b2b2da312b
 
   slug:
     name: Plugin slug
@@ -50,7 +50,7 @@ jobs:
   php-syntax:
     name: PHP syntax
     needs: slug
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-syntax-check.yml@9f64dc77b25727130884eaf427d2bd75493557ce
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-syntax-check.yml@3cbd985255e76f8026644ccdee5be0b2b2da312b
     with:
       php-versions: '["7.4"]'
       paths: ${{ format('["{0}.php", "uninstall.php", "includes"]', needs.slug.outputs.slug) }}
@@ -85,6 +85,10 @@ jobs:
           php-version: '8.5'
           coverage: none
           tools: composer:v2
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: package.json
+          cache: 'npm'
       - name: Fill in the scaffold
         env:
           PLUGIN_NAME: Acme Orders
@@ -100,3 +104,9 @@ jobs:
         run: |
           composer lint:php
           composer test:unit
+      # The display name lands in the block's JSX, which only a build and the script and type lints parse.
+      - name: Build and lint the filled-in plugin's scripts
+        run: |
+          npm run build
+          npm run lint:scripts
+          npm run lint:types

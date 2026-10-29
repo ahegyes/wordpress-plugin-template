@@ -108,11 +108,11 @@ final class FeatureDetailTest extends TestCase {
 		self::assertStringContainsString( esc_html( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ) ), $this->print() );
 	}
 
-	public function test_an_empty_greeting_prints_nothing(): void {
+	public function test_an_empty_greeting_prints_its_translated_default(): void {
 		update_option( DWS_TPL_OPTION_GREETING, '' );
 		$this->place_orders( 1 );
 
-		self::assertSame( '', $this->print() );
+		self::assertStringContainsString( esc_html( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ) ), $this->print() );
 	}
 
 	protected function place_orders( int $count ): void {

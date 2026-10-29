@@ -13,10 +13,6 @@ use DeepWebSolutions\PluginTemplate\Plugin;
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'plugins_loaded', 'dws_tpl_boot', 15 );
-add_action( 'before_woocommerce_init', 'dws_tpl_declare_compatibility' );
-register_deactivation_hook( DWS_TPL_FILE, 'dws_tpl_deactivate' );
-
 $dws_tpl_includes = glob( __DIR__ . '/includes/*.php' );
 if ( false === $dws_tpl_includes ) {
 	throw new RuntimeException( 'The includes directory could not be read.' );
@@ -28,6 +24,11 @@ foreach ( $dws_tpl_includes as $dws_tpl_include ) {
 		require_once $dws_tpl_include;
 	}
 }
+
+// The hooks come last, so an include that throws leaves nothing of the plugin hooked.
+add_action( 'plugins_loaded', 'dws_tpl_boot', 15 );
+add_action( 'before_woocommerce_init', 'dws_tpl_declare_compatibility' );
+register_deactivation_hook( DWS_TPL_FILE, 'dws_tpl_deactivate' );
 
 /**
  * Returns the plugin's composition root, built on first use.
@@ -63,7 +64,7 @@ function dws_tpl_boot(): void {
 }
 
 /**
- * Unschedules the plugin's jobs on the site it is deactivated on.
+ * Unschedules the plugin's jobs on the site it is deactivated on, reporting a composition root that cannot be built as an incomplete build.
  *
  * @since   2.0.0
  * @version 2.0.0
@@ -71,7 +72,11 @@ function dws_tpl_boot(): void {
  * @return  void
  */
 function dws_tpl_deactivate(): void {
-	dws_tpl_plugin()->deactivate();
+	try {
+		dws_tpl_plugin()->deactivate();
+	} catch ( Throwable $error ) {
+		dws_tpl_handle_build_error( $error );
+	}
 }
 
 /**
