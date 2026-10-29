@@ -14,8 +14,8 @@ grep -Eq '^[A-Za-z][A-Za-z0-9]*$' <<< "$NS" || { echo "::error::php-namespace mu
 # Both ports land in JSON numbers, where a leading zero is invalid, and the tests environment takes the next one;
 # neither may be the template's own 8811 or 8812, which the leftover check below refuses.
 { grep -Eq '^[1-9][0-9]{0,4}$' <<< "$PORT" && [ "$PORT" -le 65534 ] && { [ "$PORT" -lt 8810 ] || [ "$PORT" -gt 8812 ]; }; } || { echo "::error::wp-env-port must be 1-65534 with no leading zero, and neither it nor the next port may be 8811 or 8812."; exit 1; }
-# The display name lands in single-quoted PHP and JavaScript strings.
-if printf '%s' "$PLUGIN_NAME" | grep -q "['\\\$/]"; then echo "::error::plugin-name must not contain \\, \$, / or '."; exit 1; fi
+# The display name lands in single-quoted PHP and JavaScript strings, and in JSX text.
+if printf '%s' "$PLUGIN_NAME" | grep -q "['\\\$/<>{}]"; then echo "::error::plugin-name must not contain \\, \$, /, ', <, >, { or }."; exit 1; fi
 
 export SCREAMING_PREFIX="${PREFIX^^}"
 export TESTS_PORT=$(( PORT + 1 ))
