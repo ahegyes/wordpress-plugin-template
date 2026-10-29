@@ -32,6 +32,9 @@ try {
 	$dws_tpl_footprint  = dws_tpl_get_footprint();
 	$dws_tpl_consent    = DWS_TPL_OPTION_DELETE_DATA;
 	$dws_tpl_meta_types = MetaTypes::DEFINITIONS;
+	if ( ! class_exists( Uninstaller::class ) ) {
+		throw new RuntimeException( 'its uninstall engine is missing.' );
+	}
 } catch ( Throwable $error ) {
 	// WP-CLI then fails and keeps the files for a rerun on a complete build, while a web request deletes them and leaves the data.
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
