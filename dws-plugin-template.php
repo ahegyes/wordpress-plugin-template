@@ -2,7 +2,7 @@
 /**
  * Plugin Name:          DWS Plugin Template
  * Plugin URI:           https://github.com/ahegyes/wordpress-plugin-template
- * Description:          Starting point for WordPress plugins built on the DWS framework.
+ * Description:          WordPress plugins on the wp-framework packages start here, from one tested anatomy, so all are built alike and a fix found in one applies to all.
  * Version:              2.0.0
  * Requires at least:    7.1
  * Requires PHP:         8.5

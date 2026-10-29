@@ -2,7 +2,7 @@
 
 WordPress plugins on the wp-framework packages start here, from one tested anatomy, so all are built alike and a fix found in one applies to all.
 
-The template is itself a working WooCommerce plugin: it boots the framework's composition, holds a settings tab, a feature gated on one of its settings, a block, migrations, safeguards and an uninstall footprint, and every suite and release check passes on it. `docs/ARCHITECTURE.md` describes that anatomy and `docs/recipes.md` the changes most plugins make to it.
+The template is itself a working WooCommerce plugin: it boots the framework's composition, holds a settings tab, a feature gated on one of its settings, a block, migrations, an empty safeguards slot and an uninstall footprint, and every suite and release check passes on it. `docs/ARCHITECTURE.md` describes that anatomy and `docs/recipes.md` the changes most plugins make to it.
 
 ## Starting a plugin
 

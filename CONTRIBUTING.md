@@ -2,18 +2,20 @@
 
 ## Changelog entries
 
-One fragment per user-visible change so PRs don't conflict on `CHANGELOG.md`:
+Each user-visible change adds one fragment, so pull requests never conflict on `CHANGELOG.md`:
 
 ```bash
 composer changelog:add
 ```
 
-Interactive prompt (Significance + Type + entry); fragment lands in `changelog/<branch-name>`, commit it with the PR. CI validates via `composer changelog:validate`.
+The command asks for the change's significance, its type and its entry, and writes the fragment to `changelog/<branch-name>`, which the pull request commits. CI validates the fragments with `composer changelog:validate`.
 
 ## Releases
+
+A release writes the fragments into a new version block of `CHANGELOG.md`, whose version the fragments' significance sets:
 
 ```bash
 composer changelog:write
 ```
 
-Aggregates fragments → new `CHANGELOG.md` version block (semver computed from fragment significance). Commit + tag.
+The release commit also sets the entry file's `Version:` header to that version, and `readme.txt`'s `Stable tag:` where the plugin has one, because the release refuses a tag either differs from. Pushing the tag `v<version>` on that commit starts the release.
