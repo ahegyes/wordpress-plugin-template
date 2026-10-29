@@ -894,6 +894,12 @@ TODO: what the plugin does, for the directory's listing.
 ```
 
 5. In `.github/workflows/release.yml`, pass `wp-org: true` to the reusable release. A tag then also deploys the zip and the `.wordpress-org/` assets to the directory's SVN from the `wp-org-release` environment: create it, store `SVN_USERNAME` and `SVN_PASSWORD` there and only there, and protect it with required reviewers.
+6. A plugin whose earlier releases shipped another main file, such as a 1.x `bootstrap.php`, also passes that name as `archive-entry-file`, from a wordpress-configs version that has the input. The source keeps `dws-plugin-template.php`, and `uninstall.php` finds the main file by its header. The rename suits only wordpress.org distribution, because the GitHub updater reads the next release's floors from the main file at the release tag, under its installed name:
+
+```yaml
+      # 1.x shipped bootstrap.php, and WordPress identifies an active plugin by its folder and file, so an update without that file would deactivate it on every site.
+      archive-entry-file: bootstrap.php
+```
 
 The wordpress.org build runs Plugin Check's full set but for the checks `exclude-checks` names; Plugin Check's `prefixing` and `direct_file_access` stop at PHP 8.4 syntax such as `protected(set)`, which wordpress.org's own scan may meet too. The bundled updater ships inert under `vendor-prefixed/`, which wordpress.org's reviewers may still ask to remove.
 
