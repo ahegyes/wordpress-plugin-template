@@ -35,6 +35,19 @@ final class PartialDeployTest extends TestCase {
 		self::assertSame( '[false,true]', $request['last'] );
 	}
 
+	public function test_the_peer_getters_a_partial_deploy_defines_still_answer(): void {
+		$root = \dirname( DWS_TPL_FILE ) . '/src/Plugin.php'; // options.php reads it at include time, after metadata.php has loaded.
+		\rename( $root, "$root.hidden" );
+		try {
+			$request = self::request( 'echo wp_json_encode( array( false !== has_action( "plugins_loaded", "dws_tpl_boot" ), dws_tpl_get_plugin_slug(), dws_tpl_get_plugin_name(), dws_tpl_get_plugin_version() ) );' );
+		} finally {
+			\rename( "$root.hidden", $root );
+		}
+
+		self::assertSame( 0, $request['status'], $request['output'] );
+		self::assertSame( wp_json_encode( array( false, dws_tpl_get_plugin_slug(), dws_tpl_get_plugin_name(), dws_tpl_get_plugin_version() ) ), $request['last'] );
+	}
+
 	public function test_a_deactivation_whose_composition_root_cannot_be_built_is_reported_as_a_build_error(): void {
 		$root = \dirname( DWS_TPL_FILE ) . '/vendor-prefixed/ahegyes/wp-framework-core/src/PluginBoot.php'; // The composition root constructs it, and no include reads it.
 		\rename( $root, "$root.hidden" );
