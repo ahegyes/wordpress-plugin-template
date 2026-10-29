@@ -85,6 +85,10 @@ jobs:
           php-version: '8.5'
           coverage: none
           tools: composer:v2
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: package.json
+          cache: 'npm'
       - name: Fill in the scaffold
         env:
           PLUGIN_NAME: Acme Orders
@@ -100,13 +104,9 @@ jobs:
         run: |
           composer lint:php
           composer test:unit
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version-file: package.json
-          cache: 'npm'
-      # The display name lands in the block's JSX, which only a build and the type lint parse.
-      - name: Build and type-check the filled-in plugin's scripts
+      # The display name lands in the block's JSX, which only a build and the script and type lints parse.
+      - name: Build and lint the filled-in plugin's scripts
         run: |
-          npm ci
           npm run build
+          npm run lint:scripts
           npm run lint:types

@@ -65,6 +65,11 @@ for swept_json in .wp-env.json .wp-env.tests.json composer.json package.json pac
 	php -r 'json_decode( (string) file_get_contents( $argv[1] ), false, 512, JSON_THROW_ON_ERROR );' "$swept_json"
 done
 
+# A name or slug shorter than the template's leaves wrapped lines that Prettier joins, so the swept scripts are formatted
+# again. Install scripts stay off, because the fill-in job holds a token that can push.
+npm ci --ignore-scripts --no-audit --no-fund
+node_modules/.bin/wp-scripts format '{blocks/src,assets/src,tests/e2e}/**/*.{js,jsx,ts,tsx}'
+
 status=0
 if git grep -n -I -E 'dws-plugin-template|dws_tpl|DWS_TPL|PluginTemplate|DWS Plugin Template|wordpress-plugin-template' -- . ':!.github/scripts/fill-in-scaffold.sh'; then
 	echo "::error::The fill-in left the template's names above."
