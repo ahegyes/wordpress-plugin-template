@@ -99,7 +99,7 @@ function dws_tpl_get_int_option( string $key ): int {
 }
 
 /**
- * Returns an option as a string, which reads an option with a translated default only after init.
+ * Returns an option as a string, reading a missing or empty value of an option with a translated default as that default, only after init.
  *
  * @since   2.0.0
  * @version 2.0.0
@@ -109,8 +109,12 @@ function dws_tpl_get_int_option( string $key ): int {
  * @return  string
  */
 function dws_tpl_get_string_option( string $key ): string {
-	$default = dws_tpl_get_option_default( $key ) ?? dws_tpl_get_option_text( $key );
+	$text    = dws_tpl_get_option_text( $key );
+	$default = dws_tpl_get_option_default( $key ) ?? $text;
 	$stored  = get_option( $key, $default );
+	if ( '' === $stored ) {
+		return $text; // The field shows a translated default as its placeholder, so an untouched field stores an empty value.
+	}
 
 	return is_string( $stored ) ? $stored : ( is_string( $default ) ? $default : '' );
 }

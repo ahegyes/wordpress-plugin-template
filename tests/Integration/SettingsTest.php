@@ -66,10 +66,20 @@ final class SettingsTest extends TestCase {
 
 		self::assertSame( 'DWS Plugin Template', self::$tab->get_label() );
 		self::assertFalse( $form->getElementById( DWS_TPL_OPTION_FEATURE )?->hasAttribute( 'checked' ) );
-		self::assertSame( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), $form->getElementById( DWS_TPL_OPTION_GREETING )?->getAttribute( 'value' ) );
+		self::assertSame( '', $form->getElementById( DWS_TPL_OPTION_GREETING )?->getAttribute( 'value' ) );
+		self::assertSame( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), $form->getElementById( DWS_TPL_OPTION_GREETING )?->getAttribute( 'placeholder' ) );
 		self::assertSame( '1', $form->getElementById( DWS_TPL_OPTION_GREETING_ORDERS )?->getAttribute( 'value' ) );
 		self::assertSame( '1', $form->getElementById( DWS_TPL_OPTION_GREETING_ORDERS )?->getAttribute( 'min' ) );
 		self::assertFalse( $form->getElementById( DWS_TPL_OPTION_DELETE_DATA )?->hasAttribute( 'checked' ) );
+	}
+
+	public function test_a_save_that_leaves_the_message_untouched_stores_no_translated_text(): void {
+		delete_option( DWS_TPL_OPTION_GREETING );
+
+		$this->save( array( DWS_TPL_OPTION_GREETING => $this->render()->getElementById( DWS_TPL_OPTION_GREETING )?->getAttribute( 'value' ) ) );
+
+		self::assertSame( '', get_option( DWS_TPL_OPTION_GREETING ) );
+		self::assertSame( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
 	}
 
 	public function test_the_retention_opt_in_round_trips_through_woocommerces_save(): void {

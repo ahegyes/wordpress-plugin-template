@@ -51,10 +51,11 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 				'default' => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_FEATURE ] ),
 			),
 			array(
-				'type'    => 'text',
-				'id'      => DWS_TPL_OPTION_GREETING,
-				'title'   => __( 'Message', 'dws-plugin-template' ),
-				'default' => dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ),
+				'type'        => 'text',
+				'id'          => DWS_TPL_OPTION_GREETING,
+				'title'       => __( 'Message', 'dws-plugin-template' ),
+				'default'     => '',
+				'placeholder' => dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), // A default would be saved in the admin's language with the first save of the tab.
 			),
 			array(
 				'type'              => 'number',

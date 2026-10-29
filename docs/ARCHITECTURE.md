@@ -34,7 +34,7 @@ The request that activates the plugin does not boot it, because WordPress includ
 
 ## Data
 
-- **Options** are prefixed constants in `includes/options.php`, read only through its typed readers, which guard each stored value and fall back to the key's default. Translated defaults come from `dws_tpl_get_option_text()` after `init`.
+- **Options** are prefixed constants in `includes/options.php`, read only through its typed readers, which guard each stored value and fall back to the key's default. Translated defaults come from `dws_tpl_get_option_text()` after `init`; a field shows one as its placeholder and stores an empty value, which its reader reads as the default, so no save stores the admin's language.
 - **Migrations** are the append-only steps `dws_tpl_get_migration_steps()` returns. The framework's runner runs each pending step once per site on `wp_loaded`, behind a lock, and records the revision reached in `dws_tpl_revision`. A step converges from any partial state and throws when a write fails, so a failed step runs again on a later request.
 - **The footprint**, `dws_tpl_get_footprint()`, names every kind of data the plugin stores: option and user meta prefixes, network options, scheduled hooks and Action Scheduler groups. Options, transients and user meta under the `dws_tpl_` prefix are covered; meta on posts, terms, comments or orders needs a `meta_prefixes` entry per object type, and data under another name its own entry, which no check enforces.
 - **Deactivation** unschedules every hook in the footprint's `cron_hooks` and `as_hooks` on the current site.

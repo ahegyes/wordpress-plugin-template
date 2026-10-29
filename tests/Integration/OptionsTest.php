@@ -127,6 +127,10 @@ final class OptionsTest extends TestCase {
 		self::assertNotSame( '', dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ) );
 		self::assertSame( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
 
+		update_option( DWS_TPL_OPTION_GREETING, '' );
+
+		self::assertSame( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
+
 		update_option( DWS_TPL_OPTION_GREETING, 'Hello' );
 
 		self::assertSame( 'Hello', dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
