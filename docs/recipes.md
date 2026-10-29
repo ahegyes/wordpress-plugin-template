@@ -326,6 +326,7 @@ final class SettingsPage implements ComponentInterface, OptionsPageDefinitionInt
 							'type'              => 'number',
 							'id'                => DWS_TPL_SETTING_LIMIT,
 							'title'             => __( 'Limit', 'dws-plugin-template' ),
+							'default'           => (string) DWS_TPL_SETTING_DEFAULTS[ DWS_TPL_SETTING_LIMIT ],
 							'custom_attributes' => array(
 								'min'  => '1',
 								'step' => '1',
@@ -708,7 +709,7 @@ final class Pruning implements ComponentInterface {
 	 * @return  void
 	 */
 	public function repair_schedule(): void {
-		$ensured_at = filter_var( get_option( DWS_TPL_OPTION_RECURRING_ENSURED_AT, 0 ), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE ) ?? 0;
+		$ensured_at = dws_tpl_get_int_option( DWS_TPL_OPTION_RECURRING_ENSURED_AT );
 		if ( time() - $ensured_at < HOUR_IN_SECONDS ) {
 			return;
 		}
@@ -1041,6 +1042,7 @@ final class Settings implements ComponentInterface, OptionsPageDefinitionInterfa
 							'type'              => 'number',
 							'id'                => DWS_TPL_SETTING_LIMIT,
 							'title'             => __( 'Limit', 'dws-plugin-template' ),
+							'default'           => (string) DWS_TPL_SETTING_DEFAULTS[ DWS_TPL_SETTING_LIMIT ],
 							'custom_attributes' => array(
 								'min'  => '1',
 								'step' => '1',
