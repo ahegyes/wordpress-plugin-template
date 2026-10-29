@@ -13,7 +13,7 @@
         "npm": ">=11"
     },
     "devDependencies": {
-        "@ahegyes/wordpress-configs": "git+https://github.com/ahegyes/wordpress-configs.git#9f64dc77b25727130884eaf427d2bd75493557ce",
+        "@ahegyes/wordpress-configs": "git+https://github.com/ahegyes/wordpress-configs.git#3cbd985255e76f8026644ccdee5be0b2b2da312b",
         "@axe-core/playwright": "^4.14.0",
         "@playwright/test": "^1.64.1",
         "@types/node": "^26.6.5",
