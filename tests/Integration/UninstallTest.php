@@ -18,6 +18,27 @@ final class UninstallTest extends TestCase {
 	}
 
 	#[RunInSeparateProcess]
+	public function test_an_uninstall_checks_the_floors_of_its_own_main_file_under_any_name(): void {
+		\define( 'WP_UNINSTALL_PLUGIN', 'another-plugin/another-plugin.php' ); // A bulk uninstall keeps the first plugin's value for every later one.
+		$entry  = \dirname( DWS_TPL_FILE ) . '/bootstrap.php'; // A release can ship the main file under another name.
+		$source = (string) \file_get_contents( DWS_TPL_FILE );
+		\rename( DWS_TPL_FILE, DWS_TPL_FILE . '.hidden' );
+		\file_put_contents( $entry, (string) \preg_replace( '/^(\s*\*\s*Requires PHP:\s*).*$/m', '${1}99.0', $source ) );
+		$log = (string) \tempnam( \sys_get_temp_dir(), 'dws-tpl-uninstall-' );
+		\ini_set( 'error_log', $log ); // phpcs:ignore WordPress.PHP.IniSet.Risky -- The child process's stderr would fail the test.
+
+		try {
+			include \dirname( DWS_TPL_FILE ) . '/uninstall.php';
+		} finally {
+			\unlink( $entry );
+			\rename( DWS_TPL_FILE . '.hidden', DWS_TPL_FILE );
+		}
+
+		self::assertStringContainsString( 'below its PHP or WordPress floor', (string) \file_get_contents( $log ) );
+		\unlink( $log );
+	}
+
+	#[RunInSeparateProcess]
 	public function test_a_consenting_uninstall_removes_a_row_of_every_kind_the_framework_roots_store(): void {
 		$prefix = Plugin::PREFIX . '_';
 		update_option( DWS_TPL_OPTION_DELETE_DATA, 'yes' );
