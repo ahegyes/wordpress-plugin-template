@@ -12,7 +12,7 @@ permissions:
 jobs:
   integration:
     name: Integration
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@3cbd985255e76f8026644ccdee5be0b2b2da312b
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@f420c38db593b332d58a481eb0f008f8d36d0cc4
     with:
       php-version: '8.5'
       wp-env-core: 'https://wordpress.org/nightly-builds/wordpress-latest.zip'
@@ -21,7 +21,7 @@ jobs:
 
   e2e:
     name: E2E
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-playwright-e2e.yml@3cbd985255e76f8026644ccdee5be0b2b2da312b
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-playwright-e2e.yml@f420c38db593b332d58a481eb0f008f8d36d0cc4
     with:
       artifact-slug: nightly
       php-version: '8.5'
