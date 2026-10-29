@@ -22,6 +22,8 @@ export TESTS_PORT=$(( PORT + 1 ))
 export REPO_NAME="${REPO#*/}"
 
 git mv --force README.scaffold.md README.md
+# The scaffold README becomes the plugin's README.md, which .distignore already excludes.
+perl -ni -e 'print unless /^README\.scaffold\.md$/' .distignore
 git rm --quiet includes/_disabled-example.php
 # The template's recipe test loads the recipe's safeguard helper, which a plugin that applies the recipe declares
 # itself, so only the recipe's own test stays.
