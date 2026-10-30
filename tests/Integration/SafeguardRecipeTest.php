@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 final class SafeguardRecipeTest extends TestCase {
 	protected const string CAPABILITY = 'dws_tpl_export_data';
 
-	protected const string FILTER = 'dws_tpl_restrict_data_export';
+	protected const string FILTER = 'dws_tpl/data_export/should_restrict';
 
 	#[BeforeClass]
 	public static function load_the_recipe(): void {
@@ -51,16 +51,16 @@ final class SafeguardRecipeTest extends TestCase {
 
 	public function test_an_explicit_false_does_not_relax_the_safeguard_before_the_plugin_booted(): void {
 		global $wp_actions;
-		self::assertGreaterThan( 0, did_action( 'dws_tpl_initialized' ) );
-		$fired = $wp_actions['dws_tpl_initialized'];
-		unset( $wp_actions['dws_tpl_initialized'] );
+		self::assertGreaterThan( 0, did_action( 'dws_tpl/boot/succeeded' ) );
+		$fired = $wp_actions['dws_tpl/boot/succeeded'];
+		unset( $wp_actions['dws_tpl/boot/succeeded'] );
 		add_filter( self::FILTER, '__return_false' );
 
 		try {
 			self::assertSame( array( 'do_not_allow' ), map_meta_cap( self::CAPABILITY, 0 ) );
 		} finally {
 			remove_filter( self::FILTER, '__return_false' );
-			$wp_actions['dws_tpl_initialized'] = $fired;
+			$wp_actions['dws_tpl/boot/succeeded'] = $fired;
 		}
 	}
 }
