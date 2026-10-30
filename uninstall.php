@@ -14,24 +14,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerc
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
+$dws_tpl_file = __DIR__ . '/dws-plugin-template.php';
 try {
-	// The main file is the one with a plugin header, since a release may ship it under another name than the source's and a bulk uninstall keeps WP_UNINSTALL_PLUGIN at the first plugin it visits.
-	$dws_tpl_candidates = glob( __DIR__ . '/*.php' );
-	if ( false === $dws_tpl_candidates ) {
-		throw new RuntimeException( 'its folder could not be read.' );
-	}
-
-	$dws_tpl_entries = array();
-	foreach ( $dws_tpl_candidates as $dws_tpl_candidate ) {
-		if ( '' !== get_file_data( $dws_tpl_candidate, array( 'name' => 'Plugin Name' ) )['name'] ) {
-			$dws_tpl_entries[] = $dws_tpl_candidate;
-		}
-	}
-	if ( 1 !== count( $dws_tpl_entries ) ) {
-		throw new RuntimeException( 'its folder does not hold exactly one main plugin file.' );
-	}
-
-	$dws_tpl_file      = $dws_tpl_entries[0];
 	$dws_tpl_bootstrap = __DIR__ . '/vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php';
 	if ( ! is_readable( $dws_tpl_bootstrap ) ) {
 		throw new RuntimeException( 'its bootstrap package is missing.' );

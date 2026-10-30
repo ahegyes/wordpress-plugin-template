@@ -12,7 +12,7 @@ permissions:
 jobs:
   unit:
     name: Unit
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@f420c38db593b332d58a481eb0f008f8d36d0cc4
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@8d53efd292e4abee4a9c57b0e379434f54bedbe9
     with:
       php-version: '8.5'
       composer-script: 'test:unit'
@@ -52,7 +52,7 @@ jobs:
       fail-fast: false
       matrix:
         wp: ${{ fromJSON(needs.wordpress.outputs.versions) }}
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@f420c38db593b332d58a481eb0f008f8d36d0cc4
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-phpunit.yml@8d53efd292e4abee4a9c57b0e379434f54bedbe9
     with:
       php-version: '8.5'
       wp-version: ${{ matrix.wp }}
@@ -66,7 +66,7 @@ jobs:
       fail-fast: false
       matrix:
         wp: ${{ fromJSON(needs.wordpress.outputs.versions) }}
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-playwright-e2e.yml@f420c38db593b332d58a481eb0f008f8d36d0cc4
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-playwright-e2e.yml@8d53efd292e4abee4a9c57b0e379434f54bedbe9
     with:
       artifact-slug: wp-${{ matrix.wp }}
       php-version: '8.5'
