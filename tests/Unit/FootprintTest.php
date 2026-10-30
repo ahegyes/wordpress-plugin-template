@@ -27,6 +27,7 @@ final class FootprintTest extends TestCase {
 	public function test_every_entry_is_in_the_plugin_prefix_family(): void {
 		$family = array(
 			Plugin::PREFIX . '_',
+			Plugin::PREFIX . '/', // Hook names put a slash after the prefix.
 			'_' . Plugin::PREFIX . '_', // WordPress hides meta keys that start with an underscore.
 			'_transient_' . Plugin::PREFIX . '_',
 			'_transient_timeout_' . Plugin::PREFIX . '_',

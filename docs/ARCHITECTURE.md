@@ -18,10 +18,10 @@ This document describes how the plugin loads, boots, stores its data and leaves 
 `src/Plugin.php` is the composition root. Its constructor builds the logger, the scheduler and the framework's `PluginBoot`, which runs the composition and reports its outcome:
 
 - The scheduler registers its hooks first, so the plugin's recurring jobs keep their schedules while the plugin is blocked.
-- `WooCommerceRequirement` checks WooCommerce against the `WC requires at least` header; without it, the boot is `blocked`, `dws_tpl_initialization_blocked` fires, and users who can activate plugins see why the plugin stays off.
+- `WooCommerceRequirement` checks WooCommerce against the `WC requires at least` header; without it, the boot is `blocked`, `dws_tpl/boot/blocked` fires, and users who can activate plugins see why the plugin stays off.
 - The migration runner registers, and runs pending steps on `wp_loaded`.
 - The kernel builds each class in `Plugin::COMPONENTS` through a PHP-DI container and calls its `register_hooks()`; a composite adds its children, and a conditional component loads only when its static `should_load()` returns true.
-- Once every component has registered, the boot is `booted` and `dws_tpl_initialized` fires. A throw anywhere in the composition makes it `failed`: `dws_tpl_initialization_failure` fires, the failure is logged, and administrators see a notice, while local and development environments rethrow it.
+- Once every component has registered, the boot is `booted` and `dws_tpl/boot/succeeded` fires. A throw anywhere in the composition makes it `failed`: `dws_tpl/boot/failed` fires, the failure is logged, and administrators see a notice, while local and development environments rethrow it.
 
 The request that activates the plugin does not boot it, because WordPress includes the plugin's file after `plugins_loaded`; its post types, routes and migrations first run on the next request.
 
