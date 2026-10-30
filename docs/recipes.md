@@ -845,8 +845,8 @@ Tested up to: TODO, the newest WordPress branch the plugin is tested on
 Stable tag: TODO, the Version header
 Requires at least: TODO, the Requires at least header
 Requires PHP: TODO, the Requires PHP header
-License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+License: GPLv3 or later
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 TODO: the plugin's one sentence, at most 150 characters.
 
