@@ -27,6 +27,7 @@ final class FootprintTest extends TestCase {
 	public function test_every_entry_is_in_the_plugin_prefix_family(): void {
 		$family = array(
 			Plugin::PREFIX . '_',
+			Plugin::PREFIX . '/', // Hook names put a slash after the prefix.
 			'_' . Plugin::PREFIX . '_', // WordPress hides meta keys that start with an underscore.
 			'_transient_' . Plugin::PREFIX . '_',
 			'_transient_timeout_' . Plugin::PREFIX . '_',
@@ -51,7 +52,7 @@ final class FootprintTest extends TestCase {
 		self::assertContains( $prefix, dws_tpl_get_footprint()['user_meta_site_prefixes'] );
 		self::assertContains( $prefix, dws_tpl_get_footprint()['user_meta_global_prefixes'] );
 		self::assertContains( $prefix . 'network_notices', dws_tpl_get_footprint()['network_options'] );
-		self::assertContains( $prefix . 'revision_run', dws_tpl_get_footprint()['cron_hooks'] );
+		self::assertContains( $prefix . 'revision/migration/run', dws_tpl_get_footprint()['cron_hooks'] );
 		self::assertContains( Plugin::PREFIX, dws_tpl_get_footprint()['as_groups'] );
 	}
 

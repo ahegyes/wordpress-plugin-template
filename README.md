@@ -64,4 +64,4 @@ Every pull request also rehearses the fill-in with sample inputs and gates the f
 
 ## License
 
-GPL-2.0-or-later.
+GPL-3.0-or-later.

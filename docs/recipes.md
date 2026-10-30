@@ -17,7 +17,7 @@ These are the changes most plugins built from this template make, each as the fi
 
 ## A safeguard
 
-A safeguard is a restriction that holds even when the rest of the plugin fails to load, such as a capability that stays locked unless the plugin unlocks it. It lives in `includes/safeguards.php`, which the entry file loads before the autoloader, so it calls only WordPress and what that file defines. The plugin relaxes it only through the safeguard's own filter, with an explicit `false`, and only after `dws_tpl_initialized`, which fires once the plugin has booted, so a half-loaded build never relaxes it.
+A safeguard is a restriction that holds even when the rest of the plugin fails to load, such as a capability that stays locked unless the plugin unlocks it. It lives in `includes/safeguards.php`, which the entry file loads before the autoloader, so it calls only WordPress and what that file defines. The plugin relaxes it only through the safeguard's own filter, with an explicit `false`, and only after `dws_tpl/boot/succeeded`, which fires once the plugin has booted, so a half-loaded build never relaxes it.
 
 Replace `includes/safeguards.php` with the helper and the safeguard. The file must still parse on PHP 7.4, because the entry loads it before the floor gate passes on a site without the plugin's built files:
 
@@ -47,7 +47,7 @@ add_filter( 'map_meta_cap', 'dws_tpl_map_export_capability', 10, 2 );
  * @return  bool
  */
 function dws_tpl_is_relaxed( $filtered ): bool {
-	return 0 < did_action( 'dws_tpl_initialized' ) && false === $filtered;
+	return 0 < did_action( 'dws_tpl/boot/succeeded' ) && false === $filtered;
 }
 
 /**
@@ -74,7 +74,7 @@ function dws_tpl_map_export_capability( array $caps, string $cap ): array {
 	 *
 	 * @param   bool $restricted Whether the data export stays locked.
 	 */
-	return dws_tpl_is_relaxed( apply_filters( 'dws_tpl_restrict_data_export', true ) ) ? array( 'manage_options' ) : array( 'do_not_allow' );
+	return dws_tpl_is_relaxed( apply_filters( 'dws_tpl/data_export/should_restrict', true ) ) ? array( 'manage_options' ) : array( 'do_not_allow' );
 }
 ```
 
@@ -83,15 +83,15 @@ Every further safeguard calls `dws_tpl_is_relaxed()` around its own literal `app
 A component relaxes the lock only around the operation that needs it, and removes the relaxation even when the operation throws:
 
 ```php
-add_filter( 'dws_tpl_restrict_data_export', '__return_false' );
+add_filter( 'dws_tpl/data_export/should_restrict', '__return_false' );
 try {
 	$this->export(); // Checks current_user_can( 'dws_tpl_export_data' ).
 } finally {
-	remove_filter( 'dws_tpl_restrict_data_export', '__return_false' );
+	remove_filter( 'dws_tpl/data_export/should_restrict', '__return_false' );
 }
 ```
 
-Add the safeguard's failure test as `tests/Integration/SafeguardsTest.php`. The plugin has booted when the Integration suite runs, so the last row takes `dws_tpl_initialized` back for its duration:
+Add the safeguard's failure test as `tests/Integration/SafeguardsTest.php`. The plugin has booted when the Integration suite runs, so the last row takes `dws_tpl/boot/succeeded` back for its duration:
 
 ```php
 <?php declare( strict_types=1 );
@@ -104,7 +104,7 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class SafeguardsTest extends TestCase {
-	protected const string FILTER = 'dws_tpl_restrict_data_export';
+	protected const string FILTER = 'dws_tpl/data_export/should_restrict';
 
 	public static function relaxations(): array {
 		return array(
@@ -132,16 +132,16 @@ final class SafeguardsTest extends TestCase {
 
 	public function test_an_explicit_false_does_not_relax_the_export_lock_before_the_plugin_booted(): void {
 		global $wp_actions;
-		self::assertGreaterThan( 0, did_action( 'dws_tpl_initialized' ) );
-		$fired = $wp_actions['dws_tpl_initialized'];
-		unset( $wp_actions['dws_tpl_initialized'] );
+		self::assertGreaterThan( 0, did_action( 'dws_tpl/boot/succeeded' ) );
+		$fired = $wp_actions['dws_tpl/boot/succeeded'];
+		unset( $wp_actions['dws_tpl/boot/succeeded'] );
 		add_filter( self::FILTER, '__return_false' );
 
 		try {
 			self::assertSame( array( 'do_not_allow' ), map_meta_cap( 'dws_tpl_export_data', 0 ) );
 		} finally {
 			remove_filter( self::FILTER, '__return_false' );
-			$wp_actions['dws_tpl_initialized'] = $fired;
+			$wp_actions['dws_tpl/boot/succeeded'] = $fired;
 		}
 	}
 }
@@ -659,7 +659,7 @@ final class Pruning implements ComponentInterface {
 	 *
 	 * @var     string
 	 */
-	public const string HOOK = Plugin::PREFIX . '_prune';
+	public const string HOOK = Plugin::PREFIX . '/records/prune';
 
 	// endregion
 
@@ -757,7 +757,7 @@ final class Pruning implements ComponentInterface {
 ```
 
 Then:
-- Add `Plugin::PREFIX . '_prune'` to `cron_hooks` in `includes/footprint.php`. Deactivation unschedules every hook there through the plugin's scheduler, and uninstall clears WP-Cron's copies, while Action Scheduler's are in the footprint's `as_groups` already.
+- Add `Plugin::PREFIX . '/records/prune'` to `cron_hooks` in `includes/footprint.php`. Deactivation unschedules every hook there through the plugin's scheduler, and uninstall clears WP-Cron's copies, while Action Scheduler's are in the footprint's `as_groups` already.
 - Delete the repair gate's option on activation, so the next request ensures the jobs: add `register_activation_hook( DWS_TPL_FILE, 'dws_tpl_activate' );` to `functions.php` beside the deactivation hook, and a `dws_tpl_activate()` that calls `delete_option( DWS_TPL_OPTION_RECURRING_ENSURED_AT )`.
 - Change an interval in code only: `ensure_recurring()` replaces a schedule whose interval differs on the next pass of the repair gate. A "run now" schedules the same hook with an argument that sets it apart, or calls `prune()` directly.
 
@@ -845,8 +845,8 @@ Tested up to: TODO, the newest WordPress branch the plugin is tested on
 Stable tag: TODO, the Version header
 Requires at least: TODO, the Requires at least header
 Requires PHP: TODO, the Requires PHP header
-License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+License: GPLv3 or later
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 TODO: the plugin's one sentence, at most 150 characters.
 

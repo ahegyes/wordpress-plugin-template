@@ -11,8 +11,8 @@
  * WC tested up to:      11.2
  * Author:               Contributors
  * Author URI:           https://github.com/ahegyes
- * License:              GPL-2.0-or-later
- * License URI:          https://www.gnu.org/licenses/gpl-2.0.html
+ * License:              GPL-3.0-or-later
+ * License URI:          https://www.gnu.org/licenses/gpl-3.0.html
  * Update URI:           https://github.com/ahegyes/wordpress-plugin-template
  * Text Domain:          dws-plugin-template
  * Domain Path:          /languages
