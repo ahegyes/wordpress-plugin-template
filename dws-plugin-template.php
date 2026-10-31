@@ -28,6 +28,8 @@ defined( 'ABSPATH' ) || exit;
 define( 'DWS_TPL_FILE', __FILE__ );
 load_plugin_textdomain( 'dws-plugin-template', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' ); // phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- WordPress registers languages/ itself only for plugins it does not network-activate.
 
+require_once __DIR__ . '/includes/safeguards.php'; // Before the floor gate, so the restrictions hold on any runtime that parses the plugin.
+
 $dws_tpl_bootstrap = __DIR__ . '/vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php';
 if ( is_readable( $dws_tpl_bootstrap ) ) {
 	require_once $dws_tpl_bootstrap;
@@ -36,8 +38,6 @@ if ( is_readable( $dws_tpl_bootstrap ) ) {
 		return;
 	}
 }
-
-require_once __DIR__ . '/includes/safeguards.php';
 
 if ( ! is_readable( $dws_tpl_bootstrap ) || ! is_readable( __DIR__ . '/blocks/build/blocks-manifest.php' ) ) { // The floor gate never ran, or the scripts were never built, so nothing built may load.
 	add_action( 'all_admin_notices', 'dws_tpl_render_build_notice' );

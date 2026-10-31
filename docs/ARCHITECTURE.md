@@ -7,8 +7,8 @@ This document describes how the plugin loads, boots, stores its data and leaves 
 `dws-plugin-template.php` is the only file WordPress includes, and it parses on PHP 7.4 so that a site below the floors gets a notice instead of a fatal error:
 
 1. It defines `DWS_TPL_FILE` and registers `languages/`, which WordPress skips for a network-activated plugin.
-2. It requires `vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php`, registers the GitHub updater, then checks the `Requires PHP` and `Requires at least` headers. The updater comes first, so a release that lowers the floors still reaches a site below them. On a site below a floor, WordPress's own notice shows and nothing else loads.
-3. It loads `includes/safeguards.php`, which holds even when the rest of the build fails.
+2. It loads `includes/safeguards.php`, whose restrictions hold on any runtime that parses the plugin: below the floors, on a partial deploy and when the boot fails.
+3. It requires `vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php`, registers the GitHub updater, then checks the `Requires PHP` and `Requires at least` headers. The updater comes first, so a release that lowers the floors still reaches a site below them. On a site below a floor, WordPress's own notice shows and nothing past the safeguards loads.
 4. It stops with a notice when the prefixed framework or the built blocks are missing. It then requires the autoloader and `functions.php`; a missing file throws, which local and development environments rethrow and every other environment logs, showing the same notice.
 
 `functions.php` defines the `dws_tpl_plugin()` accessor, boots the plugin on `plugins_loaded` at priority 15, after WooCommerce and Action Scheduler have loaded, registers the deactivation callback, declares the plugin's WooCommerce feature compatibility, and requires every `includes/*.php` in name order except those whose names start with `_`.
@@ -28,7 +28,7 @@ The request that activates the plugin does not boot it, because WordPress includ
 ## Where code lives
 
 - `src/` holds the composition root and its components: final classes that implement the framework's `ComponentInterface` and add their hooks in `register_hooks()`. A component takes ungated services in its constructor, such as the logger, the scheduler or `AdminNotices`, which `Plugin::get_definitions()` provides.
-- `includes/` holds code that registers no hooks and is not part of the tree, as prefixed functions and constants: the option keys, defaults and typed readers (`options.php`), the footprint (`footprint.php`), the migration steps (`migrations.php`), the asset registrars (`assets.php`) and the slug, name and version getters a peer plugin reads (`metadata.php`). Quality's syntax job parses the folder on PHP 7.4, because `safeguards.php` and what it requires run before the floor check passes on a site without the built files.
+- `includes/` holds code that registers no hooks and is not part of the tree, as prefixed functions and constants: the option keys, defaults and typed readers (`options.php`), the footprint (`footprint.php`), the migration steps (`migrations.php`), the asset registrars (`assets.php`) and the slug, name and version getters a peer plugin reads (`metadata.php`). Quality's syntax job parses the folder on PHP 7.4, because `safeguards.php` runs before the floor check, and `phpstan.safeguards.neon` analyzes it at PHP 7.4 and the oldest WordPress the bootstrap package runs on.
 - `blocks/src/` and `assets/src/` hold the TypeScript and SCSS sources, which `npm run build` compiles into `blocks/build/` and `assets/build/`; `includes/assets.php` reads the `*.asset.php` file wp-scripts writes beside each build, and `src/Blocks.php` registers the blocks from `blocks/build/blocks-manifest.php`.
 - `models/` and `templates/` are empty extension points, for classes on Composer's classmap and for template partials.
 

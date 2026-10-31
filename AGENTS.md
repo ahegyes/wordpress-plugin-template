@@ -5,7 +5,7 @@ A WordPress plugin built on the five wp-framework packages (`ahegyes/wp-framewor
 ## Layout
 
 ```
-dws-plugin-template.php      the entry: bootstrap load.php, the updater, the floor check, safeguards, the build gate, the autoloader
+dws-plugin-template.php      the entry: safeguards, bootstrap load.php, the updater, the floor check, the build gate, the autoloader
 functions.php                dws_tpl_plugin(), the boot on plugins_loaded 15, deactivation, the HPOS declaration (false), the includes/ loader
 uninstall.php                the framework's uninstall engine over the footprint, with DWS_TPL_OPTION_DELETE_DATA's consent
 src/                         the composition root and its components only
@@ -14,7 +14,7 @@ src/                         the composition root and its components only
 ├── Blocks.php               the blocks from blocks/build/blocks-manifest.php and the block-editor script
 └── Feature/                 the greeting: a composite gated on DWS_TPL_OPTION_FEATURE and its account-dashboard child
 includes/                    hook-free code as dws_tpl_ functions and DWS_TPL_ constants, loaded in name order, _-prefixed files skipped
-├── safeguards.php           restrictions that hold when the build fails; loaded by the entry before the autoloader
+├── safeguards.php           restrictions that hold whenever the plugin cannot boot; loaded by the entry before the floor check
 ├── options.php              the option keys, their defaults, the typed readers, the translated text and the validator
 ├── footprint.php            dws_tpl_get_footprint(), every kind of data the plugin stores
 ├── migrations.php           dws_tpl_get_migration_steps() and one function per step, append-only
@@ -31,7 +31,7 @@ models/, templates/          empty extension points
 composer packages-install    # dependencies, then php-scoper into vendor-prefixed/
 composer test:unit
 composer test:integration    # starts .wp-env.tests.json, then runs test:integration:run, which builds the scripts first
-composer quality-check       # manifest and changelog validation, PHPCS (both profiles), PHPStan, Unit and Integration
+composer quality-check       # manifest and changelog validation, PHPCS (both profiles), PHPStan (both profiles), Unit and Integration
 npm run setup                # both installs, the scripts' build, then the development site
 npm run build                # blocks and assets through the local wp-scripts; npm run start watches them in a POSIX shell
 npm run lint:scripts         # ESLint, beside lint:styles (Stylelint) and lint:types (tsc)
@@ -55,7 +55,7 @@ Both run PHP 8.5 with WooCommerce from `vendor/` and its order tables on; CI run
 4. **Add-ons.** An add-on extends a base plugin only through the base plugin's documented hooks. It reads a template-built base plugin's slug, name and version only through that plugin's `{prefix}_get_plugin_*()` getters, from `plugins_loaded` on, since the add-on may load first, and behind `function_exists()`, since a base plugin below its floors or with a partial build may stay active without defining them.
 5. **Request reads.** An integer or boolean is read as `filter_var( wp_unslash( $_POST['key'] ?? '' ), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE ) ?? $default` (`FILTER_VALIDATE_BOOL` for a boolean, where an absent key reads false, as an unchecked checkbox posts nothing), and a string through an `is_string()` guard and the field's sanitizer; never `filter_input()`, the `default` filter option or a cast on request input.
 6. **Options and data.** Options are read only through `includes/options.php`'s typed readers, safeguards excepted. Everything stored lives under `dws_tpl_`, or `_dws_tpl_` for hidden meta. The footprint covers the prefix's options, transients and user meta; object meta needs a `meta_prefixes` entry per type, and anything else its own entry.
-7. **Safeguards** live in `includes/safeguards.php`, call only WordPress and that file, and relax only through their own filter, through `dws_tpl_is_relaxed()` (`docs/recipes.md`).
+7. **Safeguards** live in `includes/safeguards.php`, call only WordPress and that file, and relax only through their own filter, through `dws_tpl_is_relaxed()` (`docs/recipes.md`). The entry loads them before the floor check, so they parse on PHP 7.4 and call only WordPress APIs present at the oldest WordPress the bootstrap package runs on, or guard them, which `phpstan.safeguards.neon` checks.
 8. **Migrations** are append-only: a step converges from any partial state, verifies its writes and throws when one fails.
 
 ## Style

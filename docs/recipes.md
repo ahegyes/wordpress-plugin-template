@@ -17,14 +17,14 @@ These are the changes most plugins built from this template make, each as the fi
 
 ## A safeguard
 
-A safeguard is a restriction that holds even when the rest of the plugin fails to load, such as a capability that stays locked unless the plugin unlocks it. It lives in `includes/safeguards.php`, which the entry file loads before the autoloader, so it calls only WordPress and what that file defines. The plugin relaxes it only through the safeguard's own filter, with an explicit `false`, and only after `dws_tpl/boot/succeeded`, which fires once the plugin has booted, so a half-loaded build never relaxes it.
+A safeguard is a restriction that holds even when the rest of the plugin fails to load, such as a capability that stays locked unless the plugin unlocks it. It lives in `includes/safeguards.php`, which the entry file loads before the floor gate and the autoloader, so it calls only WordPress and what that file defines. The plugin relaxes it only through the safeguard's own filter, with an explicit `false`, and only after `dws_tpl/boot/succeeded`, which fires once the plugin has booted, so a half-loaded build never relaxes it.
 
-Replace `includes/safeguards.php` with the helper and the safeguard. The file must still parse on PHP 7.4, because the entry loads it before the floor gate passes on a site without the plugin's built files:
+Replace `includes/safeguards.php` with the helper and the safeguard. The file runs on any runtime that parses the plugin, so it must parse on PHP 7.4 and call only WordPress APIs present at the oldest WordPress the bootstrap package runs on, or guard them, which `phpstan.safeguards.neon` checks:
 
 ```php
 <?php declare( strict_types=1 );
 /**
- * Holds the plugin's safeguards, which load before its autoloader, so they hold even when the rest of the build fails to load.
+ * Holds the plugin's safeguards, which load before its floor gate, so they hold on a runtime below its floors and when the rest of the build fails to load.
  *
  * @since   2.0.0
  * @version 2.0.0
