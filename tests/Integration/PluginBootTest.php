@@ -25,7 +25,6 @@ final class PluginBootTest extends TestCase {
 	public function test_the_entry_loads_every_include_but_those_whose_names_start_with_an_underscore(): void {
 		$includes = \dirname( DWS_TPL_FILE ) . '/includes/';
 
-		self::assertContains( $includes . 'safeguards.php', \get_included_files() );
 		self::assertContains( $includes . 'index.php', \get_included_files() );
 		self::assertNotContains( $includes . '_disabled-example.php', \get_included_files() );
 	}

@@ -1,4 +1,4 @@
-# The safeguards load before the floor gate, so they are analyzed at the oldest PHP and WordPress the bootstrap package runs on; the WordPress extensions are listed here because composer.json keeps them from installing themselves, and before configs' profile because wp-compat's neon resets WPCompat.requiresAtLeast to null.
+# The safeguards load before the floor gate, so they are analyzed at the oldest PHP and WordPress the bootstrap package runs on, which the framework's phpstan.bootstrap.neon sets; the WordPress extensions are listed because composer.json keeps them from installing themselves.
 includes:
     - vendor/szepeviktor/phpstan-wordpress/extension.neon
     - vendor/johnbillion/wp-compat/extension.neon
