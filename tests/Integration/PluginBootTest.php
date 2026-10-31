@@ -30,6 +30,16 @@ final class PluginBootTest extends TestCase {
 		self::assertNotContains( $includes . '_disabled-example.php', \get_included_files() );
 	}
 
+	public function test_the_entry_loads_its_safeguards_before_the_bootstrap_package_and_its_floor_gate(): void {
+		$root       = \dirname( DWS_TPL_FILE );
+		$safeguards = \array_search( $root . '/includes/safeguards.php', \get_included_files(), true );
+		$bootstrap  = \array_search( $root . '/vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php', \get_included_files(), true );
+
+		self::assertIsInt( $safeguards );
+		self::assertIsInt( $bootstrap );
+		self::assertLessThan( $bootstrap, $safeguards );
+	}
+
 	public function test_the_stored_data_is_at_the_revision_of_the_code(): void {
 		self::assertInstanceOf( MigrationRunner::class, dws_tpl_plugin()->migrations );
 		self::assertSame( \count( dws_tpl_get_migration_steps() ), MigrationRunner::get_revision( Plugin::PREFIX . '_revision' ) );
