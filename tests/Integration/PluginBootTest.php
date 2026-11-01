@@ -9,11 +9,14 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Admin
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migration\MigrationRunner;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Scheduling\Scheduler;
 use DeepWebSolutions\PluginTemplate\Settings;
+use DeepWebSolutions\PluginTemplate\Tests\Support\RunsRequestsTrait;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class PluginBootTest extends TestCase {
+	use RunsRequestsTrait;
+
 	public function test_the_plugin_boots_with_the_greeting_gated_off_until_a_site_switches_it_on(): void {
 		$plugin = dws_tpl_plugin();
 
@@ -26,7 +29,15 @@ final class PluginBootTest extends TestCase {
 		$includes = \dirname( DWS_TPL_FILE ) . '/includes/';
 
 		self::assertContains( $includes . 'index.php', \get_included_files() );
-		self::assertNotContains( $includes . '_disabled-example.php', \get_included_files() );
+		self::assertIsInt( \file_put_contents( $includes . '_skipped-include.php', "<?php\nconst DWS_TPL_SKIPPED_INCLUDE = true;\n" ) );
+		try {
+			$request = self::request( 'echo 0 < did_action( "dws_tpl/boot/succeeded" ) ? ( defined( "DWS_TPL_SKIPPED_INCLUDE" ) ? "loaded" : "skipped" ) : "not booted";' );
+		} finally {
+			\unlink( $includes . '_skipped-include.php' );
+		}
+
+		self::assertSame( 0, $request['status'], $request['output'] );
+		self::assertSame( 'skipped', $request['last'], $request['output'] );
 	}
 
 	public function test_the_entry_loads_its_safeguards_before_the_bootstrap_package_and_its_floor_gate(): void {
