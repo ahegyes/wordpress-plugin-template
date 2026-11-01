@@ -3,12 +3,15 @@
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Uninstall\Uninstaller;
+use DeepWebSolutions\PluginTemplate\Tests\Support\RunsRequestsTrait;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class PartialDeployTest extends TestCase {
+	use RunsRequestsTrait;
+
 	public function test_a_missing_blocks_manifest_shows_the_build_notice_and_loads_nothing_built(): void {
 		$manifest = \dirname( DWS_TPL_FILE ) . '/blocks/build/blocks-manifest.php';
 		\rename( $manifest, "$manifest.hidden" );
@@ -82,19 +85,5 @@ final class PartialDeployTest extends TestCase {
 
 		\unlink( $log );
 		update_option( DWS_TPL_OPTION_DELETE_DATA, 'no' );
-	}
-
-	/**
-	 * @return array{status: int, output: string, last: string}
-	 */
-	protected static function request( string $php ): array {
-		\exec( 'wp --path=' . \escapeshellarg( ABSPATH ) . ' eval ' . \escapeshellarg( $php ) . ' 2>&1', $output, $status ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec -- Each row needs a fresh request that loads the plugin.
-		$output = \array_values( \array_filter( $output, static fn ( string $line ): bool => '' !== \trim( $line ) ) );
-
-		return array(
-			'status' => $status,
-			'output' => \implode( "\n", $output ),
-			'last'   => (string) \end( $output ),
-		);
 	}
 }
