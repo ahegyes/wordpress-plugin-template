@@ -18,8 +18,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\Psr\Log\LoggerInterface as PsrLoggerI
 /**
  * Composes the plugin from its logger, scheduler, migrations and components, inside the framework's boot boundary.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  */
 final class Plugin {
 	// region FIELDS AND CONSTANTS
@@ -27,8 +27,8 @@ final class Plugin {
 	/**
 	 * The plugin's slug, which is also its text domain and its log source.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @var     string
 	 */
@@ -37,8 +37,8 @@ final class Plugin {
 	/**
 	 * The prefix of the plugin's hook names, options, transients and scheduled jobs.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @var     string
 	 */
@@ -47,8 +47,8 @@ final class Plugin {
 	/**
 	 * The top-level components, in hook-registration order.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @var     list<class-string>
 	 */
@@ -63,8 +63,8 @@ final class Plugin {
 	/**
 	 * The boot boundary, whose status tells whether the plugin booted.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @var     PluginBoot
 	 */
@@ -73,8 +73,8 @@ final class Plugin {
 	/**
 	 * The scheduler, which registers its WP-Cron schedules even while the plugin is blocked.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @var     Scheduler
 	 */
@@ -83,8 +83,8 @@ final class Plugin {
 	/**
 	 * The migration runner, once the composition built it.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @var     MigrationRunner|null
 	 */
@@ -93,8 +93,8 @@ final class Plugin {
 	/**
 	 * The kernel, once the composition built it, which tells which components loaded and which were gated off.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @var     PluginKernel|null
 	 */
@@ -103,8 +103,8 @@ final class Plugin {
 	/**
 	 * The logger every part of the plugin writes to.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @var     PsrLoggerInterface
 	 */
@@ -117,8 +117,8 @@ final class Plugin {
 	/**
 	 * Constructor.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	public function __construct() {
 		$this->logger    = new WooCommerceLogger( self::SLUG, \defined( 'DWS_TPL_DEBUG' ) && true === \constant( 'DWS_TPL_DEBUG' ) ? 'debug' : null );
@@ -133,8 +133,8 @@ final class Plugin {
 	/**
 	 * Runs the composition inside the framework's boot boundary.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @return  void
 	 */
@@ -145,8 +145,8 @@ final class Plugin {
 	/**
 	 * Unschedules the footprint's jobs on the current site, logging each one that could not be unscheduled.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @return  void
 	 */
@@ -175,8 +175,8 @@ final class Plugin {
 	/**
 	 * Builds the plugin and boots its components, returning false when WooCommerce is missing or too old.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @return  bool
 	 */
@@ -198,8 +198,8 @@ final class Plugin {
 	/**
 	 * Returns the container's definitions of the services the root builds, which the kernel's components share.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @param   PsrLoggerInterface $logger    The plugin's logger.
 	 * @param   Scheduler          $scheduler The plugin's scheduler.

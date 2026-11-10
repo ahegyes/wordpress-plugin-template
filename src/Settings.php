@@ -11,8 +11,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerc
 /**
  * Adds the plugin's WooCommerce settings tab, which holds the greeting's settings and the consent to delete the plugin's data on uninstall.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  */
 final class Settings implements ComponentInterface, SectionFieldsDefinitionInterface {
 	// region INHERITED METHODS
@@ -20,8 +20,8 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function register_hooks(): void {
@@ -31,8 +31,8 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function get_section_fields( string $tab_id, string $section_id ): array {
@@ -99,8 +99,8 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 	/**
 	 * Adds the plugin's settings tab, which WooCommerce's settings page class must exist to construct.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @param   array<int, \WC_Settings_Page> $pages The settings tabs.
 	 *

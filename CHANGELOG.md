@@ -4,7 +4,7 @@ All notable changes to this plugin are documented in this file. Format follows [
 
 Pending entries live in [`changelog/`](./changelog) — add via `composer changelog:add`. Aggregate into a release with `composer changelog:write`.
 
-## 2.0.0 - unreleased
+## 1.0.0 - unreleased
 
 ### Added
 - Initial release.

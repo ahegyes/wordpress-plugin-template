@@ -18,9 +18,8 @@ Create the plugin's repository from this template with GitHub's **Use this templ
 
 The workflow:
 - renames the entry file and replaces the template's names, prefix and ports in every tracked file outside `.github/workflows/`, which read the slug from `composer.json` instead, since GitHub refuses the workflow's own token for workflow changes;
-- resets the version to 0.1.0 and the changelog to one unreleased entry;
 - makes `README.scaffold.md` the plugin's README, which lists the template's demo and what removing each part takes;
-- deletes the disabled example include and refreshes the Composer lock's content hash;
+- deletes the disabled example include and any changelog fragments, and refreshes the Composer lock's content hash;
 - fails when any name or port of the template is left, and otherwise pushes one commit to the branch it ran on.
 
 ## Naming

@@ -9,8 +9,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Compo
 /**
  * Registers the plugin's blocks from their build manifest, and the block-editor script that adds their styles.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  */
 final class Blocks implements ComponentInterface {
 	// region INHERITED METHODS
@@ -18,8 +18,8 @@ final class Blocks implements ComponentInterface {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function register_hooks(): void {
@@ -34,8 +34,8 @@ final class Blocks implements ComponentInterface {
 	/**
 	 * Registers every built block from the manifest, which reads all their metadata from one file.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @return  void
 	 */
@@ -46,8 +46,8 @@ final class Blocks implements ComponentInterface {
 	/**
 	 * Enqueues the block-editor script.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @return  void
 	 */

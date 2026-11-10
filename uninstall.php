@@ -2,8 +2,8 @@
 /**
  * Removes the plugin's data where the site consents, through the framework's uninstall engine, once the site meets the plugin's floors.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @package DeepWebSolutions\PluginTemplate
  */

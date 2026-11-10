@@ -10,8 +10,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Condi
 /**
  * Groups the greeting's components, which load only on sites that switch the greeting on.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  */
 final class Feature implements CompositeComponentInterface, ConditionalComponentInterface {
 	// region INHERITED METHODS
@@ -19,8 +19,8 @@ final class Feature implements CompositeComponentInterface, ConditionalComponent
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public static function should_load(): bool {
@@ -30,8 +30,8 @@ final class Feature implements CompositeComponentInterface, ConditionalComponent
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public static function get_child_component_classes(): array {
@@ -41,8 +41,8 @@ final class Feature implements CompositeComponentInterface, ConditionalComponent
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function register_hooks(): void {}

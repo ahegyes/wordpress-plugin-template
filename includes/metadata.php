@@ -4,8 +4,8 @@
  *
  * A peer calls them from plugins_loaded on, since it may load before the plugin, and behind function_exists(), since a site below the floors or with a partial build may leave them undefined. Each reads only the plugin's header, so a getter that is defined still answers when a later include fails.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @package DeepWebSolutions\PluginTemplate
  */
@@ -15,8 +15,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Returns the plugin's slug, which is the text domain its header declares.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @return  string
  */
@@ -27,8 +27,8 @@ function dws_tpl_get_plugin_slug(): string {
 /**
  * Returns the plugin's name from its header, translated only once init has fired, because WordPress flags translations loaded earlier.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @return  string
  */
@@ -41,8 +41,8 @@ function dws_tpl_get_plugin_name(): string {
 /**
  * Returns the plugin's version from its header.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @return  string
  */

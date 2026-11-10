@@ -2,8 +2,8 @@
 /**
  * Holds the plugin's option keys and defaults, and reads each option as its type, guarding the stored value.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @package DeepWebSolutions\PluginTemplate
  */
@@ -15,8 +15,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * The option that holds 'yes' where the site consents to uninstall removing the plugin's data.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @var     string
  */
@@ -25,8 +25,8 @@ const DWS_TPL_OPTION_DELETE_DATA = Plugin::PREFIX . '_delete_data';
 /**
  * The option that holds 'yes' where the site greets returning customers on their account dashboard.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @var     string
  */
@@ -35,8 +35,8 @@ const DWS_TPL_OPTION_FEATURE = Plugin::PREFIX . '_feature';
 /**
  * The option that holds the greeting.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @var     string
  */
@@ -45,8 +45,8 @@ const DWS_TPL_OPTION_GREETING = Plugin::PREFIX . '_greeting';
 /**
  * The option that holds the number of orders a customer places before the greeting shows.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @var     string
  */
@@ -55,8 +55,8 @@ const DWS_TPL_OPTION_GREETING_ORDERS = Plugin::PREFIX . '_greeting_orders';
 /**
  * The value each option reads as while nothing valid is stored.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @var     array<string, bool|int|string|list<string>>
  */
@@ -69,8 +69,8 @@ const DWS_TPL_OPTION_DEFAULTS = array(
 /**
  * Returns an option as a boolean, which reads checkbox values such as 'yes' and 'no'.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   string $key The option's key.
  *
@@ -85,8 +85,8 @@ function dws_tpl_get_bool_option( string $key ): bool {
 /**
  * Returns an option as an integer.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   string $key The option's key.
  *
@@ -101,8 +101,8 @@ function dws_tpl_get_int_option( string $key ): int {
 /**
  * Returns an option as a string, reading a missing or empty value of an option with a translated default as that default, only after init.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   string $key The option's key.
  *
@@ -122,8 +122,8 @@ function dws_tpl_get_string_option( string $key ): string {
 /**
  * Returns an option as a list of strings, keeping the stored strings in order.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   string $key The option's key.
  *
@@ -140,8 +140,8 @@ function dws_tpl_get_list_option( string $key ): array {
 /**
  * Returns an option's translated default, which exists only after init, or an empty string for an option without one.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   string $key The option's key.
  *
@@ -159,8 +159,8 @@ function dws_tpl_get_option_text( string $key ): string {
 /**
  * Returns the number of orders before the greeting shows in the form WooCommerce stores, or an error when the submission is not a whole number of at least 1.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   mixed $submitted The submitted value.
  *
@@ -175,8 +175,8 @@ function dws_tpl_validate_greeting_orders( $submitted ) {
 /**
  * Returns the option's default, or null for an option without one.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   string $key The option's key.
  *

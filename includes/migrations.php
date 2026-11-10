@@ -2,8 +2,8 @@
 /**
  * Holds the plugin's migration steps, which bring its stored data to the revision its code expects.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @package DeepWebSolutions\PluginTemplate
  */
@@ -13,8 +13,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Returns the migration steps, append-only, where index 0 brings the data to revision 1.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @return  list<callable(): void>
  */
@@ -27,8 +27,8 @@ function dws_tpl_get_migration_steps(): array {
 /**
  * Stores the defaults of the settings that need no translation, autoloaded, so a site that never saved them reads them without a query; a translated default is never stored, because it would keep the language the site had when the step ran.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @throws  RuntimeException Thrown when a default could not be stored.
  *

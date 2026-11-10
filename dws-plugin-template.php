@@ -3,7 +3,7 @@
  * Plugin Name:          DWS Plugin Template
  * Plugin URI:           https://github.com/ahegyes/wordpress-plugin-template
  * Description:          WordPress plugins on the wp-framework packages start here, from one tested anatomy, so all are built alike and a fix found in one applies to all.
- * Version:              2.0.0
+ * Version:              1.0.0
  * Requires at least:    7.1
  * Tested up to:         7.1
  * Requires PHP:         8.5
@@ -59,8 +59,8 @@ try {
 /**
  * Reports a build that could not load, rethrowing in local and development environments and otherwise logging the error with its location and showing the build notice.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   Throwable $error The error that stopped the build.
  *
@@ -86,8 +86,8 @@ function dws_tpl_handle_build_error( Throwable $error ): void {
 /**
  * Prints the notice that the plugin's build is incomplete to users who can activate plugins.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @return  void
  */

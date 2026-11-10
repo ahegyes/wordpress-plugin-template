@@ -52,11 +52,7 @@ git ls-files -z -- . ':!.github/workflows/' ':!.github/scripts/fill-in-scaffold.
 git ls-files -z -- . ':!.github/workflows/' ':!.github/scripts/fill-in-scaffold.sh' ':!composer.lock' ':!package-lock.json' | xargs -0 perl -pi -e '
 	BEGIN { @ARGV = grep { ! -l $_ } @ARGV }
 	s/\b(881[123])\b/8811 == $1 ? $ENV{PORT} : 8812 == $1 ? $ENV{TESTS_PORT} : $ENV{MULTISITE_PORT}/ge;
-	s/^(\s*\*\s*\@(?:since|version)\s+)2\.0\.0$/${1}0.1.0/;
 '
-# shellcheck disable=SC2016
-perl -pi -e 's/^(\s*\*\s*Version:\s*)2\.0\.0$/${1}0.1.0/' "$SLUG.php"
-perl -pi -e 's/^## 2\.0\.0 - unreleased$/## 0.1.0 - unreleased/' CHANGELOG.md
 find changelog -type f ! -name '.gitkeep' -delete
 
 # The sweep renamed the package, so the lock's content hash follows, or composer validate --strict fails.
