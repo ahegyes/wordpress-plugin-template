@@ -32,15 +32,18 @@ load_plugin_textdomain( 'dws-plugin-template', false, dirname( plugin_basename( 
 require_once __DIR__ . '/includes/safeguards.php'; // Before the floor gate, so the restrictions hold on any runtime that parses the plugin.
 
 $dws_tpl_bootstrap = __DIR__ . '/vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php';
-if ( is_readable( $dws_tpl_bootstrap ) ) {
-	require_once $dws_tpl_bootstrap;
-	Updater::register( __FILE__ ); // Before the floor gate, so a release that lowers the floors still reaches a site below them.
-	if ( ! Requirements::check_floors( __FILE__ ) ) {
-		return;
-	}
+if ( ! is_readable( $dws_tpl_bootstrap ) ) { // The floor gate lives in the bootstrap package, so nothing built may load without it.
+	add_action( 'all_admin_notices', 'dws_tpl_render_build_notice' );
+	return;
 }
 
-if ( ! is_readable( $dws_tpl_bootstrap ) || ! is_readable( __DIR__ . '/blocks/build/blocks-manifest.php' ) ) { // The floor gate never ran, or the scripts were never built, so nothing built may load.
+require_once $dws_tpl_bootstrap;
+Updater::register( __FILE__ ); // Before the floor gate, so a release that lowers the floors still reaches a site below them.
+if ( ! Requirements::check_floors( __FILE__ ) ) {
+	return;
+}
+
+if ( ! is_readable( __DIR__ . '/blocks/build/blocks-manifest.php' ) || ! is_readable( __DIR__ . '/assets/build/editor.asset.php' ) ) { // The plugin reads both build trees unchecked, so a build that wrote only one of them must not load.
 	add_action( 'all_admin_notices', 'dws_tpl_render_build_notice' );
 	return;
 }
