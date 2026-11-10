@@ -7,7 +7,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Compo
 \defined( 'ABSPATH' ) || exit;
 
 /**
- * Registers the plugin's blocks from their build manifest, and the block-editor script that adds their styles.
+ * Registers the plugin's blocks from their build manifest, and the block-editor script.
  *
  * @since   1.0.0
  * @version 1.0.0
