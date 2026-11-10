@@ -541,6 +541,13 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 	 */
 	#[\Override]
 	public function get_section_fields( string $tab_id, string $section_id ): array {
+		$methods = array();
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			if ( $gateway instanceof \WC_Payment_Gateway ) {
+				$methods[ $gateway->id ] = $gateway->get_method_title();
+			}
+		}
+
 		return array(
 			array(
 				'type'  => 'title',
@@ -552,6 +559,14 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 				'id'    => Plugin::PREFIX . '_payment_notes',
 				'title' => __( 'Payment notes', 'dws-plugin-template' ),
 				'desc'  => __( 'Add a note to each order when its payment completes', 'dws-plugin-template' ),
+			),
+			array(
+				'type'    => 'multiselect',
+				'id'      => DWS_TPL_OPTION_PAYMENT_METHODS,
+				'title'   => __( 'Payment methods', 'dws-plugin-template' ),
+				'desc'    => __( 'Add the note only to orders paid with these methods', 'dws-plugin-template' ),
+				'class'   => 'wc-enhanced-select',
+				'options' => $methods,
 			),
 			array(
 				'type' => 'sectionend',
@@ -607,7 +622,38 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 }
 ```
 
-WooCommerce stores each field in its own option under its id, flat rather than in a group, and a WooCommerce checkbox stores `yes` or `no`; read it with `dws_tpl_get_bool_option()` once the key and its default are in `includes/options.php`.
+WooCommerce stores each field in its own option under its id, flat rather than in a group: a checkbox stores `yes` or `no`, which `dws_tpl_get_bool_option()` reads, and a multiselect the list of the chosen keys, which a list reader reads. Add each key to `includes/options.php` with its default in `DWS_TPL_OPTION_DEFAULTS`, the multiselect's an empty array, whose `@var` then allows `list<string>`, and the list reader beside the other typed readers:
+
+```php
+/**
+ * The option that holds the payment methods whose orders get the payment note.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @var     string
+ */
+const DWS_TPL_OPTION_PAYMENT_METHODS = 'dws_tpl_payment_methods';
+
+/**
+ * Returns an option as a list of strings, keeping the stored strings in order.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   string $key The option's key.
+ *
+ * @return  list<string>
+ */
+function dws_tpl_get_list_option( string $key ): array {
+	$default = dws_tpl_get_option_default( $key );
+	$stored  = get_option( $key, $default );
+	$stored  = is_array( $stored ) ? $stored : $default;
+	return is_array( $stored ) ? array_values( array_filter( $stored, 'is_string' ) ) : array();
+}
+```
+
+WooCommerce's save drops a multiselect key of `'0'` or `''`, so each key stays truthy, as gateway ids are.
 
 ## Recurring jobs
 

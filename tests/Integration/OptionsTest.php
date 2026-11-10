@@ -50,15 +50,6 @@ final class OptionsTest extends TestCase {
 		);
 	}
 
-	public static function stored_lists(): array {
-		return array(
-			'list'   => array( array( 'a', 'b' ), array( 'a', 'b' ) ),
-			'mixed'  => array( array( 'a', 7, 'b' ), array( 'a', 'b' ) ),
-			'keyed'  => array( array( 'x' => 'a' ), array( 'a' ) ),
-			'string' => array( 'a', array() ),
-		);
-	}
-
 	public static function submitted_order_counts(): array {
 		return array(
 			'one'      => array( '1', '1' ),
@@ -118,13 +109,6 @@ final class OptionsTest extends TestCase {
 		update_option( self::KEY, $stored );
 
 		self::assertSame( $expected, dws_tpl_get_string_option( self::KEY ) );
-	}
-
-	#[DataProvider( 'stored_lists' )]
-	public function test_a_list_reads_the_stored_strings_in_order( mixed $stored, array $expected ): void {
-		update_option( self::KEY, $stored );
-
-		self::assertSame( $expected, dws_tpl_get_list_option( self::KEY ) );
 	}
 
 	public function test_a_string_without_a_stored_value_reads_its_translated_default(): void {

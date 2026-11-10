@@ -58,7 +58,7 @@ const DWS_TPL_OPTION_GREETING_ORDERS = Plugin::PREFIX . '_greeting_orders';
  * @since   1.0.0
  * @version 1.0.0
  *
- * @var     array<string, bool|int|string|list<string>>
+ * @var     array<string, bool|int|string>
  */
 const DWS_TPL_OPTION_DEFAULTS = array(
 	DWS_TPL_OPTION_DELETE_DATA     => false,
@@ -117,24 +117,6 @@ function dws_tpl_get_string_option( string $key ): string {
 	}
 
 	return is_string( $stored ) ? $stored : ( is_string( $default ) ? $default : '' );
-}
-
-/**
- * Returns an option as a list of strings, keeping the stored strings in order.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @param   string $key The option's key.
- *
- * @return  list<string>
- */
-function dws_tpl_get_list_option( string $key ): array {
-	$default = dws_tpl_get_option_default( $key );
-	$stored  = get_option( $key, $default );
-	$stored  = is_array( $stored ) ? $stored : $default;
-
-	return is_array( $stored ) ? array_values( array_filter( $stored, 'is_string' ) ) : array();
 }
 
 /**
