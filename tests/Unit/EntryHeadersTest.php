@@ -16,6 +16,11 @@ final class EntryHeadersTest extends TestCase {
 		self::assertSame( \implode( '.', \array_slice( \explode( '.', $woocommerce['version'] ), 0, 2 ) ), self::get_header( 'WC tested up to' ) );
 	}
 
+	public function test_phpstan_checks_wordpress_calls_at_the_entry_floor(): void {
+		self::assertSame( 1, \preg_match( "/^\tWPCompat:\n\t\trequiresAtLeast: '([^']+)'$/m", (string) \file_get_contents( \dirname( __DIR__, 2 ) . '/phpstan.dist.neon' ), $floor ) );
+		self::assertSame( self::get_header( 'Requires at least' ), $floor[1] );
+	}
+
 	protected static function get_header( string $name ): string {
 		self::assertSame( 1, \preg_match( '/^\s*\*\s*' . \preg_quote( $name, '/' ) . ':\s*(\S+)\s*$/m', (string) \file_get_contents( \dirname( __DIR__, 2 ) . '/' . Plugin::SLUG . '.php' ), $header ) );
 		return $header[1];
