@@ -4,23 +4,23 @@ on:
   workflow_dispatch:
     inputs:
       plugin-name:
-        description: 'Display name (e.g. "Acme Orders")'
+        description: 'Display name, such as "Acme Orders"'
         required: true
         type: string
       plugin-slug:
-        description: 'Kebab-case slug, also the text domain and the entry file name (e.g. "acme-orders")'
+        description: 'Kebab-case slug, also the text domain and the entry file name, such as "acme-orders"'
         required: true
         type: string
       php-namespace:
-        description: 'PHP namespace segment after DeepWebSolutions\ (e.g. "AcmeOrders")'
+        description: 'PHP namespace segment after DeepWebSolutions\, such as "AcmeOrders"'
         required: true
         type: string
       prefix:
-        description: 'Prefix of the global functions, constants, options and hooks, dws_ plus one segment (e.g. "dws_ao")'
+        description: 'Prefix of the global functions, constants, options and hooks, dws_ plus one segment, such as "dws_ao"'
         required: true
         type: string
       wp-env-port:
-        description: 'Development wp-env port; the tests and multisite environments take the next two (e.g. "8821")'
+        description: 'Development wp-env port, such as "8821"; the tests and multisite environments take the next two'
         required: true
         type: string
 
