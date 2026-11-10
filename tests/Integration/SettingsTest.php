@@ -42,6 +42,15 @@ final class SettingsTest extends TestCase {
 		);
 	}
 
+	public static function field_texts(): array {
+		return array(
+			'toggle'    => array( DWS_TPL_OPTION_GREETING_ENABLED, 'Show the greeting', 'Greet returning customers' ),
+			'message'   => array( DWS_TPL_OPTION_GREETING, 'Message', 'Leave empty to show the default greeting in each customer\'s language.' ),
+			'threshold' => array( DWS_TPL_OPTION_GREETING_ORDERS, 'Orders before the greeting', 'Customers see the greeting once this many of their orders are paid.' ),
+			'consent'   => array( DWS_TPL_OPTION_DELETE_DATA, 'Remove all data on uninstallation', 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later' ),
+		);
+	}
+
 	public static function whole_order_counts(): array {
 		return array(
 			'padded'        => array( ' 3 ' ),
@@ -83,21 +92,12 @@ final class SettingsTest extends TestCase {
 		self::assertFalse( $form->getElementById( DWS_TPL_OPTION_DELETE_DATA )?->hasAttribute( 'checked' ) );
 	}
 
-	public function test_the_tab_words_each_field_by_what_it_does(): void {
-		$form = $this->render();
-		$rows = array(
-			DWS_TPL_OPTION_GREETING_ENABLED => array( 'Show the greeting', 'Greet returning customers' ),
-			DWS_TPL_OPTION_GREETING         => array( 'Message', 'Leave empty to show the default greeting in each customer\'s language.' ),
-			DWS_TPL_OPTION_GREETING_ORDERS  => array( 'Orders before the greeting', 'Customers see the greeting once this many of their orders are paid.' ),
-			DWS_TPL_OPTION_DELETE_DATA      => array( 'Remove all data on uninstallation', 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later' ),
-		);
+	#[DataProvider( 'field_texts' )]
+	public function test_the_tab_words_each_field_by_what_it_does( string $key, string $title, string $description ): void {
+		$row = (string) $this->render()->getElementById( $key )?->closest( 'tr' )?->textContent; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- A DOM property.
 
-		foreach ( $rows as $key => $texts ) {
-			$row = (string) $form->getElementById( $key )?->closest( 'tr' )?->textContent; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- A DOM property.
-			foreach ( $texts as $text ) {
-				self::assertStringContainsString( $text, $row, $key );
-			}
-		}
+		self::assertStringContainsString( $title, $row );
+		self::assertStringContainsString( $description, $row );
 	}
 
 	public function test_a_save_that_leaves_the_message_untouched_stores_no_translated_text(): void {
