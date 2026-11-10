@@ -64,4 +64,12 @@ final class BlocksTest extends TestCase {
 		self::assertSame( $asset['dependencies'], wp_scripts()->registered[ Plugin::SLUG . '-editor' ]->deps );
 		self::assertSame( $asset['version'], wp_scripts()->registered[ Plugin::SLUG . '-editor' ]->ver );
 	}
+
+	public function test_the_block_editor_gets_only_an_editor_script_the_plugin_registered(): void {
+		wp_register_script( Plugin::SLUG . '-editor', 'https://example.org/other.js', array(), '1', true );
+
+		new Blocks()->enqueue_editor_script();
+
+		self::assertFalse( wp_script_is( Plugin::SLUG . '-editor', 'enqueued' ) );
+	}
 }
