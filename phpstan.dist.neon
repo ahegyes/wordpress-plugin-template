@@ -1,4 +1,4 @@
-# The WordPress extensions are listed here because composer.json keeps them from installing themselves, and before configs' profile because wp-compat's neon resets WPCompat.requiresAtLeast to null.
+# The WordPress extensions are listed here because composer.json keeps them from installing themselves.
 includes:
 	- vendor/szepeviktor/phpstan-wordpress/extension.neon
 	- vendor/johnbillion/wp-compat/extension.neon
@@ -23,3 +23,6 @@ parameters:
 	# The scoped packages load through vendor-prefixed/scoper-autoload.php, which PHPStan does not read.
 	scanDirectories:
 		- vendor-prefixed
+	# The entry's Requires at least, so no call reaches an API newer than the plugin's WordPress floor.
+	WPCompat:
+		requiresAtLeast: '7.1'

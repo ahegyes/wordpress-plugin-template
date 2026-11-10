@@ -60,6 +60,12 @@ Lint the scripts, styles and types:
 npm run lint
 ```
 
+Update the dependencies within their constraints, and `@wordpress/*` to npm's latest rather than the WordPress floor's versions, since WordPress supplies those packages at runtime and PHPStan and the end-to-end suite on the floor's WordPress keep the plugin to its floor's APIs:
+
+```sh
+npm run packages-update:all
+```
+
 Every pull request also rehearses the fill-in with sample inputs and gates the filled-in plugin, and rehearses the release on the built zip. `tests/README.md` describes the suites and CI, `AGENTS.md` the conventions, `CONTRIBUTING.md` the changelog, and `SECURITY.md` how to report a vulnerability.
 
 ## License

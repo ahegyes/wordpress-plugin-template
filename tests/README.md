@@ -6,7 +6,7 @@ This document describes the plugin's three test suites, the environments they ru
 
 | Suite | Where | Runs on | Covers |
 | --- | --- | --- | --- |
-| Unit | `tests/Unit/` | PHP alone, without WordPress | the component tree and the footprint's shape and coverage |
+| Unit | `tests/Unit/` | PHP alone, without WordPress | the component tree, the footprint's shape and coverage, and the entry's headers against the locked WooCommerce and PHPStan's WordPress floor |
 | Integration | `tests/Integration/` | the tests site, with WordPress, WooCommerce and order tables loaded, and the multisite site for its `multisite` group | the boot, every component, the options and their readers, the migrations, deactivation, uninstall, the assets and blocks, the peer getters, a partial deploy: a missing build file or engine, or an include that throws, and the boot and settings on a second site of a network |
 | End to end | `tests/EndToEnd/` | the tests site, in a browser through Playwright | the settings tab by keyboard, a rejected and a corrected value, accessibility through axe, and the plugin with WooCommerce deactivated |
 
