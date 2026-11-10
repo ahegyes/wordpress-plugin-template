@@ -22,10 +22,10 @@ done
 # A namespace that is a reserved word, such as List, parses from PHP 8.0 only, which the fill-in job's PHP 7.4 syntax
 # check refuses.
 [[ $NS =~ ^[A-Za-z][A-Za-z0-9]*$ ]] || fail 'php-namespace must match ^[A-Za-z][A-Za-z0-9]*$.'
-# One segment after dws_ keeps every prefix in one plugin's family from starting another plugin's; past 23 characters
+# One segment after dws_ keeps every prefix in one plugin's family from starting another plugin's; past 22 characters
 # the template's longest option constants fail PHPCS's array alignment, which Quality's rehearsal at the cap checks,
 # and the framework's admin notices refuse a network or hidden segment.
-[[ $PREFIX =~ ^dws_[a-z0-9]{1,23}$ && $PREFIX != dws_network && $PREFIX != dws_hidden ]] || fail 'prefix must match ^dws_[a-z0-9]{1,23}$ and must not be dws_network or dws_hidden.'
+[[ $PREFIX =~ ^dws_[a-z0-9]{1,22}$ && $PREFIX != dws_network && $PREFIX != dws_hidden ]] || fail 'prefix must match ^dws_[a-z0-9]{1,22}$ and must not be dws_network or dws_hidden.'
 # The ports land in JSON numbers, where a leading zero is invalid, and the tests and multisite environments take the
 # next two; none may be the template's own 8811, 8812 or 8813, which the leftover check below refuses.
 [[ $PORT =~ ^[1-9][0-9]{0,4}$ && $PORT -le 65533 && ( $PORT -lt 8809 || $PORT -gt 8813 ) ]] ||
