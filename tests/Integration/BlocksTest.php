@@ -23,6 +23,31 @@ final class BlocksTest extends TestCase {
 		self::assertSame( array( 'dws-plugin-template-example-notice-editor-script' ), $block->editor_script_handles );
 		self::assertSame( array( 'dws-plugin-template-example-notice-editor-style' ), $block->editor_style_handles );
 		self::assertSame( array( 'dws-plugin-template-example-notice-style' ), $block->style_handles );
+		self::assertSame(
+			array(
+				array(
+					'name'  => 'outlined',
+					'label' => 'Outlined',
+				),
+			),
+			$block->styles
+		);
+	}
+
+	public function test_the_example_block_renders_its_text_in_the_visitors_language_with_its_style(): void {
+		$translate = static fn ( string $translation, string $text, string $domain ): string => 'dws-plugin-template' === $domain && 'An example notice from DWS Plugin Template.' === $text ? 'Ein Beispielhinweis.' : $translation;
+		add_filter( 'gettext', $translate, 10, 3 );
+		try {
+			$html = do_blocks( '<!-- wp:dws-plugin-template/example-notice {"className":"is-style-outlined"} /-->' );
+		} finally {
+			remove_filter( 'gettext', $translate );
+		}
+
+		$notice = \Dom\HTMLDocument::createFromString( '<!DOCTYPE html><html><body>' . $html . '</body></html>', \LIBXML_NOERROR )->querySelector( 'p' );
+
+		self::assertNotNull( $notice );
+		self::assertEqualsCanonicalizing( array( 'wp-block-dws-plugin-template-example-notice', 'is-style-outlined' ), \explode( ' ', (string) $notice->getAttribute( 'class' ) ) );
+		self::assertSame( 'Ein Beispielhinweis.', \trim( (string) $notice->textContent ) ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- A DOM property.
 	}
 
 	public function test_the_block_editor_gets_the_editor_script_with_its_generated_dependencies(): void {
