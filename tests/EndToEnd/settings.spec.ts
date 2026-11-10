@@ -4,7 +4,7 @@ import type { Locator, Page } from '@playwright/test';
 
 const SAVED = 'Your settings have been saved.';
 const REJECTED =
-	'Orders before the greeting was not saved, so it keeps its previous value. Enter a whole number of 1 or more, such as 3.';
+	'Orders before the greeting was not saved and keeps its previous value. The other changes were saved. Enter a whole number of 1 or more, such as 3.';
 
 const tabTo = async ( page: Page, target: Locator ): Promise< void > => {
 	for ( let presses = 0; presses < 10; presses++ ) {
