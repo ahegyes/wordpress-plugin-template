@@ -60,6 +60,21 @@ jobs:
           REPO: ${{ github.repository }}
         run: .github/scripts/fill-in-scaffold.sh
 
+      # The entry runs before the floor gate and names the namespace, so one PHP 7.4 cannot parse stops the fill-in here, on the files Quality parses on PHP 7.4.
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '7.4'
+          coverage: none
+          tools: none
+
+      - name: Check the PHP 7.4 syntax
+        env:
+          SLUG: ${{ inputs.plugin-slug }}
+        run: |
+          for file in "$SLUG.php" uninstall.php includes/*.php; do
+            php -l "$file"
+          done
+
       - name: Save the filled-in plugin as a patch
         run: |
           git add -A

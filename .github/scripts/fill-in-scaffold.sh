@@ -5,18 +5,34 @@ set -euo pipefail
 
 : "${PLUGIN_NAME:?}" "${SLUG:?}" "${NS:?}" "${PREFIX:?}" "${PORT:?}" "${REPO:?}"
 
-# The slug names the entry file and the text domain, so it stays clean kebab-case.
-grep -Eq '^[a-z][a-z0-9]*(-[a-z0-9]+)*$' <<< "$SLUG" || { echo "::error::plugin-slug must be kebab-case starting with a letter, with no leading, trailing or double hyphen."; exit 1; }
-grep -Eq '^[A-Za-z][A-Za-z0-9]*$' <<< "$NS" || { echo "::error::php-namespace must match ^[A-Za-z][A-Za-z0-9]*$."; exit 1; }
+fail() {
+	echo "::error::$1"
+	exit 1
+}
+
+# Each input lands on one line of the files it fills in, so the checks below match whole values.
+for input in "$PLUGIN_NAME" "$SLUG" "$NS" "$PREFIX" "$PORT"; do
+	[[ $input != *[$'\r\n']* ]] || fail 'No input may contain a line break.'
+done
+
+# The slug names the entry file, the text domain and the block namespace, which WordPress refuses unless it starts
+# with a letter, and the workflows check the slug they read from composer.json with the same pattern.
+[[ $SLUG =~ ^[a-z][a-z0-9]*(-[a-z0-9]+)*$ ]] || fail 'plugin-slug must be kebab-case starting with a letter, with no leading, trailing or double hyphen.'
+# A namespace that is a reserved word, such as List, parses from PHP 8.0 only, which the fill-in job's PHP 7.4 syntax
+# check refuses.
+[[ $NS =~ ^[A-Za-z][A-Za-z0-9]*$ ]] || fail 'php-namespace must match ^[A-Za-z][A-Za-z0-9]*$.'
 # One segment after dws_ keeps every prefix in one plugin's family from starting another plugin's; past 23 characters
 # the template's longest option constants fail PHPCS's array alignment, which Quality's rehearsal at the cap checks,
 # and the framework's admin notices refuse a network or hidden segment.
-{ grep -Eq '^dws_[a-z0-9]{1,23}$' <<< "$PREFIX" && [ "$PREFIX" != dws_network ] && [ "$PREFIX" != dws_hidden ]; } || { echo "::error::prefix must match ^dws_[a-z0-9]{1,23}$ and must not be dws_network or dws_hidden."; exit 1; }
+[[ $PREFIX =~ ^dws_[a-z0-9]{1,23}$ && $PREFIX != dws_network && $PREFIX != dws_hidden ]] || fail 'prefix must match ^dws_[a-z0-9]{1,23}$ and must not be dws_network or dws_hidden.'
 # The ports land in JSON numbers, where a leading zero is invalid, and the tests and multisite environments take the
 # next two; none may be the template's own 8811, 8812 or 8813, which the leftover check below refuses.
-{ grep -Eq '^[1-9][0-9]{0,4}$' <<< "$PORT" && [ "$PORT" -le 65533 ] && { [ "$PORT" -lt 8809 ] || [ "$PORT" -gt 8813 ]; }; } || { echo "::error::wp-env-port must be 1-65533 with no leading zero, and neither it nor the next two ports may be 8811, 8812 or 8813."; exit 1; }
-# The display name lands in single-quoted PHP and JavaScript strings, and in JSX text.
-if printf '%s' "$PLUGIN_NAME" | grep -q "['\\\$/<>{}]"; then echo "::error::plugin-name must not contain \\, \$, /, ', <, >, { or }."; exit 1; fi
+[[ $PORT =~ ^[1-9][0-9]{0,4}$ && $PORT -le 65533 && ( $PORT -lt 8809 || $PORT -gt 8813 ) ]] ||
+	fail 'wp-env-port must be 1-65533 with no leading zero, and neither it nor the next two ports may be 8811, 8812 or 8813.'
+# WordPress skips a plugin whose name is blank, and the name lands in single-quoted PHP and JavaScript strings, and in
+# JSX text.
+name_breakers="['\\\$/<>{}]"
+[[ $PLUGIN_NAME =~ [^[:space:]] && ! $PLUGIN_NAME =~ $name_breakers ]] || fail "plugin-name must not be blank or contain \\, \$, /, ', <, >, { or }."
 
 export SCREAMING_PREFIX="${PREFIX^^}"
 export TESTS_PORT=$(( PORT + 1 ))
@@ -77,7 +93,7 @@ if git grep -n -I -E 'dws-plugin-template|dws_tpl|DWS_TPL|PluginTemplate|DWS Plu
 	echo "::error::The fill-in left the template's names above."
 	status=1
 fi
-if git grep -n -I -E '\b881[123]\b' -- . ':!.github/scripts/fill-in-scaffold.sh' ':!composer.lock' ':!package-lock.json'; then
+if git grep -n -I -w -E '881[123]' -- . ':!.github/scripts/fill-in-scaffold.sh' ':!composer.lock' ':!package-lock.json'; then
 	echo "::error::The fill-in left the template's ports above."
 	status=1
 fi
