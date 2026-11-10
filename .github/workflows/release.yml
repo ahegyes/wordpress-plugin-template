@@ -51,5 +51,5 @@ jobs:
       wp-env-config-file: '.wp-env.tests.json'
       # Both parse every PHP file with php-parser 4, which stops at PHP 8.4 syntax such as protected(set).
       exclude-checks: 'prefixing,direct_file_access'
-      # A pull request or a dispatch on a branch rehearses the release without publishing it.
-      publish: ${{ github.ref_type == 'tag' }}
+      # A pull request, a dispatch on a branch or any tag on the template rehearses the release without publishing it.
+      publish: ${{ github.ref_type == 'tag' && !github.event.repository.is_template }}

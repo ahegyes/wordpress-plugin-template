@@ -66,7 +66,7 @@ Update the dependencies within their constraints, and `@wordpress/*` to npm's la
 npm run packages-update:all
 ```
 
-Every pull request also rehearses the fill-in with sample inputs and gates the filled-in plugin, and rehearses the release on the built zip. `tests/README.md` describes the suites and CI, `AGENTS.md` the conventions, `CONTRIBUTING.md` the changelog, and `SECURITY.md` how to report a vulnerability.
+Every pull request also rehearses the fill-in with sample inputs and gates the filled-in plugin, and rehearses the release on the built zip. The template itself publishes no release, even on a tag, and takes no changelog fragments, which the fill-in deletes. `tests/README.md` describes the suites and CI, `AGENTS.md` the conventions, `CONTRIBUTING.md` the changelog, and `SECURITY.md` how to report a vulnerability.
 
 ## License
 
