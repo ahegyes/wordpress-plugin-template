@@ -72,4 +72,29 @@ final class UninstallTest extends TestCase {
 		dws_tpl_plugin()->migrations?->run();
 		self::assertSame( 'no', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
 	}
+
+	#[RunInSeparateProcess]
+	public function test_a_web_uninstall_whose_engine_fails_ends_with_its_message_and_keeps_the_consent(): void {
+		global $wpdb;
+
+		\define( 'WP_UNINSTALL_PLUGIN', plugin_basename( DWS_TPL_FILE ) );
+		update_option( DWS_TPL_OPTION_DELETE_DATA, 'yes' );
+		$failing = "DELETE FROM `$wpdb->options` WHERE `option_name` = '" . Plugin::PREFIX . "_revision'";
+		add_filter( 'query', static fn ( string $query ): string => \str_contains( $query, $failing ) ? 'SELECT * FROM dws_tpl_missing_table' : $query );
+		add_filter( 'wp_die_handler', static fn (): \Closure => static fn ( string $message, string $title, array $args ): never => throw new \LogicException( $args['response'] . ' ' . $message ) );
+		$wpdb->suppress_errors();
+
+		try {
+			include \dirname( DWS_TPL_FILE ) . '/uninstall.php';
+			self::fail( 'The uninstall finished.' );
+		} catch ( \LogicException $died ) {
+			self::assertStringStartsWith( '500 Uninstall could not remove everything: option ' . Plugin::PREFIX . '_revision', $died->getMessage() );
+			self::assertSame( 'yes', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
+		} finally {
+			remove_all_filters( 'query' );
+			delete_option( DWS_TPL_OPTION_DELETE_DATA );
+			delete_option( Plugin::PREFIX . '_revision' );
+			dws_tpl_plugin()->migrations?->run();
+		}
+	}
 }
