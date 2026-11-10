@@ -186,7 +186,7 @@ final class Plugin {
 			return false;
 		}
 
-		$this->migrations = new MigrationRunner( DWS_TPL_FILE, self::PREFIX . '_revision', dws_tpl_get_migration_steps(), $this->logger, $this->scheduler );
+		$this->migrations = new MigrationRunner( DWS_TPL_FILE, DWS_TPL_OPTION_REVISION, dws_tpl_get_migration_steps(), $this->logger, $this->scheduler );
 		$this->migrations->register_hooks();
 
 		$this->kernel = new PluginKernel( new ContainerBuilder()->addDefinitions( $this->get_definitions( $this->logger, $this->scheduler ) )->build() );

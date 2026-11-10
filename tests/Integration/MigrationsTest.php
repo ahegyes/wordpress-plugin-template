@@ -2,7 +2,6 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
-use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migration\MigrationRunner;
 use PHPUnit\Framework\Attributes\After;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -28,7 +27,7 @@ final class MigrationsTest extends TestCase {
 			false === $value ? delete_option( $key ) : update_option( $key, $value );
 		}
 
-		update_option( Plugin::PREFIX . '_revision', \count( dws_tpl_get_migration_steps() ) );
+		update_option( DWS_TPL_OPTION_REVISION, \count( dws_tpl_get_migration_steps() ) );
 	}
 
 	// The runner's time budget lasts for its request, and this process's bootstrap spends it when it migrates a new site, so the row runs as a request of its own.
@@ -38,11 +37,11 @@ final class MigrationsTest extends TestCase {
 		foreach ( self::KEYS as $key ) {
 			delete_option( $key );
 		}
-		update_option( Plugin::PREFIX . '_revision', 0 );
+		update_option( DWS_TPL_OPTION_REVISION, 0 );
 
 		dws_tpl_plugin()->migrations?->run();
 
-		self::assertSame( 1, MigrationRunner::get_revision( Plugin::PREFIX . '_revision' ) );
+		self::assertSame( 1, MigrationRunner::get_revision( DWS_TPL_OPTION_REVISION ) );
 		self::assertSame( 'no', get_option( DWS_TPL_OPTION_FEATURE ) );
 		self::assertSame( '1', get_option( DWS_TPL_OPTION_GREETING_ORDERS ) );
 		self::assertSame( 'no', get_option( DWS_TPL_OPTION_DELETE_DATA ) );

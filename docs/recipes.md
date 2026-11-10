@@ -1019,7 +1019,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 	 */
 	protected function compose(): bool {
 		$this->scheduler->register_hooks();
-		$this->migrations = new MigrationRunner( DWS_TPL_FILE, self::PREFIX . '_revision', dws_tpl_get_migration_steps(), $this->logger, $this->scheduler );
+		$this->migrations = new MigrationRunner( DWS_TPL_FILE, DWS_TPL_OPTION_REVISION, dws_tpl_get_migration_steps(), $this->logger, $this->scheduler );
 		$this->migrations->register_hooks();
 
 		$this->kernel = new PluginKernel( new ContainerBuilder()->addDefinitions( $this->get_definitions( $this->logger, $this->scheduler ) )->build() );
@@ -1131,6 +1131,16 @@ final class Settings implements ComponentInterface, OptionsPageDefinitionInterfa
 use DeepWebSolutions\PluginTemplate\Plugin;
 
 defined( 'ABSPATH' ) || exit;
+
+/**
+ * The option in which the migration runner records the revision the plugin's data has reached.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @var     string
+ */
+const DWS_TPL_OPTION_REVISION = 'dws_tpl_revision';
 
 /**
  * The option that holds the settings page's fields, keyed by field id.

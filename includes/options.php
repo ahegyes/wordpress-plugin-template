@@ -53,6 +53,16 @@ const DWS_TPL_OPTION_GREETING = Plugin::PREFIX . '_greeting';
 const DWS_TPL_OPTION_GREETING_ORDERS = Plugin::PREFIX . '_greeting_orders';
 
 /**
+ * The option in which the migration runner records the revision the plugin's data has reached.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @var     string
+ */
+const DWS_TPL_OPTION_REVISION = 'dws_tpl_revision';
+
+/**
  * The value each option reads as while nothing valid is stored.
  *
  * @since   1.0.0
