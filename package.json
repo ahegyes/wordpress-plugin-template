@@ -52,7 +52,7 @@
 		"start": "npm run start:blocks & npm run start:assets & wait",
 		"start:blocks": "wp-scripts start --webpack-src-dir=blocks/src --output-path=blocks/build --blocks-manifest",
 		"start:assets": "wp-scripts start editor=./assets/src/editor.ts greeting=./assets/src/greeting.scss --output-path=assets/build",
-		"lint:scripts": "wp-scripts lint-js blocks/src assets/src tests/EndToEnd",
+		"lint:scripts": "wp-scripts lint-js blocks/src assets/src tests/EndToEnd eslint.config.mjs stylelint.config.js playwright.config.js",
 		"lint:styles": "wp-scripts lint-style 'blocks/src/**/*.scss' 'assets/src/**/*.scss'",
 		"lint:types": "tsc",
 		"audit": "composer audit && npm audit",
