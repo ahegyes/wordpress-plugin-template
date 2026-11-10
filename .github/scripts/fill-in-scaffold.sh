@@ -68,7 +68,7 @@ for swept_json in .wp-env.json .wp-env.tests.json .wp-env.multisite.json compose
 done
 
 # A name or slug shorter than the template's leaves wrapped lines that Prettier joins, so the swept scripts are formatted
-# again. Install scripts stay off, because the fill-in job holds a token that can push.
+# again. Install scripts stay off, since formatting needs none of them.
 npm ci --ignore-scripts --no-audit --no-fund
 node_modules/.bin/wp-scripts format '{blocks/src,assets/src,tests/EndToEnd}/**/*.{js,jsx,ts,tsx}'
 
