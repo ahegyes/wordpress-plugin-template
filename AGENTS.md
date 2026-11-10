@@ -31,6 +31,7 @@ models/, templates/          empty extension points
 composer packages-install    # dependencies, then php-scoper into vendor-prefixed/
 composer test:unit
 composer test:integration    # starts .wp-env.tests.json, then runs test:integration:run, which builds the scripts first
+composer test:integration:multisite  # starts .wp-env.multisite.json, then runs the Integration suite's multisite group, which the default run skips
 composer quality-check       # manifest and changelog validation, PHPCS (both profiles), PHPStan (both profiles), Unit and Integration
 npm run setup                # both installs, the scripts' build, then the development site
 npm run build                # blocks and assets through the local wp-scripts; npm run start watches them in a POSIX shell
@@ -44,8 +45,9 @@ Run wp-scripts only through the npm scripts or `node_modules/.bin/wp-scripts`: `
 
 - `.wp-env.json`: development, as `local`, on port 8811, behind `npm run setup` and `wp-env:*`. The framework rethrows boot and migration failures there.
 - `.wp-env.tests.json`: Integration and end to end, as `production`, on port 8812, behind `wp-env:tests:*`, `composer test:integration` and `npm run test:e2e`. The end-to-end suite deactivates and reactivates WooCommerce there.
+- `.wp-env.multisite.json`: a network with WooCommerce and the plugin network-activated, as `production`, on port 8813, behind `wp-env:multisite:*` and `composer test:integration:multisite`, for the Integration suite's `multisite` group.
 
-Both run PHP 8.5 with WooCommerce from `vendor/` and its order tables on; CI runs Integration and end to end on every WordPress branch from the entry's `Requires at least` up, and nightly on WordPress trunk.
+Each runs PHP 8.5 with WooCommerce from `vendor/` and its order tables on; CI runs Integration and end to end on every WordPress branch from the entry's `Requires at least` up, and nightly on WordPress trunk.
 
 ## Conventions
 

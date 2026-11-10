@@ -11,14 +11,15 @@ grep -Eq '^[A-Za-z][A-Za-z0-9]*$' <<< "$NS" || { echo "::error::php-namespace mu
 # One segment after dws_ keeps every prefix in one plugin's family from starting another plugin's, and the
 # framework's admin notices refuse a prefix over 32 characters or with a network or hidden segment.
 { grep -Eq '^dws_[a-z0-9]{1,28}$' <<< "$PREFIX" && [ "$PREFIX" != dws_network ] && [ "$PREFIX" != dws_hidden ]; } || { echo "::error::prefix must match ^dws_[a-z0-9]{1,28}$ and must not be dws_network or dws_hidden."; exit 1; }
-# Both ports land in JSON numbers, where a leading zero is invalid, and the tests environment takes the next one;
-# neither may be the template's own 8811 or 8812, which the leftover check below refuses.
-{ grep -Eq '^[1-9][0-9]{0,4}$' <<< "$PORT" && [ "$PORT" -le 65534 ] && { [ "$PORT" -lt 8810 ] || [ "$PORT" -gt 8812 ]; }; } || { echo "::error::wp-env-port must be 1-65534 with no leading zero, and neither it nor the next port may be 8811 or 8812."; exit 1; }
+# The ports land in JSON numbers, where a leading zero is invalid, and the tests and multisite environments take the
+# next two; none may be the template's own 8811, 8812 or 8813, which the leftover check below refuses.
+{ grep -Eq '^[1-9][0-9]{0,4}$' <<< "$PORT" && [ "$PORT" -le 65533 ] && { [ "$PORT" -lt 8809 ] || [ "$PORT" -gt 8813 ]; }; } || { echo "::error::wp-env-port must be 1-65533 with no leading zero, and neither it nor the next two ports may be 8811, 8812 or 8813."; exit 1; }
 # The display name lands in single-quoted PHP and JavaScript strings, and in JSX text.
 if printf '%s' "$PLUGIN_NAME" | grep -q "['\\\$/<>{}]"; then echo "::error::plugin-name must not contain \\, \$, /, ', <, >, { or }."; exit 1; fi
 
 export SCREAMING_PREFIX="${PREFIX^^}"
 export TESTS_PORT=$(( PORT + 1 ))
+export MULTISITE_PORT=$(( PORT + 2 ))
 export REPO_NAME="${REPO#*/}"
 
 git mv --force README.scaffold.md README.md
@@ -48,7 +49,7 @@ git ls-files -z -- . ':!.github/workflows/' ':!.github/scripts/fill-in-scaffold.
 # shellcheck disable=SC2016
 git ls-files -z -- . ':!.github/workflows/' ':!.github/scripts/fill-in-scaffold.sh' ':!composer.lock' ':!package-lock.json' | xargs -0 perl -pi -e '
 	BEGIN { @ARGV = grep { ! -l $_ } @ARGV }
-	s/\b(881[12])\b/8811 == $1 ? $ENV{PORT} : $ENV{TESTS_PORT}/ge;
+	s/\b(881[123])\b/8811 == $1 ? $ENV{PORT} : 8812 == $1 ? $ENV{TESTS_PORT} : $ENV{MULTISITE_PORT}/ge;
 	s/^(\s*\*\s*\@(?:since|version)\s+)2\.0\.0$/${1}0.1.0/;
 '
 # shellcheck disable=SC2016
@@ -63,7 +64,7 @@ composer validate --strict
 php -l "$SLUG.php"
 php -l uninstall.php
 # shellcheck disable=SC2016
-for swept_json in .wp-env.json .wp-env.tests.json composer.json package.json package-lock.json; do
+for swept_json in .wp-env.json .wp-env.tests.json .wp-env.multisite.json composer.json package.json package-lock.json; do
 	php -r 'json_decode( (string) file_get_contents( $argv[1] ), false, 512, JSON_THROW_ON_ERROR );' "$swept_json"
 done
 
@@ -77,7 +78,7 @@ if git grep -n -I -E 'dws-plugin-template|dws_tpl|DWS_TPL|PluginTemplate|DWS Plu
 	echo "::error::The fill-in left the template's names above."
 	status=1
 fi
-if git grep -n -I -E '\b881[12]\b' -- . ':!.github/scripts/fill-in-scaffold.sh' ':!composer.lock' ':!package-lock.json'; then
+if git grep -n -I -E '\b881[123]\b' -- . ':!.github/scripts/fill-in-scaffold.sh' ':!composer.lock' ':!package-lock.json'; then
 	echo "::error::The fill-in left the template's ports above."
 	status=1
 fi
