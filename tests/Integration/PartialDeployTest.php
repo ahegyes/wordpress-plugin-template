@@ -25,6 +25,19 @@ final class PartialDeployTest extends TestCase {
 		self::assertSame( '[false,true]', $request['last'] );
 	}
 
+	public function test_a_missing_assets_build_shows_the_build_notice_and_loads_nothing_built(): void {
+		$asset = \dirname( DWS_TPL_FILE ) . '/assets/build/editor.asset.php';
+		\rename( $asset, "$asset.hidden" );
+		try {
+			$request = self::request( 'echo wp_json_encode( array( function_exists( "dws_tpl_boot" ), false !== has_action( "all_admin_notices", "dws_tpl_render_build_notice" ) ) );' );
+		} finally {
+			\rename( "$asset.hidden", $asset );
+		}
+
+		self::assertSame( 0, $request['status'], $request['output'] );
+		self::assertSame( '[false,true]', $request['last'] );
+	}
+
 	public function test_a_missing_bootstrap_package_shows_the_build_notice_and_loads_nothing_built(): void {
 		$bootstrap = \dirname( DWS_TPL_FILE ) . '/vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php';
 		\rename( $bootstrap, "$bootstrap.hidden" );
