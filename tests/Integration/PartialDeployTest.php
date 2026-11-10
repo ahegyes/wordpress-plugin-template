@@ -13,6 +13,21 @@ use PHPUnit\Framework\TestCase;
 final class PartialDeployTest extends TestCase {
 	use RunsRequestsTrait;
 
+	public function test_the_build_notice_says_the_features_stay_off_until_the_plugin_is_reinstalled(): void {
+		wp_set_current_user( 1 );
+		\ob_start();
+		try {
+			dws_tpl_render_build_notice();
+		} finally {
+			$notice = (string) \ob_get_clean();
+			wp_set_current_user( 0 );
+		}
+
+		$sentence = \Dom\HTMLDocument::createFromString( '<!DOCTYPE html><html><body>' . $notice . '</body></html>', \LIBXML_NOERROR )->querySelector( '.notice-error p' );
+
+		self::assertSame( 'DWS Plugin Template is missing some of its files, so its features stay off until the plugin is reinstalled.', $sentence?->textContent ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- A DOM property.
+	}
+
 	public function test_a_missing_blocks_manifest_shows_the_build_notice_and_loads_nothing_built(): void {
 		$manifest = \dirname( DWS_TPL_FILE ) . '/blocks/build/blocks-manifest.php';
 		\rename( $manifest, "$manifest.hidden" );

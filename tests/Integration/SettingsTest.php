@@ -38,6 +38,16 @@ final class SettingsTest extends TestCase {
 			'decimal'  => array( '2.5' ),
 			'word'     => array( 'three' ),
 			'empty'    => array( '' ),
+			'too-big'  => array( '1e20' ),
+		);
+	}
+
+	public static function whole_order_counts(): array {
+		return array(
+			'padded'        => array( ' 3 ' ),
+			'leading-zero'  => array( '03' ),
+			'zero-decimals' => array( '3.0' ),
+			'exponent'      => array( '0.3e1' ),
 		);
 	}
 
@@ -73,6 +83,23 @@ final class SettingsTest extends TestCase {
 		self::assertFalse( $form->getElementById( DWS_TPL_OPTION_DELETE_DATA )?->hasAttribute( 'checked' ) );
 	}
 
+	public function test_the_tab_words_each_field_by_what_it_does(): void {
+		$form = $this->render();
+		$rows = array(
+			DWS_TPL_OPTION_FEATURE         => array( 'Show the greeting', 'Greet returning customers' ),
+			DWS_TPL_OPTION_GREETING        => array( 'Message', 'Leave empty to show the default greeting in each customer\'s language.' ),
+			DWS_TPL_OPTION_GREETING_ORDERS => array( 'Orders before the greeting', 'Customers see the greeting once this many of their orders are paid.' ),
+			DWS_TPL_OPTION_DELETE_DATA     => array( 'Remove all data on uninstallation', 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later' ),
+		);
+
+		foreach ( $rows as $key => $texts ) {
+			$row = (string) $form->getElementById( $key )?->closest( 'tr' )?->textContent; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- A DOM property.
+			foreach ( $texts as $text ) {
+				self::assertStringContainsString( $text, $row, $key );
+			}
+		}
+	}
+
 	public function test_a_save_that_leaves_the_message_untouched_stores_no_translated_text(): void {
 		delete_option( DWS_TPL_OPTION_GREETING );
 
@@ -105,8 +132,9 @@ final class SettingsTest extends TestCase {
 		self::assertSame( array( 'Orders before the greeting was not saved and keeps its previous value. The other changes were saved. Enter a whole number of 1 or more, such as 3.' ), ( new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' ) )->getValue() );
 	}
 
-	public function test_a_whole_order_count_of_at_least_one_is_stored(): void {
-		$this->save( array( DWS_TPL_OPTION_GREETING_ORDERS => ' 3 ' ) );
+	#[DataProvider( 'whole_order_counts' )]
+	public function test_a_whole_order_count_of_at_least_one_is_stored_as_its_digits( string $posted ): void {
+		$this->save( array( DWS_TPL_OPTION_GREETING_ORDERS => $posted ) );
 
 		self::assertSame( '3', get_option( DWS_TPL_OPTION_GREETING_ORDERS ) );
 		self::assertSame( 3, dws_tpl_get_int_option( DWS_TPL_OPTION_GREETING_ORDERS ) );
