@@ -57,10 +57,13 @@ function dws_tpl_plugin(): Plugin {
  */
 function dws_tpl_boot(): void {
 	try {
-		dws_tpl_plugin()->boot();
+		$plugin = dws_tpl_plugin();
 	} catch ( Throwable $error ) {
 		dws_tpl_handle_build_error( $error );
+		return;
 	}
+
+	$plugin->boot(); // PluginBoot reports a failed composition itself, and a hook listener's throw is not a build error.
 }
 
 /**
@@ -73,10 +76,13 @@ function dws_tpl_boot(): void {
  */
 function dws_tpl_deactivate(): void {
 	try {
-		dws_tpl_plugin()->deactivate();
+		$plugin = dws_tpl_plugin();
 	} catch ( Throwable $error ) {
 		dws_tpl_handle_build_error( $error );
+		return;
 	}
+
+	$plugin->deactivate();
 }
 
 /**
