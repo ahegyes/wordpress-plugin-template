@@ -133,7 +133,7 @@ final class OptionsTest extends TestCase {
 	}
 
 	public function test_an_option_without_a_translated_default_has_no_text(): void {
-		self::assertSame( '', dws_tpl_get_option_text( DWS_TPL_OPTION_FEATURE ) );
+		self::assertSame( '', dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING_ENABLED ) );
 	}
 
 	#[DataProvider( 'submitted_order_counts' )]

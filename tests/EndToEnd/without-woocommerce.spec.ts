@@ -17,7 +17,7 @@ const bootStatus = (): string =>
 			'cli',
 			'wp',
 			'eval',
-			'echo dws_tpl_plugin()->boot->status;',
+			'echo dws_tpl_plugin()->boundary->status;',
 		],
 		{ encoding: 'utf8', stdio: [ 'ignore', 'pipe', 'ignore' ] }
 	)

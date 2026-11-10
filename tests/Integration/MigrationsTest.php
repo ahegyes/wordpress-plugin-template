@@ -2,7 +2,6 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
-use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migration\MigrationRunner;
 use PHPUnit\Framework\Attributes\After;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -11,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class MigrationsTest extends TestCase {
-	protected const array KEYS = array( DWS_TPL_OPTION_FEATURE, DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS, DWS_TPL_OPTION_DELETE_DATA );
+	protected const array KEYS = array( DWS_TPL_OPTION_GREETING_ENABLED, DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS, DWS_TPL_OPTION_DELETE_DATA );
 
 	protected array $stored = array();
 
@@ -28,7 +27,7 @@ final class MigrationsTest extends TestCase {
 			false === $value ? delete_option( $key ) : update_option( $key, $value );
 		}
 
-		update_option( Plugin::PREFIX . '_revision', \count( dws_tpl_get_migration_steps() ) );
+		update_option( DWS_TPL_OPTION_REVISION, \count( dws_tpl_get_migration_steps() ) );
 	}
 
 	// The runner's time budget lasts for its request, and this process's bootstrap spends it when it migrates a new site, so the row runs as a request of its own.
@@ -38,27 +37,27 @@ final class MigrationsTest extends TestCase {
 		foreach ( self::KEYS as $key ) {
 			delete_option( $key );
 		}
-		update_option( Plugin::PREFIX . '_revision', 0 );
+		update_option( DWS_TPL_OPTION_REVISION, 0 );
 
 		dws_tpl_plugin()->migrations?->run();
 
-		self::assertSame( 1, MigrationRunner::get_revision( Plugin::PREFIX . '_revision' ) );
-		self::assertSame( 'no', get_option( DWS_TPL_OPTION_FEATURE ) );
+		self::assertSame( 1, MigrationRunner::get_revision( DWS_TPL_OPTION_REVISION ) );
+		self::assertSame( 'no', get_option( DWS_TPL_OPTION_GREETING_ENABLED ) );
 		self::assertSame( '1', get_option( DWS_TPL_OPTION_GREETING_ORDERS ) );
 		self::assertSame( 'no', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
 		self::assertFalse( get_option( DWS_TPL_OPTION_GREETING ) );
-		foreach ( array( DWS_TPL_OPTION_FEATURE, DWS_TPL_OPTION_GREETING_ORDERS, DWS_TPL_OPTION_DELETE_DATA ) as $key ) {
+		foreach ( array( DWS_TPL_OPTION_GREETING_ENABLED, DWS_TPL_OPTION_GREETING_ORDERS, DWS_TPL_OPTION_DELETE_DATA ) as $key ) {
 			self::assertSame( 'on', $wpdb->get_var( $wpdb->prepare( "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s", $key ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Reads the stored autoload flag.
 		}
 	}
 
 	public function test_the_first_step_keeps_the_values_a_site_stored(): void {
-		update_option( DWS_TPL_OPTION_FEATURE, 'yes' );
+		update_option( DWS_TPL_OPTION_GREETING_ENABLED, 'yes' );
 		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '5' );
 
 		dws_tpl_add_settings();
 
-		self::assertSame( 'yes', get_option( DWS_TPL_OPTION_FEATURE ) );
+		self::assertSame( 'yes', get_option( DWS_TPL_OPTION_GREETING_ENABLED ) );
 		self::assertSame( '5', get_option( DWS_TPL_OPTION_GREETING_ORDERS ) );
 	}
 

@@ -1,6 +1,6 @@
 <?php declare( strict_types=1 );
 
-namespace DeepWebSolutions\PluginTemplate\Feature;
+namespace DeepWebSolutions\PluginTemplate\Greeting;
 
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\CompositeComponentInterface;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\ConditionalComponentInterface;
@@ -13,7 +13,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Condi
  * @since   1.0.0
  * @version 1.0.0
  */
-final class Feature implements CompositeComponentInterface, ConditionalComponentInterface {
+final class GreetingFeature implements CompositeComponentInterface, ConditionalComponentInterface {
 	// region INHERITED METHODS
 
 	/**
@@ -24,7 +24,7 @@ final class Feature implements CompositeComponentInterface, ConditionalComponent
 	 */
 	#[\Override]
 	public static function should_load(): bool {
-		return dws_tpl_get_bool_option( DWS_TPL_OPTION_FEATURE );
+		return dws_tpl_get_bool_option( DWS_TPL_OPTION_GREETING_ENABLED );
 	}
 
 	/**
@@ -35,7 +35,7 @@ final class Feature implements CompositeComponentInterface, ConditionalComponent
 	 */
 	#[\Override]
 	public static function get_child_component_classes(): array {
-		return array( FeatureDetail::class );
+		return array( AccountDashboardGreeting::class );
 	}
 
 	/**

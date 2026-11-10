@@ -28,7 +28,7 @@ function dws_tpl_get_asset( string $path ): array {
 	 *
 	 * @var array{dependencies: list<non-empty-string|array{id: non-empty-string, import?: 'static'|'dynamic'}>, version: string, type?: string, handle?: string} $asset
 	 */
-	$asset = require plugin_dir_path( DWS_TPL_FILE ) . dirname( $path ) . '/' . basename( $path, '.' . pathinfo( $path, PATHINFO_EXTENSION ) ) . '.asset.php';
+	$asset = require plugin_dir_path( DWS_TPL_FILE ) . dirname( $path ) . '/' . pathinfo( $path, PATHINFO_FILENAME ) . '.asset.php';
 
 	return $asset;
 }
@@ -39,9 +39,11 @@ function dws_tpl_get_asset( string $path ): array {
  * @since   1.0.0
  * @version 1.0.0
  *
- * @param   non-empty-string                                                                         $handle The script's handle.
- * @param   non-empty-string                                                                         $path   The built script's path, relative to the plugin's directory.
- * @param   array{strategy?: 'async'|'defer', in_footer?: bool, fetchpriority?: 'auto'|'low'|'high'} $args   Optional. How the script loads. Default none, which loads it in the head.
+ * @phpstan-param array{strategy?: 'async'|'defer', in_footer?: bool, fetchpriority?: 'auto'|'low'|'high'} $args
+ *
+ * @param   non-empty-string $handle The script's handle.
+ * @param   non-empty-string $path   The built script's path, relative to the plugin's directory.
+ * @param   array            $args   Optional. How the script loads. Default none, which loads it in the head.
  *
  * @return  bool
  */

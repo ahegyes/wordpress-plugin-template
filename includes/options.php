@@ -23,16 +23,6 @@ defined( 'ABSPATH' ) || exit;
 const DWS_TPL_OPTION_DELETE_DATA = Plugin::PREFIX . '_delete_data';
 
 /**
- * The option that holds 'yes' where the site greets returning customers on their account dashboard.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @var     string
- */
-const DWS_TPL_OPTION_FEATURE = Plugin::PREFIX . '_feature';
-
-/**
  * The option that holds the greeting.
  *
  * @since   1.0.0
@@ -41,6 +31,16 @@ const DWS_TPL_OPTION_FEATURE = Plugin::PREFIX . '_feature';
  * @var     string
  */
 const DWS_TPL_OPTION_GREETING = Plugin::PREFIX . '_greeting';
+
+/**
+ * The option that holds 'yes' where the site greets returning customers on their account dashboard.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @var     string
+ */
+const DWS_TPL_OPTION_GREETING_ENABLED = 'dws_tpl_greeting_enabled';
 
 /**
  * The option that holds the number of orders a customer places before the greeting shows.
@@ -53,6 +53,16 @@ const DWS_TPL_OPTION_GREETING = Plugin::PREFIX . '_greeting';
 const DWS_TPL_OPTION_GREETING_ORDERS = Plugin::PREFIX . '_greeting_orders';
 
 /**
+ * The option in which the migration runner records the revision the plugin's data has reached.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @var     string
+ */
+const DWS_TPL_OPTION_REVISION = 'dws_tpl_revision';
+
+/**
  * The value each option reads as while nothing valid is stored.
  *
  * @since   1.0.0
@@ -61,9 +71,9 @@ const DWS_TPL_OPTION_GREETING_ORDERS = Plugin::PREFIX . '_greeting_orders';
  * @var     array<string, bool|int|string>
  */
 const DWS_TPL_OPTION_DEFAULTS = array(
-	DWS_TPL_OPTION_DELETE_DATA     => false,
-	DWS_TPL_OPTION_FEATURE         => false,
-	DWS_TPL_OPTION_GREETING_ORDERS => 1,
+	DWS_TPL_OPTION_DELETE_DATA      => false,
+	DWS_TPL_OPTION_GREETING_ENABLED => false,
+	DWS_TPL_OPTION_GREETING_ORDERS  => 1,
 );
 
 /**
@@ -139,7 +149,9 @@ function dws_tpl_get_option_text( string $key ): string {
 }
 
 /**
- * Returns the number of orders before the greeting shows in the form WooCommerce stores, or an error when the submission is not a whole number of at least 1.
+ * Returns the number of orders before the greeting shows as the digits WooCommerce stores, or an error when the submission is not a whole number of at least 1.
+ *
+ * The number input sends a whole number in any form a browser accepts, such as 03 or 3.0, so the submission parses as a float.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -149,9 +161,12 @@ function dws_tpl_get_option_text( string $key ): string {
  * @return  string|WP_Error
  */
 function dws_tpl_validate_greeting_orders( $submitted ) {
-	$orders = is_string( $submitted ) ? filter_var( $submitted, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ) : false;
+	$orders = is_string( $submitted ) ? filter_var( $submitted, FILTER_VALIDATE_FLOAT ) : false;
+	if ( false === $orders || $orders < 1 || $orders >= PHP_INT_MAX || floor( $orders ) !== $orders ) {
+		return new WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) );
+	}
 
-	return false === $orders ? new WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) ) : (string) $orders;
+	return (string) (int) $orders;
 }
 
 /**

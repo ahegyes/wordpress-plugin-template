@@ -88,7 +88,7 @@ jobs:
           SLUG: acme-orders
           NS: AcmeOrders
           # The rehearsal fills in the longest prefix the script accepts, so its PHPCS run fails once the cap stops passing.
-          PREFIX: dws_acmeextraordinaryorders
+          PREFIX: dws_acmeextraordinarysales
           PORT: '8821'
           REPO: acme/acme-orders
         run: .github/scripts/fill-in-scaffold.sh
@@ -98,7 +98,7 @@ jobs:
         run: |
           composer lint:php
           composer test:unit
-      # The display name lands in the block's JSX, which only a build and the script and type lints parse.
+      # The display name lands in the block's editor script, which only a build and the script and type lints parse.
       - name: Build and lint the filled-in plugin's scripts
         run: |
           npm run build

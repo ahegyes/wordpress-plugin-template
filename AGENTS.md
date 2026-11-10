@@ -12,7 +12,7 @@ src/                         the composition root and its components only
 ├── Plugin.php               SLUG, PREFIX (dws_tpl), COMPONENTS, the logger, the scheduler, the migration runner and the kernel
 ├── Settings.php             the WooCommerce settings tab dws_tpl: the greeting's fields and the uninstall consent
 ├── Blocks.php               the blocks from blocks/build/blocks-manifest.php and the block-editor script
-└── Feature/                 the greeting: a composite gated on DWS_TPL_OPTION_FEATURE and its account-dashboard child
+└── Greeting/                the greeting: GreetingFeature, gated on DWS_TPL_OPTION_GREETING_ENABLED, and its AccountDashboardGreeting child
 includes/                    hook-free code as dws_tpl_ functions and DWS_TPL_ constants, loaded in name order, _-prefixed files skipped
 ├── safeguards.php           restrictions that hold whenever the plugin cannot boot; loaded by the entry before the floor check
 ├── options.php              the option keys, their defaults, the typed readers, the translated text and the validator
@@ -20,7 +20,7 @@ includes/                    hook-free code as dws_tpl_ functions and DWS_TPL_ c
 ├── migrations.php           dws_tpl_get_migration_steps() and one function per step, append-only
 ├── assets.php               the *.asset.php reader and the script and style registrars
 └── metadata.php             the slug, name and version getters, the plugin's surface for a peer plugin
-blocks/src/, assets/src/     TypeScript and SCSS, built into blocks/build/ and assets/build/ (untracked)
+blocks/src/, assets/src/     TypeScript, SCSS and each block's render.php, built into blocks/build/ and assets/build/ (untracked)
 models/, templates/          empty extension points
 .github/scripts/fill-in-scaffold.sh  the fill-in's sweep, which fill-in-scaffold.yml runs once in a new plugin and Quality rehearses here
 ```

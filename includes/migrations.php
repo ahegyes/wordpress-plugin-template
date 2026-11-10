@@ -36,9 +36,9 @@ function dws_tpl_get_migration_steps(): array {
  */
 function dws_tpl_add_settings(): void {
 	$defaults = array(
-		DWS_TPL_OPTION_FEATURE         => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_FEATURE ] ),
-		DWS_TPL_OPTION_GREETING_ORDERS => (string) DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_GREETING_ORDERS ],
-		DWS_TPL_OPTION_DELETE_DATA     => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_DELETE_DATA ] ),
+		DWS_TPL_OPTION_GREETING_ENABLED => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_GREETING_ENABLED ] ),
+		DWS_TPL_OPTION_GREETING_ORDERS  => (string) DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_GREETING_ORDERS ],
+		DWS_TPL_OPTION_DELETE_DATA      => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_DELETE_DATA ] ),
 	);
 
 	foreach ( $defaults as $key => $value ) {

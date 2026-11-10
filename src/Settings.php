@@ -45,15 +45,16 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 			),
 			array(
 				'type'    => 'checkbox',
-				'id'      => DWS_TPL_OPTION_FEATURE,
-				'title'   => __( 'Greeting', 'dws-plugin-template' ),
+				'id'      => DWS_TPL_OPTION_GREETING_ENABLED,
+				'title'   => __( 'Show the greeting', 'dws-plugin-template' ),
 				'desc'    => __( 'Greet returning customers', 'dws-plugin-template' ),
-				'default' => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_FEATURE ] ),
+				'default' => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_GREETING_ENABLED ] ),
 			),
 			array(
 				'type'        => 'text',
 				'id'          => DWS_TPL_OPTION_GREETING,
 				'title'       => __( 'Message', 'dws-plugin-template' ),
+				'desc'        => __( 'Leave empty to show the default greeting in each customer\'s language.', 'dws-plugin-template' ),
 				'default'     => '',
 				'placeholder' => dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), // A default would be saved in the admin's language with the first save of the tab.
 			),
@@ -61,7 +62,7 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 				'type'              => 'number',
 				'id'                => DWS_TPL_OPTION_GREETING_ORDERS,
 				'title'             => __( 'Orders before the greeting', 'dws-plugin-template' ),
-				'desc'              => __( 'Customers see the greeting once they have placed this many orders.', 'dws-plugin-template' ),
+				'desc'              => __( 'Customers see the greeting once this many of their orders are paid.', 'dws-plugin-template' ),
 				'default'           => (string) DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_GREETING_ORDERS ],
 				'custom_attributes' => array(
 					'min'  => '1',
@@ -81,8 +82,8 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 			array(
 				'type'    => 'checkbox',
 				'id'      => DWS_TPL_OPTION_DELETE_DATA,
-				'title'   => __( 'Data on uninstall', 'dws-plugin-template' ),
-				'desc'    => __( 'Delete the plugin\'s data when it is uninstalled', 'dws-plugin-template' ),
+				'title'   => __( 'Remove all data on uninstallation', 'dws-plugin-template' ),
+				'desc'    => __( 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later', 'dws-plugin-template' ),
 				'default' => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_DELETE_DATA ] ),
 			),
 			array(

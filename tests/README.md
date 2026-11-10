@@ -8,7 +8,7 @@ This document describes the plugin's three test suites, the environments they ru
 | --- | --- | --- | --- |
 | Unit | `tests/Unit/` | PHP alone, without WordPress | the component tree, the footprint's shape and coverage, and the entry's `WC tested up to` against the locked WooCommerce |
 | Integration | `tests/Integration/` | the tests site, with WordPress, WooCommerce and order tables loaded, and the multisite site for its `multisite` group | the boot, every component, the options and their readers, the migrations, deactivation, uninstall, the assets and blocks, the peer getters, a partial deploy: a missing build file or engine, or an include that throws, and the boot and settings on a second site of a network |
-| End to end | `tests/EndToEnd/` | the tests site, in a browser through Playwright | the settings tab by keyboard, a rejected and a corrected value, accessibility through axe, and the plugin with WooCommerce deactivated |
+| End to end | `tests/EndToEnd/` | the tests site, in a browser through Playwright | the settings tab by keyboard, a rejected and a corrected value, accessibility through axe, the example block inserted from the editor's command palette, and the plugin with WooCommerce deactivated |
 
 PHPUnit runs both PHP suites in random order, so each row sets up what it needs and restores what it changes; its cache lives in `tests/.cache/phpunit/`, and Playwright's output in `tests/.cache/artifacts/`.
 

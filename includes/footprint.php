@@ -26,7 +26,7 @@ function dws_tpl_get_footprint(): array {
 		'user_meta_site_prefixes'   => array( Plugin::PREFIX . '_' ),
 		'user_meta_global_prefixes' => array( Plugin::PREFIX . '_' ),
 		'network_options'           => array( Plugin::PREFIX . '_network_notices' ),
-		'cron_hooks'                => array( Plugin::PREFIX . '_revision/migration/run' ),
+		'cron_hooks'                => array( DWS_TPL_OPTION_REVISION . '/migration/run' ),
 		'as_groups'                 => array( Plugin::PREFIX ),
 	);
 }

@@ -2,7 +2,7 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
-use DeepWebSolutions\PluginTemplate\Feature\Feature;
+use DeepWebSolutions\PluginTemplate\Greeting\GreetingFeature;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migration\MigrationRunner;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Logging\WooCommerceLogger;
@@ -18,8 +18,8 @@ final class PluginBootTest extends TestCase {
 	public function test_the_plugin_boots_with_the_greeting_gated_off_until_a_site_switches_it_on(): void {
 		$plugin = dws_tpl_plugin();
 
-		self::assertSame( 'booted', $plugin->boot->status );
-		self::assertSame( array( Feature::class ), $plugin->kernel?->skipped );
+		self::assertSame( 'booted', $plugin->boundary->status );
+		self::assertSame( array( GreetingFeature::class ), $plugin->kernel?->skipped );
 	}
 
 	public function test_the_entry_loads_every_include_but_those_whose_names_start_with_an_underscore(): void {
@@ -71,7 +71,7 @@ final class PluginBootTest extends TestCase {
 
 	public function test_the_stored_data_is_at_the_revision_of_the_code(): void {
 		self::assertInstanceOf( MigrationRunner::class, dws_tpl_plugin()->migrations );
-		self::assertSame( \count( dws_tpl_get_migration_steps() ), MigrationRunner::get_revision( Plugin::PREFIX . '_revision' ) );
+		self::assertSame( \count( dws_tpl_get_migration_steps() ), MigrationRunner::get_revision( DWS_TPL_OPTION_REVISION ) );
 	}
 
 	protected static function get_threshold( WooCommerceLogger $logger ): mixed {

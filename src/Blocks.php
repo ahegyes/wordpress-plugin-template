@@ -7,7 +7,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Compo
 \defined( 'ABSPATH' ) || exit;
 
 /**
- * Registers the plugin's blocks from their build manifest, and the block-editor script that adds their styles.
+ * Registers the plugin's blocks from their build manifest, and the block-editor script.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -52,8 +52,9 @@ final class Blocks implements ComponentInterface {
 	 * @return  void
 	 */
 	public function enqueue_editor_script(): void {
-		dws_tpl_register_script( Plugin::SLUG . '-editor', 'assets/build/editor.js' );
-		wp_enqueue_script( Plugin::SLUG . '-editor' );
+		if ( dws_tpl_register_script( Plugin::SLUG . '-editor', 'assets/build/editor.js' ) ) {
+			wp_enqueue_script( Plugin::SLUG . '-editor' );
+		}
 	}
 
 	// endregion

@@ -256,6 +256,8 @@ function dws_tpl_get_int_setting( string $field ): int {
 /**
  * Returns the limit as the settings page stores it, or an error when the submission is not a whole number of at least 1.
  *
+ * The number input sends a whole number in any form a browser accepts, such as 03 or 3.0, so the submission parses as a float.
+ *
  * @since   1.0.0
  * @version 1.0.0
  *
@@ -264,9 +266,12 @@ function dws_tpl_get_int_setting( string $field ): int {
  * @return  int|WP_Error
  */
 function dws_tpl_validate_limit( $submitted ) {
-	$limit = is_string( $submitted ) ? filter_var( $submitted, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ) : false;
+	$limit = is_string( $submitted ) ? filter_var( $submitted, FILTER_VALIDATE_FLOAT ) : false;
+	if ( false === $limit || $limit < 1 || $limit >= PHP_INT_MAX || floor( $limit ) !== $limit ) {
+		return new WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) );
+	}
 
-	return false === $limit ? new WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) ) : $limit;
+	return (int) $limit;
 }
 ```
 
@@ -999,7 +1004,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 	public function __construct() {
 		$this->logger    = new ErrorLogLogger( self::SLUG );
 		$this->scheduler = new Scheduler( self::PREFIX );
-		$this->boot      = new PluginBoot( DWS_TPL_FILE, self::PREFIX, $this->logger );
+		$this->boundary  = new PluginBoot( DWS_TPL_FILE, self::PREFIX, $this->logger );
 	}
 
 	// ...
@@ -1014,7 +1019,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 	 */
 	protected function compose(): bool {
 		$this->scheduler->register_hooks();
-		$this->migrations = new MigrationRunner( DWS_TPL_FILE, self::PREFIX . '_revision', dws_tpl_get_migration_steps(), $this->logger, $this->scheduler );
+		$this->migrations = new MigrationRunner( DWS_TPL_FILE, DWS_TPL_OPTION_REVISION, dws_tpl_get_migration_steps(), $this->logger, $this->scheduler );
 		$this->migrations->register_hooks();
 
 		$this->kernel = new PluginKernel( new ContainerBuilder()->addDefinitions( $this->get_definitions( $this->logger, $this->scheduler ) )->build() );
@@ -1024,7 +1029,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 	}
 ```
 
-6. Delete the greeting: `src/Feature/`, `tests/Integration/Feature/` and `assets/src/greeting.scss`, then its entries in `package.json`:
+6. Delete the greeting: `src/Greeting/`, `tests/Integration/Greeting/` and `assets/src/greeting.scss`, then its entries in `package.json`:
 
 ```json
 "build:assets": "wp-scripts build editor=./assets/src/editor.ts --output-path=assets/build",
@@ -1097,8 +1102,8 @@ final class Settings implements ComponentInterface, OptionsPageDefinitionInterfa
 						array(
 							'type'  => 'checkbox',
 							'id'    => DWS_TPL_SETTING_DELETE_DATA,
-							'title' => __( 'Data on uninstall', 'dws-plugin-template' ),
-							'desc'  => __( 'Delete the plugin\'s data when it is uninstalled', 'dws-plugin-template' ),
+							'title' => __( 'Remove all data on uninstallation', 'dws-plugin-template' ),
+							'desc'  => __( 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later', 'dws-plugin-template' ),
 						),
 					),
 				),
@@ -1126,6 +1131,16 @@ final class Settings implements ComponentInterface, OptionsPageDefinitionInterfa
 use DeepWebSolutions\PluginTemplate\Plugin;
 
 defined( 'ABSPATH' ) || exit;
+
+/**
+ * The option in which the migration runner records the revision the plugin's data has reached.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @var     string
+ */
+const DWS_TPL_OPTION_REVISION = 'dws_tpl_revision';
 
 /**
  * The option that holds the settings page's fields, keyed by field id.
@@ -1205,6 +1220,8 @@ function dws_tpl_get_int_setting( string $field ): int {
 /**
  * Returns the limit as the settings page stores it, or an error when the submission is not a whole number of at least 1.
  *
+ * The number input sends a whole number in any form a browser accepts, such as 03 or 3.0, so the submission parses as a float.
+ *
  * @since   1.0.0
  * @version 1.0.0
  *
@@ -1213,9 +1230,12 @@ function dws_tpl_get_int_setting( string $field ): int {
  * @return  int|WP_Error
  */
 function dws_tpl_validate_limit( $submitted ) {
-	$limit = is_string( $submitted ) ? filter_var( $submitted, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ) : false;
+	$limit = is_string( $submitted ) ? filter_var( $submitted, FILTER_VALIDATE_FLOAT ) : false;
+	if ( false === $limit || $limit < 1 || $limit >= PHP_INT_MAX || floor( $limit ) !== $limit ) {
+		return new WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) );
+	}
 
-	return false === $limit ? new WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) ) : $limit;
+	return (int) $limit;
 }
 
 /**
@@ -1270,21 +1290,22 @@ function dws_tpl_add_settings(): void {
 }
 ```
 
-10. In `uninstall.php`, delete the `MetaTypes` import, and take consent from the settings row's `delete_data` key:
+10. In `uninstall.php`, delete the `MetaTypes` import and `$dws_tpl_meta_types`, and take consent from the settings row's `delete_data` key:
 
 ```php
 	$dws_tpl_footprint = dws_tpl_get_footprint();
-	$dws_tpl_consent   = array(
-		'option' => DWS_TPL_OPTION_SETTINGS,
-		'key'    => DWS_TPL_SETTING_DELETE_DATA,
-	);
 // ...
 
-Uninstaller::run(
-	$dws_tpl_file,
-	$dws_tpl_footprint,
-	array( 'consent' => $dws_tpl_consent )
-);
+	Uninstaller::run(
+		$dws_tpl_file,
+		$dws_tpl_footprint,
+		array(
+			'consent' => array(
+				'option' => DWS_TPL_OPTION_SETTINGS,
+				'key'    => DWS_TPL_SETTING_DELETE_DATA,
+			),
+		)
+	);
 ```
 
 11. In `.wp-env.json` and `.wp-env.tests.json`, delete the WooCommerce mapping, and let `afterStart` only activate the plugin; `.wp-env.json`'s command takes no `--config`:
