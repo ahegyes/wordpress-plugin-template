@@ -23,6 +23,7 @@ parameters:
 	# The scoped packages load through vendor-prefixed/scoper-autoload.php, which PHPStan does not read.
 	scanDirectories:
 		- vendor-prefixed
-	# The entry's Requires at least, so no call reaches an API newer than the plugin's WordPress floor.
+	# wp-compat reads the floor from the entry's Requires at least only while requiresAtLeast, which configs' profile sets, is null.
 	WPCompat:
-		requiresAtLeast: '7.1'
+		pluginFile: dws-plugin-template.php
+		requiresAtLeast: null
