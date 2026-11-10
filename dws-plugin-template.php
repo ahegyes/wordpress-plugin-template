@@ -96,5 +96,5 @@ function dws_tpl_render_build_notice(): void {
 		return;
 	}
 
-	printf( '<div class="notice notice-error"><p>%s</p></div>', esc_html__( 'DWS Plugin Template is missing some of its files, so its features are off. Reinstall the plugin to restore them.', 'dws-plugin-template' ) );
+	printf( '<div class="notice notice-error"><p>%s</p></div>', esc_html__( 'DWS Plugin Template is missing some of its files, so its features stay off until the plugin is reinstalled.', 'dws-plugin-template' ) );
 }

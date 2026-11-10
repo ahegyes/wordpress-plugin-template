@@ -139,7 +139,9 @@ function dws_tpl_get_option_text( string $key ): string {
 }
 
 /**
- * Returns the number of orders before the greeting shows in the form WooCommerce stores, or an error when the submission is not a whole number of at least 1.
+ * Returns the number of orders before the greeting shows as the digits WooCommerce stores, or an error when the submission is not a whole number of at least 1.
+ *
+ * The number input sends a whole number in any form a browser accepts, such as 03 or 3.0, so the submission parses as a float.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -149,9 +151,12 @@ function dws_tpl_get_option_text( string $key ): string {
  * @return  string|WP_Error
  */
 function dws_tpl_validate_greeting_orders( $submitted ) {
-	$orders = is_string( $submitted ) ? filter_var( $submitted, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ) : false;
+	$orders = is_string( $submitted ) ? filter_var( $submitted, FILTER_VALIDATE_FLOAT ) : false;
+	if ( false === $orders || $orders < 1 || $orders >= PHP_INT_MAX || floor( $orders ) !== $orders ) {
+		return new WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) );
+	}
 
-	return false === $orders ? new WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) ) : (string) $orders;
+	return (string) (int) $orders;
 }
 
 /**

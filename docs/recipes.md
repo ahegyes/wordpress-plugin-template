@@ -256,6 +256,8 @@ function dws_tpl_get_int_setting( string $field ): int {
 /**
  * Returns the limit as the settings page stores it, or an error when the submission is not a whole number of at least 1.
  *
+ * The number input sends a whole number in any form a browser accepts, such as 03 or 3.0, so the submission parses as a float.
+ *
  * @since   1.0.0
  * @version 1.0.0
  *
@@ -264,9 +266,12 @@ function dws_tpl_get_int_setting( string $field ): int {
  * @return  int|WP_Error
  */
 function dws_tpl_validate_limit( $submitted ) {
-	$limit = is_string( $submitted ) ? filter_var( $submitted, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ) : false;
+	$limit = is_string( $submitted ) ? filter_var( $submitted, FILTER_VALIDATE_FLOAT ) : false;
+	if ( false === $limit || $limit < 1 || $limit >= PHP_INT_MAX || floor( $limit ) !== $limit ) {
+		return new WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) );
+	}
 
-	return false === $limit ? new WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) ) : $limit;
+	return (int) $limit;
 }
 ```
 
@@ -1097,8 +1102,8 @@ final class Settings implements ComponentInterface, OptionsPageDefinitionInterfa
 						array(
 							'type'  => 'checkbox',
 							'id'    => DWS_TPL_SETTING_DELETE_DATA,
-							'title' => __( 'Data on uninstall', 'dws-plugin-template' ),
-							'desc'  => __( 'Delete the plugin\'s data when it is uninstalled', 'dws-plugin-template' ),
+							'title' => __( 'Remove all data on uninstallation', 'dws-plugin-template' ),
+							'desc'  => __( 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later', 'dws-plugin-template' ),
 						),
 					),
 				),
@@ -1205,6 +1210,8 @@ function dws_tpl_get_int_setting( string $field ): int {
 /**
  * Returns the limit as the settings page stores it, or an error when the submission is not a whole number of at least 1.
  *
+ * The number input sends a whole number in any form a browser accepts, such as 03 or 3.0, so the submission parses as a float.
+ *
  * @since   1.0.0
  * @version 1.0.0
  *
@@ -1213,9 +1220,12 @@ function dws_tpl_get_int_setting( string $field ): int {
  * @return  int|WP_Error
  */
 function dws_tpl_validate_limit( $submitted ) {
-	$limit = is_string( $submitted ) ? filter_var( $submitted, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ) : false;
+	$limit = is_string( $submitted ) ? filter_var( $submitted, FILTER_VALIDATE_FLOAT ) : false;
+	if ( false === $limit || $limit < 1 || $limit >= PHP_INT_MAX || floor( $limit ) !== $limit ) {
+		return new WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) );
+	}
 
-	return false === $limit ? new WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) ) : $limit;
+	return (int) $limit;
 }
 
 /**
