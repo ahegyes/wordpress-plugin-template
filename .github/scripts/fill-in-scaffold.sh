@@ -8,9 +8,10 @@ set -euo pipefail
 # The slug names the entry file and the text domain, so it stays clean kebab-case.
 grep -Eq '^[a-z][a-z0-9]*(-[a-z0-9]+)*$' <<< "$SLUG" || { echo "::error::plugin-slug must be kebab-case starting with a letter, with no leading, trailing or double hyphen."; exit 1; }
 grep -Eq '^[A-Za-z][A-Za-z0-9]*$' <<< "$NS" || { echo "::error::php-namespace must match ^[A-Za-z][A-Za-z0-9]*$."; exit 1; }
-# One segment after dws_ keeps every prefix in one plugin's family from starting another plugin's, and the
-# framework's admin notices refuse a prefix over 32 characters or with a network or hidden segment.
-{ grep -Eq '^dws_[a-z0-9]{1,28}$' <<< "$PREFIX" && [ "$PREFIX" != dws_network ] && [ "$PREFIX" != dws_hidden ]; } || { echo "::error::prefix must match ^dws_[a-z0-9]{1,28}$ and must not be dws_network or dws_hidden."; exit 1; }
+# One segment after dws_ keeps every prefix in one plugin's family from starting another plugin's; past 23 characters
+# the template's longest option constants fail PHPCS's array alignment, which Quality's rehearsal at the cap checks,
+# and the framework's admin notices refuse a network or hidden segment.
+{ grep -Eq '^dws_[a-z0-9]{1,23}$' <<< "$PREFIX" && [ "$PREFIX" != dws_network ] && [ "$PREFIX" != dws_hidden ]; } || { echo "::error::prefix must match ^dws_[a-z0-9]{1,23}$ and must not be dws_network or dws_hidden."; exit 1; }
 # The ports land in JSON numbers, where a leading zero is invalid, and the tests and multisite environments take the
 # next two; none may be the template's own 8811, 8812 or 8813, which the leftover check below refuses.
 { grep -Eq '^[1-9][0-9]{0,4}$' <<< "$PORT" && [ "$PORT" -le 65533 ] && { [ "$PORT" -lt 8809 ] || [ "$PORT" -gt 8813 ]; }; } || { echo "::error::wp-env-port must be 1-65533 with no leading zero, and neither it nor the next two ports may be 8811, 8812 or 8813."; exit 1; }

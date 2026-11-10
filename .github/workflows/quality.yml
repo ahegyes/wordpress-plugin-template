@@ -85,8 +85,8 @@ jobs:
           PLUGIN_NAME: Acme Orders
           SLUG: acme-orders
           NS: AcmeOrders
-          # The longest prefix the fill-in accepts, so the filled-in plugin's PHPCS run shows where the cap really sits.
-          PREFIX: dws_acmeextraordinaryordermanage
+          # The rehearsal fills in the longest prefix the script accepts, so its PHPCS run fails once the cap stops passing.
+          PREFIX: dws_acmeextraordinaryorders
           PORT: '8821'
           REPO: acme/acme-orders
         run: .github/scripts/fill-in-scaffold.sh
