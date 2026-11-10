@@ -5,8 +5,10 @@ namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 use DeepWebSolutions\PluginTemplate\Feature\Feature;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migration\MigrationRunner;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Logging\WooCommerceLogger;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RunsRequestsTrait;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
@@ -45,8 +47,21 @@ final class PluginBootTest extends TestCase {
 		self::assertLessThan( $bootstrap, $safeguards );
 	}
 
+	#[RunInSeparateProcess]
+	public function test_the_debug_constant_logs_every_level(): void {
+		\define( 'DWS_TPL_DEBUG', true );
+		$logger = new \ReflectionProperty( Plugin::class, 'logger' )->getValue( new Plugin() );
+
+		self::assertInstanceOf( WooCommerceLogger::class, $logger );
+		self::assertSame( self::get_threshold( new WooCommerceLogger( Plugin::SLUG, 'debug' ) ), self::get_threshold( $logger ) );
+	}
+
 	public function test_the_stored_data_is_at_the_revision_of_the_code(): void {
 		self::assertInstanceOf( MigrationRunner::class, dws_tpl_plugin()->migrations );
 		self::assertSame( \count( dws_tpl_get_migration_steps() ), MigrationRunner::get_revision( Plugin::PREFIX . '_revision' ) );
+	}
+
+	protected static function get_threshold( WooCommerceLogger $logger ): mixed {
+		return new \ReflectionProperty( WooCommerceLogger::class, 'threshold' )->getValue( $logger );
 	}
 }

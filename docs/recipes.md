@@ -915,7 +915,7 @@ composer remove --dev --ignore-platform-req=php+ --no-interaction ahegyes/wp-fra
         - vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
 ```
 
-3. In `dws-plugin-template.php`, delete the `Requires Plugins`, `WC requires at least` and `WC tested up to` headers.
+3. In `dws-plugin-template.php`, delete the `Requires Plugins`, `WC requires at least` and `WC tested up to` headers, and in `tests/Unit/EntryHeadersTest.php` the row that ties `WC tested up to` to the locked WooCommerce.
 
 4. In `functions.php`, delete the `FeaturesUtil` import, the `before_woocommerce_init` hook and `dws_tpl_declare_compatibility()`, and drop "declares its WooCommerce feature compatibility" from the file's summary:
 
@@ -1258,7 +1258,7 @@ Uninstaller::run(
 - `OptionsTest` reads through `dws_tpl_get_bool_setting()` and `dws_tpl_get_int_setting()` from a `DWS_TPL_OPTION_SETTINGS` row; a malformed limit reads its default 1; the validator rows call `dws_tpl_validate_limit()`, which returns integers.
 - `MigrationsTest` expects `DWS_TPL_SETTING_DEFAULTS` stored autoloaded, a stored row kept as it is, and the throw when that option's `INSERT` fails.
 - `UninstallTest` consents through `array( DWS_TPL_SETTING_DELETE_DATA => 'yes' )`, seeds and asserts no Action Scheduler action, and expects the defaults stored again afterwards.
-- `PluginBootTest` expects nothing in `$plugin->kernel->skipped`.
+- `PluginBootTest` expects nothing in `$plugin->kernel->skipped`, and drops the `DWS_TPL_DEBUG` row with its `get_threshold()` helper and the `WooCommerceLogger` and `RunInSeparateProcess` imports.
 - `SettingsTest` builds `new OptionsPage( Plugin::PREFIX, new Settings() )` and calls its `register_settings()` in `setUpBeforeClass()`, which first requires `wp-admin/includes/template.php`. `tearDownAfterClass()` removes the page's `pre_update_option_` and `option_page_capability_` filters and calls `unregister_setting()`. Each test resets `$GLOBALS['wp_settings_errors']`, renders through `render_page()` and saves as `options.php` does:
 
 ```php

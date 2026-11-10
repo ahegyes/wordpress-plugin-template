@@ -25,6 +25,19 @@ final class PartialDeployTest extends TestCase {
 		self::assertSame( '[false,true]', $request['last'] );
 	}
 
+	public function test_a_missing_bootstrap_package_shows_the_build_notice_and_loads_nothing_built(): void {
+		$bootstrap = \dirname( DWS_TPL_FILE ) . '/vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php';
+		\rename( $bootstrap, "$bootstrap.hidden" );
+		try {
+			$request = self::request( 'echo wp_json_encode( array( function_exists( "dws_tpl_boot" ), false !== has_action( "all_admin_notices", "dws_tpl_render_build_notice" ) ) );' );
+		} finally {
+			\rename( "$bootstrap.hidden", $bootstrap );
+		}
+
+		self::assertSame( 0, $request['status'], $request['output'] );
+		self::assertSame( '[false,true]', $request['last'] );
+	}
+
 	public function test_an_include_that_throws_shows_the_build_notice_and_boots_nothing(): void {
 		$include = \dirname( DWS_TPL_FILE ) . '/includes/zz-throws.php';
 		\file_put_contents( $include, "<?php\nthrow new RuntimeException( 'A partial deploy.' );\n" );
