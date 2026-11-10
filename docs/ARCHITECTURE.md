@@ -4,7 +4,7 @@ This document describes how the plugin loads, boots, stores its data and leaves 
 
 ## Loading
 
-`dws-plugin-template.php` is the only file WordPress includes, and it parses on PHP 7.4 so that a site below the floors gets a notice instead of a fatal error:
+`dws-plugin-template.php` is the only file WordPress includes, and it parses on PHP 7.4 so that a site below the floors gets a notice instead of a fatal error; `phpstan.safeguards.neon` analyzes it with the safeguards at PHP 7.4 and the oldest WordPress the bootstrap package runs on:
 
 1. It defines `DWS_TPL_FILE` and registers `languages/`, which WordPress skips for a network-activated plugin.
 2. It loads `includes/safeguards.php`, whose restrictions hold on any runtime that parses the plugin: below the floors, on a partial deploy and when the boot fails.

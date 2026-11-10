@@ -907,12 +907,11 @@ A plugin that does not need WooCommerce drops the WooCommerce package, the WooCo
 composer remove --dev --ignore-platform-req=php+ --no-interaction ahegyes/wp-framework-woocommerce php-stubs/woocommerce-stubs wp-plugin/woocommerce
 ```
 
-2. In `phpstan.dist.neon`, delete the `scanFiles` block that names the WooCommerce stubs:
+2. In `phpstan.dist.neon`, delete the WooCommerce stubs from `scanFiles`:
 
 ```neon
-    scanFiles:
-        - vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
-        - vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
+		- vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+		- vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
 ```
 
 3. In `dws-plugin-template.php`, delete the `Requires Plugins`, `WC requires at least` and `WC tested up to` headers, and in `tests/Unit/EntryHeadersTest.php` the row that ties `WC tested up to` to the locked WooCommerce.
