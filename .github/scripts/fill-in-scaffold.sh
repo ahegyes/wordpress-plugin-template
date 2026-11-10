@@ -30,10 +30,10 @@ done
 # next two; none may be the template's own 8811, 8812 or 8813, which the leftover check below refuses.
 [[ $PORT =~ ^[1-9][0-9]{0,4}$ && $PORT -le 65533 && ( $PORT -lt 8809 || $PORT -gt 8813 ) ]] ||
 	fail 'wp-env-port must be 1-65533 with no leading zero, and neither it nor the next two ports may be 8811, 8812 or 8813.'
-# WordPress skips a plugin whose name is blank, and the name lands in single-quoted PHP and JavaScript strings, and in
-# JSX text.
-name_breakers="['\\\$/<>{}]"
-[[ $PLUGIN_NAME =~ [^[:space:]] && ! $PLUGIN_NAME =~ $name_breakers ]] || fail "plugin-name must not be blank or contain \\, \$, /, ', <, >, { or }."
+# WordPress skips a plugin whose name is blank and strips tags from the name it shows, and the name lands in
+# single-quoted PHP and JavaScript strings.
+name_breakers="['\\\$/<>]"
+[[ $PLUGIN_NAME =~ [^[:space:]] && ! $PLUGIN_NAME =~ $name_breakers ]] || fail "plugin-name must not be blank or contain \\, \$, /, ', < or >."
 # The description lands in the entry's header docblock, which */ would close.
 [[ $DESCRIPTION =~ [^[:space:]] && $DESCRIPTION != *'*/'* ]] || fail 'description must not be blank or contain */.'
 

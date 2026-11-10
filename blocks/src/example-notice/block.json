@@ -2,10 +2,11 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "dws-plugin-template/example-notice",
+	"version": "1.0.0",
 	"title": "Example Notice",
 	"category": "widgets",
 	"icon": "info",
-	"description": "Displays a static example notice.",
+	"description": "Displays an example notice.",
 	"attributes": {},
 	"example": {},
 	"supports": {
@@ -14,5 +15,6 @@
 	"textdomain": "dws-plugin-template",
 	"editorScript": "file:./index.js",
 	"editorStyle": "file:./index.css",
-	"style": "file:./style-index.css"
+	"style": "file:./style-index.css",
+	"render": "file:./render.php"
 }

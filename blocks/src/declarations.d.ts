@@ -8,10 +8,4 @@ declare module '@wordpress/block-editor' {
 	export function useBlockProps(
 		props?: HTMLAttributes< HTMLElement >
 	): HTMLAttributes< HTMLElement >;
-
-	export namespace useBlockProps {
-		function save(
-			props?: HTMLAttributes< HTMLElement >
-		): HTMLAttributes< HTMLElement >;
-	}
 }

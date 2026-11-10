@@ -20,7 +20,7 @@ includes/                    hook-free code as dws_tpl_ functions and DWS_TPL_ c
 ├── migrations.php           dws_tpl_get_migration_steps() and one function per step, append-only
 ├── assets.php               the *.asset.php reader and the script and style registrars
 └── metadata.php             the slug, name and version getters, the plugin's surface for a peer plugin
-blocks/src/, assets/src/     TypeScript and SCSS, built into blocks/build/ and assets/build/ (untracked)
+blocks/src/, assets/src/     TypeScript, SCSS and each block's render.php, built into blocks/build/ and assets/build/ (untracked)
 models/, templates/          empty extension points
 .github/scripts/fill-in-scaffold.sh  the fill-in's sweep, which fill-in-scaffold.yml runs once in a new plugin and Quality rehearses here
 ```

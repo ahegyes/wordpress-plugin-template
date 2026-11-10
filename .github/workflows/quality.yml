@@ -98,7 +98,7 @@ jobs:
         run: |
           composer lint:php
           composer test:unit
-      # The display name lands in the block's JSX, which only a build and the script and type lints parse.
+      # The display name lands in the block's editor script, which only a build and the script and type lints parse.
       - name: Build and lint the filled-in plugin's scripts
         run: |
           npm run build

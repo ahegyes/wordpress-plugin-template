@@ -18,4 +18,4 @@ A release writes the fragments into a new version block of `CHANGELOG.md`, whose
 composer changelog:write
 ```
 
-The release commit also sets the entry file's `Version:` header to that version, and `readme.txt`'s `Stable tag:` where the plugin has one, because the release refuses a tag either differs from. Pushing the tag `v<version>` on that commit starts the release.
+The release commit also sets the entry file's `Version:` header to that version, and `readme.txt`'s `Stable tag:` where the plugin has one, because the release refuses a tag either differs from. It sets each `blocks/src/*/block.json`'s `version` too, which WordPress puts in the block's stylesheet URL and the Unit suite holds to the header. Pushing the tag `v<version>` on that commit starts the release.
