@@ -30,7 +30,6 @@ try {
 	require_once __DIR__ . '/includes/footprint.php';
 	require_once __DIR__ . '/includes/options.php';
 	$dws_tpl_footprint  = dws_tpl_get_footprint();
-	$dws_tpl_consent    = DWS_TPL_OPTION_DELETE_DATA;
 	$dws_tpl_meta_types = MetaTypes::DEFINITIONS;
 	if ( ! class_exists( Uninstaller::class ) ) {
 		throw new RuntimeException( 'its uninstall engine is missing.' );
@@ -50,7 +49,7 @@ try {
 		$dws_tpl_file,
 		$dws_tpl_footprint,
 		array(
-			'consent'    => array( 'option' => $dws_tpl_consent ),
+			'consent'    => array( 'option' => DWS_TPL_OPTION_DELETE_DATA ),
 			'meta_types' => $dws_tpl_meta_types,
 		)
 	);

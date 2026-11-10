@@ -1290,21 +1290,22 @@ function dws_tpl_add_settings(): void {
 }
 ```
 
-10. In `uninstall.php`, delete the `MetaTypes` import, and take consent from the settings row's `delete_data` key:
+10. In `uninstall.php`, delete the `MetaTypes` import and `$dws_tpl_meta_types`, and take consent from the settings row's `delete_data` key:
 
 ```php
 	$dws_tpl_footprint = dws_tpl_get_footprint();
-	$dws_tpl_consent   = array(
-		'option' => DWS_TPL_OPTION_SETTINGS,
-		'key'    => DWS_TPL_SETTING_DELETE_DATA,
-	);
 // ...
 
-Uninstaller::run(
-	$dws_tpl_file,
-	$dws_tpl_footprint,
-	array( 'consent' => $dws_tpl_consent )
-);
+	Uninstaller::run(
+		$dws_tpl_file,
+		$dws_tpl_footprint,
+		array(
+			'consent' => array(
+				'option' => DWS_TPL_OPTION_SETTINGS,
+				'key'    => DWS_TPL_SETTING_DELETE_DATA,
+			),
+		)
+	);
 ```
 
 11. In `.wp-env.json` and `.wp-env.tests.json`, delete the WooCommerce mapping, and let `afterStart` only activate the plugin; `.wp-env.json`'s command takes no `--config`:
