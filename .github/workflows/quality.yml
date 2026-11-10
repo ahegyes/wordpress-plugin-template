@@ -83,6 +83,8 @@ jobs:
       - name: Fill in the scaffold
         env:
           PLUGIN_NAME: Acme Orders
+          # The quotes and the backslash check that the manifests' JSON strings escape the description.
+          DESCRIPTION: 'Acme Orders keeps a store''s "orders" in one place, C:\ included.'
           SLUG: acme-orders
           NS: AcmeOrders
           # The rehearsal fills in the longest prefix the script accepts, so its PHPCS run fails once the cap stops passing.

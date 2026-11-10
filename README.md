@@ -11,16 +11,17 @@ Create the plugin's repository from this template with GitHub's **Use this templ
 | Input | Example | What it sets |
 | --- | --- | --- |
 | `plugin-name` | `Acme Orders for WooCommerce` | the display name in the plugin header, the strings and the docs |
+| `description` | `Acme Orders keeps every order a store takes in one place.` | the entry's `Description` header, `composer.json`'s and `package.json`'s `description` and the README's opening sentence; set the repository's GitHub description to the same sentence |
 | `plugin-slug` | `acme-orders-for-woocommerce` | the text domain and the names of the entry file and the release zip |
 | `php-namespace` | `AcmeOrders` | the namespace segment after `DeepWebSolutions\` |
 | `prefix` | `dws_aowc` | the prefix of every global function, constant, option and hook |
 | `wp-env-port` | `8821` | the development site's port; the tests site takes the next one |
 
 The workflow:
-- renames the entry file and replaces the template's names, prefix and ports in every tracked file outside `.github/workflows/`, which read the slug from `composer.json` instead, since GitHub refuses the workflow's own token for workflow changes;
+- renames the entry file and replaces the template's names, description, prefix and ports in every tracked file outside `.github/workflows/`, which read the slug from `composer.json` instead, since GitHub refuses the workflow's own token for workflow changes;
 - makes `README.scaffold.md` the plugin's README, which lists the template's demo and what removing each part takes;
 - deletes the disabled example include and any changelog fragments, and refreshes the Composer lock's content hash;
-- fails when any name or port of the template is left, and otherwise pushes one commit to the branch it ran on.
+- fails when any name, description or port of the template is left, and otherwise pushes one commit to the branch it ran on.
 
 ## Naming
 

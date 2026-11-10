@@ -7,6 +7,10 @@ on:
         description: 'Display name, such as "Acme Orders"'
         required: true
         type: string
+      description:
+        description: 'One sentence saying why the plugin exists, such as "Acme Orders keeps every order a store takes in one place."'
+        required: true
+        type: string
       plugin-slug:
         description: 'Kebab-case slug, also the text domain and the entry file name, such as "acme-orders"'
         required: true
@@ -53,6 +57,7 @@ jobs:
       - name: Fill in the placeholders
         env:
           PLUGIN_NAME: ${{ inputs.plugin-name }}
+          DESCRIPTION: ${{ inputs.description }}
           SLUG: ${{ inputs.plugin-slug }}
           NS: ${{ inputs.php-namespace }}
           PREFIX: ${{ inputs.prefix }}
