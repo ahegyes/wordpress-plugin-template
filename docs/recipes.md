@@ -1004,7 +1004,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 	public function __construct() {
 		$this->logger    = new ErrorLogLogger( self::SLUG );
 		$this->scheduler = new Scheduler( self::PREFIX );
-		$this->boot      = new PluginBoot( DWS_TPL_FILE, self::PREFIX, $this->logger );
+		$this->boundary  = new PluginBoot( DWS_TPL_FILE, self::PREFIX, $this->logger );
 	}
 
 	// ...

@@ -18,7 +18,7 @@ final class PluginBootTest extends TestCase {
 	public function test_the_plugin_boots_with_the_greeting_gated_off_until_a_site_switches_it_on(): void {
 		$plugin = dws_tpl_plugin();
 
-		self::assertSame( 'booted', $plugin->boot->status );
+		self::assertSame( 'booted', $plugin->boundary->status );
 		self::assertSame( array( GreetingFeature::class ), $plugin->kernel?->skipped );
 	}
 

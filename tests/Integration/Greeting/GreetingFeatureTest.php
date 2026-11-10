@@ -45,7 +45,7 @@ final class GreetingFeatureTest extends TestCase {
 		$plugin = new Plugin();
 		$plugin->boot();
 
-		self::assertSame( 'booted', $plugin->boot->status );
+		self::assertSame( 'booted', $plugin->boundary->status );
 		self::assertSame( array(), $plugin->kernel?->skipped );
 	}
 }
