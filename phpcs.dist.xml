@@ -7,6 +7,16 @@
 	<exclude-pattern>*/blocks/build/*</exclude-pattern>
 	<exclude-pattern>*/assets/build/*</exclude-pattern>
 
+	<!-- Every global the plugin declares starts with its prefix or sits in its namespace. -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="dws_tpl"/>
+				<element value="DeepWebSolutions\PluginTemplate"/>
+			</property>
+		</properties>
+	</rule>
+
 	<!-- Validate every gettext call uses the plugin's text domain. -->
 	<rule ref="WordPress.WP.I18n">
 		<properties>

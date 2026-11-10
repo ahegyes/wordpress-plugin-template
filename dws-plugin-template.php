@@ -5,6 +5,7 @@
  * Description:          WordPress plugins on the wp-framework packages start here, from one tested anatomy, so all are built alike and a fix found in one applies to all.
  * Version:              2.0.0
  * Requires at least:    7.1
+ * Tested up to:         7.1
  * Requires PHP:         8.5
  * Requires Plugins:     woocommerce
  * WC requires at least: 11.2

@@ -1254,7 +1254,7 @@ Uninstaller::run(
 ```
 
 12. Adapt the tests:
-- Delete `tests/e2e/without-woocommerce.spec.ts`.
+- Delete `tests/EndToEnd/without-woocommerce.spec.ts`.
 - `OptionsTest` reads through `dws_tpl_get_bool_setting()` and `dws_tpl_get_int_setting()` from a `DWS_TPL_OPTION_SETTINGS` row; a malformed limit reads its default 1; the validator rows call `dws_tpl_validate_limit()`, which returns integers.
 - `MigrationsTest` expects `DWS_TPL_SETTING_DEFAULTS` stored autoloaded, a stored row kept as it is, and the throw when that option's `INSERT` fails.
 - `UninstallTest` consents through `array( DWS_TPL_SETTING_DELETE_DATA => 'yes' )`, seeds and asserts no Action Scheduler action, and expects the defaults stored again afterwards.
@@ -1275,12 +1275,12 @@ Uninstaller::run(
 	}
 ```
 
-- `tests/e2e/settings.spec.ts` drives the page's limit field with the same checks: it focuses `page.getByLabel( 'Limit' )`, tabs to the `Save Changes` button and scopes axe to the form:
+- `tests/EndToEnd/settings.spec.ts` drives the page's limit field with the same checks: it focuses `page.getByLabel( 'Limit' )`, tabs to the `Save Changes` button and scopes axe to the form:
 
 ```ts
 const SAVED = 'Settings saved.';
 const REJECTED =
-	'Limit was not saved, so it keeps its previous value. Enter a whole number of 1 or more, such as 3.';
+	'Limit was not saved and keeps its previous value. The other changes were saved. Enter a whole number of 1 or more, such as 3.';
 const FORM = 'form[action="options.php"]';
 
 // ...

@@ -37,7 +37,7 @@ try {
 	}
 } catch ( Throwable $error ) {
 	// WP-CLI then fails and keeps the files for a rerun on a complete build, while a web request deletes them and leaves the data.
-	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	if ( defined( 'WP_CLI' ) && true === WP_CLI ) {
 		throw $error;
 	}
 
@@ -45,11 +45,20 @@ try {
 	return;
 }
 
-Uninstaller::run(
-	$dws_tpl_file,
-	$dws_tpl_footprint,
-	array(
-		'consent'    => array( 'option' => $dws_tpl_consent ),
-		'meta_types' => $dws_tpl_meta_types,
-	)
-);
+try {
+	Uninstaller::run(
+		$dws_tpl_file,
+		$dws_tpl_footprint,
+		array(
+			'consent'    => array( 'option' => $dws_tpl_consent ),
+			'meta_types' => $dws_tpl_meta_types,
+		)
+	);
+} catch ( RuntimeException $exception ) {
+	if ( defined( 'WP_CLI' ) && true === WP_CLI ) {
+		throw $exception;
+	}
+
+	// wp_die() ends the request before WordPress deletes the files, so the next uninstall retries, and shows the reason where a throw shows only the critical-error page.
+	wp_die( esc_html( $exception->getMessage() ), '', array( 'response' => 500 ) );
+}

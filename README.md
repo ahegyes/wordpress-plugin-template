@@ -28,8 +28,8 @@ The workflow:
 - A WooCommerce plugin's display name reads `X for WooCommerce`, as WooCommerce's trademark guidelines ask, and its slug ends in `-for-woocommerce`.
 - The prefix is `dws_` and one segment of up to 28 lowercase letters and digits, such as `dws_lpmwc`, so no plugin's prefix starts with another's; the framework's admin notices refuse `dws_network` and `dws_hidden`; a WooCommerce plugin's segment ends in `wc`.
 - The namespace is flat: `DeepWebSolutions\<Name>\`, with no segment in between.
-- The Composer package is `ahegyes/wc-<name>` for a WooCommerce plugin and `ahegyes/wp-<name>` otherwise, while the repository keeps the plugin's slug; the fill-in sets `ahegyes/<slug>`, which the author changes by hand.
-- Each plugin takes its own pair of wp-env ports, apart from 8888 and 8889, which wp-env uses by default, and the template's own 8811 and 8812.
+- The repository is `wc-<name>` for a WooCommerce plugin and `wp-<name>` otherwise, as the plugin mirrors are named, and the fill-in names the Composer package `<owner>/<repository>` and the npm package `@<owner>/<repository>` after it.
+- Each plugin takes its own three consecutive wp-env ports, for its development, tests and multisite sites, apart from 8888 and 8889, which wp-env uses by default, and the template's own 8811, 8812 and 8813.
 
 ## Working on the template
 
@@ -57,7 +57,7 @@ npm run test:e2e
 Lint the scripts, styles and types:
 
 ```sh
-npm run lint:scripts && npm run lint:styles && npm run lint:types
+npm run lint
 ```
 
 Every pull request also rehearses the fill-in with sample inputs and gates the filled-in plugin, and rehearses the release on the built zip. `tests/README.md` describes the suites and CI, `AGENTS.md` the conventions, `CONTRIBUTING.md` the changelog, and `SECURITY.md` how to report a vulnerability.

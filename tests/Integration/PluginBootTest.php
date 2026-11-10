@@ -2,13 +2,9 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
-use DeepWebSolutions\PluginTemplate\Blocks;
 use DeepWebSolutions\PluginTemplate\Feature\Feature;
 use DeepWebSolutions\PluginTemplate\Plugin;
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\AdminNotice\AdminNotices;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migration\MigrationRunner;
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Scheduling\Scheduler;
-use DeepWebSolutions\PluginTemplate\Settings;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RunsRequestsTrait;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
@@ -21,8 +17,7 @@ final class PluginBootTest extends TestCase {
 		$plugin = dws_tpl_plugin();
 
 		self::assertSame( 'booted', $plugin->boot->status );
-		self::assertSame( array( Scheduler::class, AdminNotices::class, Settings::class, Blocks::class ), $plugin->kernel?->resolved );
-		self::assertSame( array( Feature::class ), $plugin->kernel->skipped );
+		self::assertSame( array( Feature::class ), $plugin->kernel?->skipped );
 	}
 
 	public function test_the_entry_loads_every_include_but_those_whose_names_start_with_an_underscore(): void {

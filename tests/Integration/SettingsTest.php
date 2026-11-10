@@ -102,7 +102,7 @@ final class SettingsTest extends TestCase {
 		$this->save( array( DWS_TPL_OPTION_GREETING_ORDERS => $posted ) );
 
 		self::assertSame( '4', get_option( DWS_TPL_OPTION_GREETING_ORDERS ) );
-		self::assertSame( array( 'Orders before the greeting was not saved, so it keeps its previous value. Enter a whole number of 1 or more, such as 3.' ), ( new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' ) )->getValue() );
+		self::assertSame( array( 'Orders before the greeting was not saved and keeps its previous value. The other changes were saved. Enter a whole number of 1 or more, such as 3.' ), ( new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' ) )->getValue() );
 	}
 
 	public function test_a_whole_order_count_of_at_least_one_is_stored(): void {

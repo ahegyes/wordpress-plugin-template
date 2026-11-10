@@ -5,26 +5,30 @@ on:
     branches: [trunk]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
 jobs:
   lint-php:
-    name: PHP Lint
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@8d53efd292e4abee4a9c57b0e379434f54bedbe9
+    name: Lint PHP
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-lint.yml@b107001cce9f2960495d9d50481c8540d228f60c
     with:
       php-version: '8.5'
-      scripts: '["lint:php:phpcs", "lint:php:phpcs:tests", "lint:php:phpstan"]'
+      scripts: '["lint:php:phpcs", "lint:php:phpcs:tests", "lint:php:phpstan", "changelog:validate"]'
 
   lint-scripts-styles:
-    name: Scripts and styles lint
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-scripts-styles-lint.yml@8d53efd292e4abee4a9c57b0e379434f54bedbe9
+    name: Lint scripts and styles
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-scripts-styles-lint.yml@b107001cce9f2960495d9d50481c8540d228f60c
     with:
       scripts: '["lint:scripts", "lint:styles", "lint:types"]'
 
   block-json:
     name: block.json schema
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-block-json-check.yml@8d53efd292e4abee4a9c57b0e379434f54bedbe9
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-block-json-check.yml@b107001cce9f2960495d9d50481c8540d228f60c
 
   slug:
     name: Plugin slug
@@ -50,25 +54,10 @@ jobs:
   php-syntax:
     name: PHP syntax
     needs: slug
-    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-syntax-check.yml@8d53efd292e4abee4a9c57b0e379434f54bedbe9
+    uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-syntax-check.yml@b107001cce9f2960495d9d50481c8540d228f60c
     with:
       php-versions: '["7.4"]'
       paths: ${{ format('["{0}.php", "uninstall.php", "includes"]', needs.slug.outputs.slug) }}
-
-  changelog:
-    name: Changelog fragments
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
-        with:
-          php-version: '8.5'
-          coverage: none
-          tools: composer:v2
-      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
-      - run: composer changelog:validate
 
   scaffold:
     name: Scaffold rehearsal
@@ -89,6 +78,8 @@ jobs:
         with:
           node-version-file: package.json
           cache: 'npm'
+      - name: Check the scripts with ShellCheck
+        run: shellcheck .github/scripts/*.sh
       - name: Fill in the scaffold
         env:
           PLUGIN_NAME: Acme Orders

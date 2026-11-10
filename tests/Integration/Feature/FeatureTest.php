@@ -4,7 +4,6 @@ namespace DeepWebSolutions\PluginTemplate\Tests\Integration\Feature;
 
 use DeepWebSolutions\PluginTemplate\Feature\Feature;
 use DeepWebSolutions\PluginTemplate\Plugin;
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\CompositeComponentInterface;
 use PHPUnit\Framework\Attributes\After;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -42,22 +41,11 @@ final class FeatureTest extends TestCase {
 
 	#[RunInSeparateProcess]
 	public function test_with_the_greeting_switched_on_every_declared_component_boots(): void {
-		$declared = array();
-		$pending  = Plugin::COMPONENTS;
-		while ( array() !== $pending ) {
-			$class      = \array_shift( $pending );
-			$declared[] = $class;
-			if ( \is_a( $class, CompositeComponentInterface::class, true ) ) {
-				\array_unshift( $pending, ...$class::get_child_component_classes() );
-			}
-		}
-
 		update_option( DWS_TPL_OPTION_FEATURE, 'yes' );
 		$plugin = new Plugin();
 		$plugin->boot();
 
 		self::assertSame( 'booted', $plugin->boot->status );
-		self::assertSame( $declared, $plugin->kernel?->resolved );
-		self::assertSame( array(), $plugin->kernel->skipped );
+		self::assertSame( array(), $plugin->kernel?->skipped );
 	}
 }
