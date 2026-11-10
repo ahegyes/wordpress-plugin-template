@@ -42,7 +42,7 @@ npm run test:e2e
 Lint the scripts, styles and types:
 
 ```sh
-npm run lint:scripts && npm run lint:styles && npm run lint:types
+npm run lint
 ```
 
 `docs/ARCHITECTURE.md` describes how the plugin loads and boots, `docs/recipes.md` holds the step-by-step changes most plugins need, `tests/README.md` describes the test suites, and `AGENTS.md` holds the conventions for people and agents working on the code.
@@ -62,12 +62,11 @@ The fill-in renamed the plugin and kept the template's demo, which boots and pas
 Whichever parts go, four settings follow what is left, since a plugin removes them in any order:
 
 - The entry's build gate checks `blocks/build/blocks-manifest.php`, and the plugin stays off until that file exists, so point it at a file the remaining build writes, such as `assets/build/editor.asset.php`, or drop its built-file check once nothing is built.
-- `lint:scripts` names only folders that still hold a script, since ESLint fails on a path that holds none.
+- `lint:scripts` and `format:scripts` name only folders that still hold a script, since ESLint fails on a path that holds none.
 - `lint:styles` names only folders that still hold SCSS. Once none does, it keeps one pattern, such as `'assets/src/**/*.scss'`, and takes `--allow-empty-input`, since Stylelint fails when nothing matches, Quality runs it, and without a pattern wp-scripts lints every stylesheet in the project.
 - `build` stays, even once it runs nothing, since `npm run setup` and the Integration run call it.
 
 Still to decide by hand:
 
-- The Composer package name: the fill-in set `ahegyes/dws-plugin-template`, while plugins published to Composer use `ahegyes/wc-<name>` for WooCommerce and `ahegyes/wp-<name>` otherwise.
 - WooCommerce's order tables: `dws_tpl_declare_compatibility()` in `functions.php` declares the plugin incompatible until its order code is verified on both storages.
 - `SECURITY.md`'s scope and the issue forms in `.github/ISSUE_TEMPLATE/`, whose wording describes this plugin's demo.

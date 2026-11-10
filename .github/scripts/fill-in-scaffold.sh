@@ -21,6 +21,8 @@ export SCREAMING_PREFIX="${PREFIX^^}"
 export TESTS_PORT=$(( PORT + 1 ))
 export MULTISITE_PORT=$(( PORT + 2 ))
 export REPO_NAME="${REPO#*/}"
+# Composer and npm accept only lowercase package names, which the sweep takes from the repository.
+export REPO="${REPO,,}"
 
 git mv --force README.scaffold.md README.md
 # The scaffold README becomes the plugin's README.md, which .distignore already excludes.

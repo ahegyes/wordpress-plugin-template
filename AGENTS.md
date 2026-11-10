@@ -35,8 +35,9 @@ composer test:integration:multisite  # starts .wp-env.multisite.json, then runs 
 composer quality-check       # manifest and changelog validation, PHPCS (both profiles), PHPStan (both profiles), Unit and Integration
 npm run setup                # both installs, the scripts' build, then the development site
 npm run build                # blocks and assets through the local wp-scripts; npm run start watches them in a POSIX shell
-npm run lint:scripts         # ESLint, beside lint:styles (Stylelint) and lint:types (tsc)
+npm run lint                 # lint:scripts (ESLint), lint:styles (Stylelint) and lint:types (tsc)
 npm run test:e2e             # Playwright on .wp-env.tests.json, starting it if needed; the scripts must be built
+npm run quality-check:all    # composer quality-check, then npm run lint and npm run test:e2e
 ```
 
 Run wp-scripts only through the npm scripts or `node_modules/.bin/wp-scripts`: `npx wp-scripts` can install an unrelated package of that name.
