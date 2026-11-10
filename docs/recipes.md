@@ -26,8 +26,8 @@ Replace `includes/safeguards.php` with the helper and the safeguard. The file ru
 /**
  * Holds the plugin's safeguards, which load before its floor gate, so they hold on a runtime below its floors and when the rest of the build fails to load.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @package DeepWebSolutions\PluginTemplate
  */
@@ -39,8 +39,8 @@ add_filter( 'map_meta_cap', 'dws_tpl_map_export_capability', 10, 2 );
 /**
  * Returns whether a safeguard's filtered value relaxes it, which takes an explicit false once the plugin has finished booting.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   mixed $filtered The value the safeguard's filter returned for true.
  *
@@ -53,8 +53,8 @@ function dws_tpl_is_relaxed( $filtered ): bool {
 /**
  * Maps the data export capability to do_not_allow, or to managing options while the plugin relaxes the export lock.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   string[] $caps The primitive capabilities the capability maps to.
  * @param   string   $cap  The capability being checked.
@@ -69,8 +69,8 @@ function dws_tpl_map_export_capability( array $caps, string $cap ): array {
 	/**
 	 * Filters whether the data export stays locked; an explicit false unlocks it once the plugin has booted.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @param   bool $restricted Whether the data export stays locked.
 	 */
@@ -161,8 +161,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Admin
 	/**
 	 * Constructor.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @param   AdminNotices $notices The plugin's admin notices.
 	 */
@@ -175,8 +175,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Admin
 	/**
 	 * Tells the current user, on their next admin screen, how many rows the export wrote.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @param   int $rows The number of rows the export wrote.
 	 *
@@ -206,8 +206,8 @@ Add the option, its field and its default, a reader that guards the field and th
 /**
  * The option that holds the settings page's fields, keyed by field id.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @var     string
  */
@@ -216,8 +216,8 @@ const DWS_TPL_OPTION_SETTINGS = Plugin::PREFIX . '_settings';
 /**
  * The settings field that holds the limit.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @var     string
  */
@@ -226,8 +226,8 @@ const DWS_TPL_SETTING_LIMIT = 'limit';
 /**
  * The value each settings field reads as while nothing valid is stored.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @var     array<string, int>
  */
@@ -238,8 +238,8 @@ const DWS_TPL_SETTING_DEFAULTS = array(
 /**
  * Returns a settings field as an integer.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   string $field The field's id.
  *
@@ -256,8 +256,8 @@ function dws_tpl_get_int_setting( string $field ): int {
 /**
  * Returns the limit as the settings page stores it, or an error when the submission is not a whole number of at least 1.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   mixed $submitted The submitted value.
  *
@@ -286,8 +286,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Settings\A
 /**
  * Adds the plugin's settings page under Settings.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  */
 final class SettingsPage implements ComponentInterface, OptionsPageDefinitionInterface {
 	// region INHERITED METHODS
@@ -295,8 +295,8 @@ final class SettingsPage implements ComponentInterface, OptionsPageDefinitionInt
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function register_hooks(): void {
@@ -306,8 +306,8 @@ final class SettingsPage implements ComponentInterface, OptionsPageDefinitionInt
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function get_options_page( string $page_id ): array {
@@ -363,8 +363,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerc
 /**
  * Adds the packing tab to the product editor.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  */
 final class ProductData implements ComponentInterface, ProductDataTabDefinitionInterface {
 	// region INHERITED METHODS
@@ -372,8 +372,8 @@ final class ProductData implements ComponentInterface, ProductDataTabDefinitionI
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function register_hooks(): void {
@@ -383,8 +383,8 @@ final class ProductData implements ComponentInterface, ProductDataTabDefinitionI
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function get_product_data_tab( string $tab_id, \WC_Product $product ): array {
@@ -436,8 +436,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Settings\E
 /**
  * Adds an editorial note to the post editor.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  */
 final class PostNote implements ComponentInterface, ObjectFormDefinitionInterface {
 	// region MAGIC METHODS
@@ -445,8 +445,8 @@ final class PostNote implements ComponentInterface, ObjectFormDefinitionInterfac
 	/**
 	 * Constructor.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @param   AdminNotices $notices The plugin's admin notices, which report the form's rejections.
 	 */
@@ -461,8 +461,8 @@ final class PostNote implements ComponentInterface, ObjectFormDefinitionInterfac
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function register_hooks(): void {
@@ -472,8 +472,8 @@ final class PostNote implements ComponentInterface, ObjectFormDefinitionInterfac
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function get_object_form( string $form_id, int $object_id ): array {
@@ -515,8 +515,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerc
 /**
  * Adds the plugin's section to WooCommerce's Payments tab, and links to it from the plugin's row.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  */
 final class PaymentSettings implements ComponentInterface, SectionFieldsDefinitionInterface {
 	// region INHERITED METHODS
@@ -524,8 +524,8 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function register_hooks(): void {
@@ -536,11 +536,18 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function get_section_fields( string $tab_id, string $section_id ): array {
+		$methods = array();
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			if ( $gateway instanceof \WC_Payment_Gateway ) {
+				$methods[ $gateway->id ] = $gateway->get_method_title();
+			}
+		}
+
 		return array(
 			array(
 				'type'  => 'title',
@@ -552,6 +559,14 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 				'id'    => Plugin::PREFIX . '_payment_notes',
 				'title' => __( 'Payment notes', 'dws-plugin-template' ),
 				'desc'  => __( 'Add a note to each order when its payment completes', 'dws-plugin-template' ),
+			),
+			array(
+				'type'    => 'multiselect',
+				'id'      => DWS_TPL_OPTION_PAYMENT_METHODS,
+				'title'   => __( 'Payment methods', 'dws-plugin-template' ),
+				'desc'    => __( 'Add the note only to orders paid with these methods', 'dws-plugin-template' ),
+				'class'   => 'wc-enhanced-select',
+				'options' => $methods,
 			),
 			array(
 				'type' => 'sectionend',
@@ -567,8 +582,8 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 	/**
 	 * Registers the plugin's section on the Payments tab.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @param   SettingsSectionRegistry $registry WooCommerce's registry of settings sections.
 	 *
@@ -590,8 +605,8 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 	/**
 	 * Adds the link to the plugin's section to its row on the Plugins screen.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @param   string[] $links The row's action links.
 	 *
@@ -607,7 +622,38 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 }
 ```
 
-WooCommerce stores each field in its own option under its id, flat rather than in a group, and a WooCommerce checkbox stores `yes` or `no`; read it with `dws_tpl_get_bool_option()` once the key and its default are in `includes/options.php`.
+WooCommerce stores each field in its own option under its id, flat rather than in a group: a checkbox stores `yes` or `no`, which `dws_tpl_get_bool_option()` reads, and a multiselect the list of the chosen keys, which a list reader reads. Add each key to `includes/options.php` with its default in `DWS_TPL_OPTION_DEFAULTS`, the multiselect's an empty array, whose `@var` then allows `list<string>`, and the list reader beside the other typed readers:
+
+```php
+/**
+ * The option that holds the payment methods whose orders get the payment note.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @var     string
+ */
+const DWS_TPL_OPTION_PAYMENT_METHODS = 'dws_tpl_payment_methods';
+
+/**
+ * Returns an option as a list of strings, keeping the stored strings in order.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   string $key The option's key.
+ *
+ * @return  list<string>
+ */
+function dws_tpl_get_list_option( string $key ): array {
+	$default = dws_tpl_get_option_default( $key );
+	$stored  = get_option( $key, $default );
+	$stored  = is_array( $stored ) ? $stored : $default;
+	return is_array( $stored ) ? array_values( array_filter( $stored, 'is_string' ) ) : array();
+}
+```
+
+WooCommerce's save drops a multiselect key of `'0'` or `''`, so each key stays truthy, as gateway ids are.
 
 ## Recurring jobs
 
@@ -619,8 +665,8 @@ Add the repair gate's option to `includes/options.php`:
 /**
  * The option that holds when the plugin last ensured its recurring jobs, which lets a request skip ensuring them for an hour.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @var     string
  */
@@ -645,8 +691,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\Psr\Log\LoggerInterface as PsrLoggerI
 /**
  * Prunes the plugin's expired records once a day.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  */
 final class Pruning implements ComponentInterface {
 	// region FIELDS AND CONSTANTS
@@ -654,8 +700,8 @@ final class Pruning implements ComponentInterface {
 	/**
 	 * The hook the daily prune runs on.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @var     string
 	 */
@@ -668,8 +714,8 @@ final class Pruning implements ComponentInterface {
 	/**
 	 * Constructor.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @param   SchedulerInterface $scheduler The plugin's scheduler.
 	 * @param   PsrLoggerInterface $logger    The plugin's logger.
@@ -686,8 +732,8 @@ final class Pruning implements ComponentInterface {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function register_hooks(): void {
@@ -703,8 +749,8 @@ final class Pruning implements ComponentInterface {
 	/**
 	 * Ensures the daily prune unless a request did so within the last hour.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @return  void
 	 */
@@ -721,8 +767,8 @@ final class Pruning implements ComponentInterface {
 	/**
 	 * Schedules the daily prune unless it runs at that interval already, logging a scheduler that refuses.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @return  void
 	 */
@@ -743,8 +789,8 @@ final class Pruning implements ComponentInterface {
 	/**
 	 * Deletes the records that have expired.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @return  void
 	 */
@@ -775,8 +821,8 @@ register_activation_hook( DWS_TPL_FILE, 'dws_tpl_activate' );
 /**
  * Lets the next request rebuild the site's rewrite rules with the plugin's post types and taxonomies.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @return  void
  */
@@ -907,15 +953,14 @@ A plugin that does not need WooCommerce drops the WooCommerce package, the WooCo
 composer remove --dev --ignore-platform-req=php+ --no-interaction ahegyes/wp-framework-woocommerce php-stubs/woocommerce-stubs wp-plugin/woocommerce
 ```
 
-2. In `phpstan.dist.neon`, delete the `scanFiles` block that names the WooCommerce stubs:
+2. In `phpstan.dist.neon`, delete the WooCommerce stubs from `scanFiles`:
 
 ```neon
-    scanFiles:
-        - vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
-        - vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
+		- vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+		- vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
 ```
 
-3. In `dws-plugin-template.php`, delete the `Requires Plugins`, `WC requires at least` and `WC tested up to` headers.
+3. In `dws-plugin-template.php`, delete the `Requires Plugins`, `WC requires at least` and `WC tested up to` headers, and in `tests/Unit/EntryHeadersTest.php` the row that ties `WC tested up to` to the locked WooCommerce.
 
 4. In `functions.php`, delete the `FeaturesUtil` import, the `before_woocommerce_init` hook and `dws_tpl_declare_compatibility()`, and drop "declares its WooCommerce feature compatibility" from the file's summary:
 
@@ -962,8 +1007,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 	/**
 	 * Registers the scheduler and the migrations, then builds the kernel and boots the plugin's components.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @return  bool
 	 */
@@ -1002,8 +1047,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Settings\A
 /**
  * Adds the plugin's settings page under Settings, which holds the limit and the consent to delete the plugin's data on uninstall.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  */
 final class Settings implements ComponentInterface, OptionsPageDefinitionInterface {
 	// region INHERITED METHODS
@@ -1011,8 +1056,8 @@ final class Settings implements ComponentInterface, OptionsPageDefinitionInterfa
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function register_hooks(): void {
@@ -1022,8 +1067,8 @@ final class Settings implements ComponentInterface, OptionsPageDefinitionInterfa
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function get_options_page( string $page_id ): array {
@@ -1072,8 +1117,8 @@ final class Settings implements ComponentInterface, OptionsPageDefinitionInterfa
 /**
  * Holds the plugin's settings option, its fields and their defaults, and reads each field as its type, guarding the stored value.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @package DeepWebSolutions\PluginTemplate
  */
@@ -1085,8 +1130,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * The option that holds the settings page's fields, keyed by field id.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @var     string
  */
@@ -1095,8 +1140,8 @@ const DWS_TPL_OPTION_SETTINGS = Plugin::PREFIX . '_settings';
 /**
  * The settings field that holds 'yes' where the site consents to uninstall removing the plugin's data.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @var     string
  */
@@ -1105,8 +1150,8 @@ const DWS_TPL_SETTING_DELETE_DATA = 'delete_data';
 /**
  * The settings field that holds the limit.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @var     string
  */
@@ -1115,8 +1160,8 @@ const DWS_TPL_SETTING_LIMIT = 'limit';
 /**
  * The value each settings field reads as while nothing valid is stored.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @var     array<string, bool|int>
  */
@@ -1128,8 +1173,8 @@ const DWS_TPL_SETTING_DEFAULTS = array(
 /**
  * Returns a settings field as a boolean, which reads checkbox values such as 'yes' and 'no'.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   string $field The field's id.
  *
@@ -1144,8 +1189,8 @@ function dws_tpl_get_bool_setting( string $field ): bool {
 /**
  * Returns a settings field as an integer.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   string $field The field's id.
  *
@@ -1160,8 +1205,8 @@ function dws_tpl_get_int_setting( string $field ): int {
 /**
  * Returns the limit as the settings page stores it, or an error when the submission is not a whole number of at least 1.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   mixed $submitted The submitted value.
  *
@@ -1176,8 +1221,8 @@ function dws_tpl_validate_limit( $submitted ) {
 /**
  * Returns a settings field's stored value, or the fallback while the settings hold none.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   string $field    The field's id.
  * @param   mixed  $fallback The value to return while nothing is stored.
@@ -1193,8 +1238,8 @@ function dws_tpl_get_setting( string $field, $fallback ) {
 /**
  * Returns a settings field's default, or null for a field without one.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   string $field The field's id.
  *
@@ -1211,8 +1256,8 @@ function dws_tpl_get_setting_default( string $field ) {
 /**
  * Stores the settings' defaults, autoloaded, so a site that never saved the settings page reads them without a query.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @throws  RuntimeException Thrown when the defaults could not be stored.
  *
@@ -1258,7 +1303,7 @@ Uninstaller::run(
 - `OptionsTest` reads through `dws_tpl_get_bool_setting()` and `dws_tpl_get_int_setting()` from a `DWS_TPL_OPTION_SETTINGS` row; a malformed limit reads its default 1; the validator rows call `dws_tpl_validate_limit()`, which returns integers.
 - `MigrationsTest` expects `DWS_TPL_SETTING_DEFAULTS` stored autoloaded, a stored row kept as it is, and the throw when that option's `INSERT` fails.
 - `UninstallTest` consents through `array( DWS_TPL_SETTING_DELETE_DATA => 'yes' )`, seeds and asserts no Action Scheduler action, and expects the defaults stored again afterwards.
-- `PluginBootTest` expects nothing in `$plugin->kernel->skipped`.
+- `PluginBootTest` expects nothing in `$plugin->kernel->skipped`, and drops the `DWS_TPL_DEBUG` row with its `get_threshold()` helper and the `WooCommerceLogger` and `RunInSeparateProcess` imports.
 - `SettingsTest` builds `new OptionsPage( Plugin::PREFIX, new Settings() )` and calls its `register_settings()` in `setUpBeforeClass()`, which first requires `wp-admin/includes/template.php`. `tearDownAfterClass()` removes the page's `pre_update_option_` and `option_page_capability_` filters and calls `unregister_setting()`. Each test resets `$GLOBALS['wp_settings_errors']`, renders through `render_page()` and saves as `options.php` does:
 
 ```php

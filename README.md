@@ -11,22 +11,22 @@ Create the plugin's repository from this template with GitHub's **Use this templ
 | Input | Example | What it sets |
 | --- | --- | --- |
 | `plugin-name` | `Acme Orders for WooCommerce` | the display name in the plugin header, the strings and the docs |
+| `description` | `Acme Orders keeps every order a store takes in one place.` | the entry's `Description` header, `composer.json`'s and `package.json`'s `description` and the README's opening sentence; set the repository's GitHub description to the same sentence |
 | `plugin-slug` | `acme-orders-for-woocommerce` | the text domain and the names of the entry file and the release zip |
 | `php-namespace` | `AcmeOrders` | the namespace segment after `DeepWebSolutions\` |
 | `prefix` | `dws_aowc` | the prefix of every global function, constant, option and hook |
 | `wp-env-port` | `8821` | the development site's port; the tests site takes the next one |
 
 The workflow:
-- renames the entry file and replaces the template's names, prefix and ports in every tracked file outside `.github/workflows/`, which read the slug from `composer.json` instead, since GitHub refuses the workflow's own token for workflow changes;
-- resets the version to 0.1.0 and the changelog to one unreleased entry;
+- renames the entry file and replaces the template's names, description, prefix and ports in every tracked file outside `.github/workflows/`, which read the slug from `composer.json` instead, since GitHub refuses the workflow's own token for workflow changes;
 - makes `README.scaffold.md` the plugin's README, which lists the template's demo and what removing each part takes;
-- deletes the disabled example include and refreshes the Composer lock's content hash;
-- fails when any name or port of the template is left, and otherwise pushes one commit to the branch it ran on.
+- deletes the disabled example include and any changelog fragments, and refreshes the Composer lock's content hash;
+- fails when any name, description or port of the template is left, and otherwise pushes one commit to the branch it ran on.
 
 ## Naming
 
 - A WooCommerce plugin's display name reads `X for WooCommerce`, as WooCommerce's trademark guidelines ask, and its slug ends in `-for-woocommerce`.
-- The prefix is `dws_` and one segment of up to 28 lowercase letters and digits, such as `dws_lpmwc`, so no plugin's prefix starts with another's; the framework's admin notices refuse `dws_network` and `dws_hidden`; a WooCommerce plugin's segment ends in `wc`.
+- The prefix is `dws_` and one segment of up to 23 lowercase letters and digits, such as `dws_lpmwc`, so no plugin's prefix starts with another's and the template's longest constants still pass PHPCS; the framework's admin notices refuse `dws_network` and `dws_hidden`; a WooCommerce plugin's segment ends in `wc`.
 - The namespace is flat: `DeepWebSolutions\<Name>\`, with no segment in between.
 - The repository is `wc-<name>` for a WooCommerce plugin and `wp-<name>` otherwise, as the plugin mirrors are named, and the fill-in names the Composer package `<owner>/<repository>` and the npm package `@<owner>/<repository>` after it.
 - Each plugin takes its own three consecutive wp-env ports, for its development, tests and multisite sites, apart from 8888 and 8889, which wp-env uses by default, and the template's own 8811, 8812 and 8813.
@@ -60,7 +60,13 @@ Lint the scripts, styles and types:
 npm run lint
 ```
 
-Every pull request also rehearses the fill-in with sample inputs and gates the filled-in plugin, and rehearses the release on the built zip. `tests/README.md` describes the suites and CI, `AGENTS.md` the conventions, `CONTRIBUTING.md` the changelog, and `SECURITY.md` how to report a vulnerability.
+Update the dependencies within their constraints, and `@wordpress/*` to npm's latest rather than the WordPress floor's versions, since WordPress supplies those packages at runtime and PHPStan and the end-to-end suite on the floor's WordPress keep the plugin to its floor's APIs:
+
+```sh
+npm run packages-update:all
+```
+
+Every pull request also rehearses the fill-in with sample inputs and gates the filled-in plugin, and rehearses the release on the built zip. The template itself publishes no release, even on a tag, and takes no changelog fragments, which the fill-in deletes. `tests/README.md` describes the suites and CI, `AGENTS.md` the conventions, `CONTRIBUTING.md` the changelog, and `SECURITY.md` how to report a vulnerability.
 
 ## License
 

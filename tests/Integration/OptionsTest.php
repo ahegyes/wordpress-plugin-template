@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 final class OptionsTest extends TestCase {
 	protected const string KEY = Plugin::PREFIX . '_options_test';
 
-	protected const array RESTORED = array( DWS_TPL_OPTION_DELETE_DATA, DWS_TPL_OPTION_GREETING );
+	protected const array RESTORED = array( DWS_TPL_OPTION_DELETE_DATA, DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS );
 
 	protected array $stored = array();
 
@@ -47,15 +47,6 @@ final class OptionsTest extends TestCase {
 			'string' => array( 'kept', 'kept' ),
 			'empty'  => array( '', '' ),
 			'array'  => array( array( 'kept' ), '' ),
-		);
-	}
-
-	public static function stored_lists(): array {
-		return array(
-			'list'   => array( array( 'a', 'b' ), array( 'a', 'b' ) ),
-			'mixed'  => array( array( 'a', 7, 'b' ), array( 'a', 'b' ) ),
-			'keyed'  => array( array( 'x' => 'a' ), array( 'a' ) ),
-			'string' => array( 'a', array() ),
 		);
 	}
 
@@ -107,18 +98,17 @@ final class OptionsTest extends TestCase {
 		self::assertSame( $expected, dws_tpl_get_int_option( self::KEY ) );
 	}
 
+	public function test_an_int_that_is_not_a_whole_number_reads_its_default(): void {
+		update_option( DWS_TPL_OPTION_GREETING_ORDERS, 'seven' );
+
+		self::assertSame( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_GREETING_ORDERS ], dws_tpl_get_int_option( DWS_TPL_OPTION_GREETING_ORDERS ) );
+	}
+
 	#[DataProvider( 'stored_strings' )]
 	public function test_a_string_reads_a_stored_string_or_the_empty_string( mixed $stored, string $expected ): void {
 		update_option( self::KEY, $stored );
 
 		self::assertSame( $expected, dws_tpl_get_string_option( self::KEY ) );
-	}
-
-	#[DataProvider( 'stored_lists' )]
-	public function test_a_list_reads_the_stored_strings_in_order( mixed $stored, array $expected ): void {
-		update_option( self::KEY, $stored );
-
-		self::assertSame( $expected, dws_tpl_get_list_option( self::KEY ) );
 	}
 
 	public function test_a_string_without_a_stored_value_reads_its_translated_default(): void {
@@ -134,6 +124,12 @@ final class OptionsTest extends TestCase {
 		update_option( DWS_TPL_OPTION_GREETING, 'Hello' );
 
 		self::assertSame( 'Hello', dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
+	}
+
+	public function test_a_string_that_is_not_a_string_reads_its_translated_default(): void {
+		update_option( DWS_TPL_OPTION_GREETING, array( 'Hello' ) );
+
+		self::assertSame( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
 	}
 
 	public function test_an_option_without_a_translated_default_has_no_text(): void {

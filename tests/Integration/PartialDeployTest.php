@@ -2,6 +2,7 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
+use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Uninstall\Uninstaller;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RunsRequestsTrait;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -25,6 +26,32 @@ final class PartialDeployTest extends TestCase {
 		self::assertSame( '[false,true]', $request['last'] );
 	}
 
+	public function test_a_missing_assets_build_shows_the_build_notice_and_loads_nothing_built(): void {
+		$asset = \dirname( DWS_TPL_FILE ) . '/assets/build/editor.asset.php';
+		\rename( $asset, "$asset.hidden" );
+		try {
+			$request = self::request( 'echo wp_json_encode( array( function_exists( "dws_tpl_boot" ), false !== has_action( "all_admin_notices", "dws_tpl_render_build_notice" ) ) );' );
+		} finally {
+			\rename( "$asset.hidden", $asset );
+		}
+
+		self::assertSame( 0, $request['status'], $request['output'] );
+		self::assertSame( '[false,true]', $request['last'] );
+	}
+
+	public function test_a_missing_bootstrap_package_shows_the_build_notice_and_loads_nothing_built(): void {
+		$bootstrap = \dirname( DWS_TPL_FILE ) . '/vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php';
+		\rename( $bootstrap, "$bootstrap.hidden" );
+		try {
+			$request = self::request( 'echo wp_json_encode( array( function_exists( "dws_tpl_boot" ), false !== has_action( "all_admin_notices", "dws_tpl_render_build_notice" ) ) );' );
+		} finally {
+			\rename( "$bootstrap.hidden", $bootstrap );
+		}
+
+		self::assertSame( 0, $request['status'], $request['output'] );
+		self::assertSame( '[false,true]', $request['last'] );
+	}
+
 	public function test_an_include_that_throws_shows_the_build_notice_and_boots_nothing(): void {
 		$include = \dirname( DWS_TPL_FILE ) . '/includes/zz-throws.php';
 		\file_put_contents( $include, "<?php\nthrow new RuntimeException( 'A partial deploy.' );\n" );
@@ -36,6 +63,22 @@ final class PartialDeployTest extends TestCase {
 
 		self::assertSame( 0, $request['status'], $request['output'] );
 		self::assertSame( '[false,true]', $request['last'] );
+	}
+
+	public function test_a_build_error_is_logged_with_its_location_once_an_hour(): void {
+		$message = 'A partial deploy ' . \uniqid() . '.';
+		$include = \dirname( DWS_TPL_FILE ) . '/includes/zz-throws.php';
+		\file_put_contents( $include, "<?php\nthrow new RuntimeException( '$message' );\n" );
+		try {
+			$first  = self::request( 'echo 1;' );
+			$second = self::request( 'echo 1;' );
+		} finally {
+			\unlink( $include );
+			delete_transient( Plugin::PREFIX . '_build_error_' . \md5( $message ) );
+		}
+
+		self::assertStringContainsString( "did not finish loading: $message in $include:2", $first['output'] );
+		self::assertStringNotContainsString( 'did not finish loading', $second['output'] );
 	}
 
 	public function test_the_peer_getters_a_partial_deploy_defines_still_answer(): void {

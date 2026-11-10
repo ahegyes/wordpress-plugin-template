@@ -2,8 +2,8 @@
 /**
  * Declares the data the plugin stores, which uninstall removes where the site consents.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @package DeepWebSolutions\PluginTemplate
  */
@@ -15,8 +15,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Returns the plugin's stored data by kind, which covers every option, transient, user meta key and scheduled job under the plugin's prefix.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @return  array{option_prefixes: list<non-empty-string>, user_meta_site_prefixes: list<non-empty-string>, user_meta_global_prefixes: list<non-empty-string>, network_options: list<non-empty-string>, cron_hooks: list<non-empty-string>, as_groups: list<non-empty-string>}
  */

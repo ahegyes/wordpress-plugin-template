@@ -2,8 +2,8 @@
 /**
  * Registers the plugin's built scripts and styles with the dependencies and version wp-scripts generates beside each.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @package DeepWebSolutions\PluginTemplate
  */
@@ -15,8 +15,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Returns the payload wp-scripts generates beside a built file, which lists its dependencies, script module imports included, and its version.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   string $path The built file's path, relative to the plugin's directory.
  *
@@ -36,8 +36,8 @@ function dws_tpl_get_asset( string $path ): array {
 /**
  * Registers a built script with its generated dependencies and version, and loads its translations from languages/.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   non-empty-string                                                                         $handle The script's handle.
  * @param   non-empty-string                                                                         $path   The built script's path, relative to the plugin's directory.
@@ -58,8 +58,8 @@ function dws_tpl_register_script( string $handle, string $path, array $args = ar
 /**
  * Registers a built stylesheet with its generated version, and its right-to-left variant for right-to-left languages.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   non-empty-string $handle The stylesheet's handle.
  * @param   non-empty-string $path   The built stylesheet's path, relative to the plugin's directory.

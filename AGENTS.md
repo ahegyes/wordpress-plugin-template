@@ -60,6 +60,7 @@ Each runs PHP 8.5 with WooCommerce from `vendor/` and its order tables on; CI ru
 6. **Options and data.** Options are read only through `includes/options.php`'s typed readers, safeguards excepted. Everything stored lives under `dws_tpl_`, or `_dws_tpl_` for hidden meta. The footprint covers the prefix's options, transients and user meta; object meta needs a `meta_prefixes` entry per type, and anything else its own entry.
 7. **Safeguards** live in `includes/safeguards.php`, call only WordPress and that file, and relax only through their own filter, through `dws_tpl_is_relaxed()` (`docs/recipes.md`). The entry loads them before the floor check, so they parse on PHP 7.4 and call only WordPress APIs present at the oldest WordPress the bootstrap package runs on, or guard them, which `phpstan.safeguards.neon` checks.
 8. **Migrations** are append-only: a step converges from any partial state, verifies its writes and throws when one fails.
+9. **WordPress floor.** The plugin calls only APIs its `Requires at least` has, PHP's and JavaScript's alike: PHPStan's wp-compat reads the floor from that header, and CI runs the end-to-end suite on the floor's WordPress, which supplies the `@wordpress/*` scripts at runtime.
 
 ## Style
 

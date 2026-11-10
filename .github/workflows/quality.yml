@@ -45,7 +45,7 @@ jobs:
         id: slug
         run: |
           slug=$(jq -r '.extra["text-domain"] // empty' composer.json)
-          if ! [[ "$slug" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+          if ! [[ "$slug" =~ ^[a-z][a-z0-9]*(-[a-z0-9]+)*$ ]]; then
             echo "::error::composer.json's extra.text-domain must be the plugin's kebab-case slug — got '$slug'."
             exit 1
           fi
@@ -83,9 +83,12 @@ jobs:
       - name: Fill in the scaffold
         env:
           PLUGIN_NAME: Acme Orders
+          # The quotes and the backslash check that the manifests' JSON strings escape the description.
+          DESCRIPTION: 'Acme Orders keeps a store''s "orders" in one place, C:\ included.'
           SLUG: acme-orders
           NS: AcmeOrders
-          PREFIX: dws_ao
+          # The rehearsal fills in the longest prefix the script accepts, so its PHPCS run fails once the cap stops passing.
+          PREFIX: dws_acmeextraordinaryorders
           PORT: '8821'
           REPO: acme/acme-orders
         run: .github/scripts/fill-in-scaffold.sh
@@ -101,3 +104,14 @@ jobs:
           npm run build
           npm run lint:scripts
           npm run lint:types
+      # Setting up PHP 7.4 replaces the PHP 8.5 the steps above need, so the fill-in job's last check runs last here too.
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '7.4'
+          coverage: none
+          tools: none
+      - name: Check the PHP 7.4 syntax
+        run: |
+          for file in acme-orders.php uninstall.php includes/*.php; do
+            php -l "$file"
+          done

@@ -10,8 +10,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Compo
 /**
  * Greets customers on their account dashboard once they have placed the set number of orders.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  */
 final class FeatureDetail implements ComponentInterface {
 	// region INHERITED METHODS
@@ -19,8 +19,8 @@ final class FeatureDetail implements ComponentInterface {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 */
 	#[\Override]
 	public function register_hooks(): void {
@@ -35,8 +35,8 @@ final class FeatureDetail implements ComponentInterface {
 	/**
 	 * Prints the greeting as a WooCommerce notice to a customer whose orders reach the set number.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @return  void
 	 */
@@ -52,8 +52,8 @@ final class FeatureDetail implements ComponentInterface {
 	/**
 	 * Enqueues the greeting's stylesheet on the account dashboard.
 	 *
-	 * @since   2.0.0
-	 * @version 2.0.0
+	 * @since   1.0.0
+	 * @version 1.0.0
 	 *
 	 * @return  void
 	 */

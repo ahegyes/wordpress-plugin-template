@@ -2,8 +2,8 @@
 /**
  * Defines the plugin's accessor, boots it on plugins_loaded, unschedules its jobs on deactivation, declares its WooCommerce feature compatibility and loads the files in includes/.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @package DeepWebSolutions\PluginTemplate
  */
@@ -33,8 +33,8 @@ register_deactivation_hook( DWS_TPL_FILE, 'dws_tpl_deactivate' );
 /**
  * Returns the plugin's composition root, built on first use.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @return  Plugin
  */
@@ -50,40 +50,46 @@ function dws_tpl_plugin(): Plugin {
 /**
  * Boots the plugin, reporting a composition root that cannot be built as an incomplete build.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @return  void
  */
 function dws_tpl_boot(): void {
 	try {
-		dws_tpl_plugin()->boot();
+		$plugin = dws_tpl_plugin();
 	} catch ( Throwable $error ) {
 		dws_tpl_handle_build_error( $error );
+		return;
 	}
+
+	$plugin->boot(); // PluginBoot reports a failed composition itself, and a hook listener's throw is not a build error.
 }
 
 /**
  * Unschedules the plugin's jobs on the site it is deactivated on, reporting a composition root that cannot be built as an incomplete build.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @return  void
  */
 function dws_tpl_deactivate(): void {
 	try {
-		dws_tpl_plugin()->deactivate();
+		$plugin = dws_tpl_plugin();
 	} catch ( Throwable $error ) {
 		dws_tpl_handle_build_error( $error );
+		return;
 	}
+
+	$plugin->deactivate();
 }
 
 /**
  * Declares whether the plugin works with WooCommerce's order tables, which each plugin built from the template sets from its own evidence.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @return  void
  */

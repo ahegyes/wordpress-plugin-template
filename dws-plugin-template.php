@@ -3,7 +3,7 @@
  * Plugin Name:          DWS Plugin Template
  * Plugin URI:           https://github.com/ahegyes/wordpress-plugin-template
  * Description:          WordPress plugins on the wp-framework packages start here, from one tested anatomy, so all are built alike and a fix found in one applies to all.
- * Version:              2.0.0
+ * Version:              1.0.0
  * Requires at least:    7.1
  * Tested up to:         7.1
  * Requires PHP:         8.5
@@ -32,15 +32,18 @@ load_plugin_textdomain( 'dws-plugin-template', false, dirname( plugin_basename( 
 require_once __DIR__ . '/includes/safeguards.php'; // Before the floor gate, so the restrictions hold on any runtime that parses the plugin.
 
 $dws_tpl_bootstrap = __DIR__ . '/vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php';
-if ( is_readable( $dws_tpl_bootstrap ) ) {
-	require_once $dws_tpl_bootstrap;
-	Updater::register( __FILE__ ); // Before the floor gate, so a release that lowers the floors still reaches a site below them.
-	if ( ! Requirements::check_floors( __FILE__ ) ) {
-		return;
-	}
+if ( ! is_readable( $dws_tpl_bootstrap ) ) { // The floor gate lives in the bootstrap package, so nothing built may load without it.
+	add_action( 'all_admin_notices', 'dws_tpl_render_build_notice' );
+	return;
 }
 
-if ( ! is_readable( $dws_tpl_bootstrap ) || ! is_readable( __DIR__ . '/blocks/build/blocks-manifest.php' ) ) { // The floor gate never ran, or the scripts were never built, so nothing built may load.
+require_once $dws_tpl_bootstrap;
+Updater::register( __FILE__ ); // Before the floor gate, so a release that lowers the floors still reaches a site below them.
+if ( ! Requirements::check_floors( __FILE__ ) ) {
+	return;
+}
+
+if ( ! is_readable( __DIR__ . '/blocks/build/blocks-manifest.php' ) || ! is_readable( __DIR__ . '/assets/build/editor.asset.php' ) ) { // The plugin reads both build trees unchecked, so a build that wrote only one of them must not load.
 	add_action( 'all_admin_notices', 'dws_tpl_render_build_notice' );
 	return;
 }
@@ -54,10 +57,10 @@ try {
 }
 
 /**
- * Reports a build that could not load, rethrowing in local and development environments and otherwise logging the error and showing the build notice.
+ * Reports a build that could not load, rethrowing in local and development environments and otherwise logging the error with its location and showing the build notice.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @param   Throwable $error The error that stopped the build.
  *
@@ -70,15 +73,21 @@ function dws_tpl_handle_build_error( Throwable $error ): void {
 		throw $error;
 	}
 
-	error_log( 'DWS Plugin Template did not finish loading: ' . $error->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- The plugin's logger is part of the build that failed.
+	// A partial deploy fails the same way on every request, so each distinct message is logged about once an hour, as best effort.
+	$key = 'dws_tpl_build_error_' . md5( $error->getMessage() );
+	if ( false === get_transient( $key ) ) {
+		set_transient( $key, 1, HOUR_IN_SECONDS );
+		error_log( 'DWS Plugin Template did not finish loading: ' . $error->getMessage() . ' in ' . $error->getFile() . ':' . $error->getLine() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- The plugin's logger is part of the build that failed.
+	}
+
 	add_action( 'all_admin_notices', 'dws_tpl_render_build_notice' );
 }
 
 /**
  * Prints the notice that the plugin's build is incomplete to users who can activate plugins.
  *
- * @since   2.0.0
- * @version 2.0.0
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @return  void
  */

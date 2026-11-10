@@ -4,12 +4,12 @@ This document describes how the plugin loads, boots, stores its data and leaves 
 
 ## Loading
 
-`dws-plugin-template.php` is the only file WordPress includes, and it parses on PHP 7.4 so that a site below the floors gets a notice instead of a fatal error:
+`dws-plugin-template.php` is the only file WordPress includes, and it parses on PHP 7.4 so that a site below the floors gets a notice instead of a fatal error; `phpstan.safeguards.neon` analyzes it with the safeguards at PHP 7.4 and the oldest WordPress the bootstrap package runs on:
 
 1. It defines `DWS_TPL_FILE` and registers `languages/`, which WordPress skips for a network-activated plugin.
 2. It loads `includes/safeguards.php`, whose restrictions hold on any runtime that parses the plugin: below the floors, on a partial deploy and when the boot fails.
-3. It requires `vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php`, registers the GitHub updater, then checks the `Requires PHP` and `Requires at least` headers. The updater comes first, so a release that lowers the floors still reaches a site below them. On a site below a floor, WordPress's own notice shows and nothing past the safeguards loads.
-4. It stops with a notice when the prefixed framework or the built blocks are missing. It then requires the autoloader and `functions.php`; a missing file throws, which local and development environments rethrow and every other environment logs, showing the same notice.
+3. It stops with a notice when the prefixed framework is missing. Otherwise it requires `vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php`, registers the GitHub updater, then checks the `Requires PHP` and `Requires at least` headers. The updater comes first, so a release that lowers the floors still reaches a site below them. On a site below a floor, WordPress's own notice shows and nothing past the safeguards loads.
+4. It stops with the same notice when the built blocks or assets are missing. It then requires the autoloader and `functions.php`; a missing file throws, which local and development environments rethrow and every other environment logs, showing the same notice.
 
 `functions.php` defines the `dws_tpl_plugin()` accessor, boots the plugin on `plugins_loaded` at priority 15, after WooCommerce and Action Scheduler have loaded, registers the deactivation callback, declares the plugin's WooCommerce feature compatibility, and requires every `includes/*.php` in name order except those whose names start with `_`.
 

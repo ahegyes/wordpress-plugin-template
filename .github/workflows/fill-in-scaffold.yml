@@ -7,6 +7,10 @@ on:
         description: 'Display name, such as "Acme Orders"'
         required: true
         type: string
+      description:
+        description: 'One sentence saying why the plugin exists, such as "Acme Orders keeps every order a store takes in one place."'
+        required: true
+        type: string
       plugin-slug:
         description: 'Kebab-case slug, also the text domain and the entry file name, such as "acme-orders"'
         required: true
@@ -34,14 +38,12 @@ jobs:
     if: ${{ !github.event.repository.is_template }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      contents: write
     steps:
-      # The job pushes the filled-in plugin back, so the checkout keeps its credentials.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: true
+          persist-credentials: false
 
+      # setup-php hands its token to Composer on disk, where the npm packages the fill-in runs can read it, so this job's token is read-only.
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.5'
@@ -55,6 +57,7 @@ jobs:
       - name: Fill in the placeholders
         env:
           PLUGIN_NAME: ${{ inputs.plugin-name }}
+          DESCRIPTION: ${{ inputs.description }}
           SLUG: ${{ inputs.plugin-slug }}
           NS: ${{ inputs.php-namespace }}
           PREFIX: ${{ inputs.prefix }}
@@ -62,12 +65,57 @@ jobs:
           REPO: ${{ github.repository }}
         run: .github/scripts/fill-in-scaffold.sh
 
+      # The entry runs before the floor gate and names the namespace, so one PHP 7.4 cannot parse stops the fill-in here, on the files Quality parses on PHP 7.4.
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '7.4'
+          coverage: none
+          tools: none
+
+      - name: Check the PHP 7.4 syntax
+        env:
+          SLUG: ${{ inputs.plugin-slug }}
+        run: |
+          for file in "$SLUG.php" uninstall.php includes/*.php; do
+            php -l "$file"
+          done
+
+      - name: Save the filled-in plugin as a patch
+        run: |
+          git add -A
+          git diff --cached --binary > "$RUNNER_TEMP/fill-in.patch"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: fill-in
+          path: ${{ runner.temp }}/fill-in.patch
+          if-no-files-found: error
+          retention-days: 1
+
+  push:
+    name: Commit and push
+    needs: fill-in
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write # Pushes the filled-in plugin.
+    steps:
+      # Only git runs in this job, so the checkout keeps the credentials the push uses.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: true
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: fill-in
+          path: ${{ runner.temp }}
+
       - name: Commit and push
         env:
           SLUG: ${{ inputs.plugin-slug }}
         run: |
+          git apply --index "$RUNNER_TEMP/fill-in.patch"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
           git commit -m "Fill in scaffold: $SLUG"
           git push

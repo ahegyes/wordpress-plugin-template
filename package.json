@@ -1,7 +1,7 @@
 {
 	"name": "@ahegyes/wordpress-plugin-template",
 	"private": true,
-	"description": "DWS WordPress plugin template — wp-env, script and style tooling.",
+	"description": "WordPress plugins on the wp-framework packages start here, from one tested anatomy, so all are built alike and a fix found in one applies to all.",
 	"license": "GPL-3.0-or-later",
 	"repository": {
 		"type": "git",

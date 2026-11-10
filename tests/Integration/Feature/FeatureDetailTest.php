@@ -81,6 +81,21 @@ final class FeatureDetailTest extends TestCase {
 		wp_deregister_style( 'dws-plugin-template-greeting' );
 	}
 
+	public function test_the_greeting_style_skips_the_account_page_endpoints(): void {
+		global $wp;
+
+		add_filter( 'woocommerce_is_account_page', '__return_true' );
+		$wp->query_vars['orders'] = '';
+		try {
+			new FeatureDetail()->enqueue_style();
+		} finally {
+			unset( $wp->query_vars['orders'] );
+			remove_filter( 'woocommerce_is_account_page', '__return_true' );
+		}
+
+		self::assertFalse( wp_style_is( 'dws-plugin-template-greeting' ) );
+	}
+
 	public function test_a_customer_whose_orders_reach_the_set_number_is_greeted_as_text(): void {
 		update_option( DWS_TPL_OPTION_GREETING, 'Hi & <b>welcome</b>' );
 		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '2' );
