@@ -45,10 +45,10 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 			),
 			array(
 				'type'    => 'checkbox',
-				'id'      => DWS_TPL_OPTION_FEATURE,
+				'id'      => DWS_TPL_OPTION_GREETING_ENABLED,
 				'title'   => __( 'Show the greeting', 'dws-plugin-template' ),
 				'desc'    => __( 'Greet returning customers', 'dws-plugin-template' ),
-				'default' => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_FEATURE ] ),
+				'default' => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_GREETING_ENABLED ] ),
 			),
 			array(
 				'type'        => 'text',

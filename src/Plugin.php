@@ -57,7 +57,7 @@ final class Plugin {
 		AdminNotices::class,
 		Settings::class,
 		Blocks::class,
-		Feature\Feature::class,
+		Greeting\GreetingFeature::class,
 	);
 
 	/**

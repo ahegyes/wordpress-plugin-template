@@ -1,6 +1,6 @@
 <?php declare( strict_types=1 );
 
-namespace DeepWebSolutions\PluginTemplate\Feature;
+namespace DeepWebSolutions\PluginTemplate\Greeting;
 
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\ComponentInterface;
@@ -13,7 +13,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Compo
  * @since   1.0.0
  * @version 1.0.0
  */
-final class FeatureDetail implements ComponentInterface {
+final class AccountDashboardGreeting implements ComponentInterface {
 	// region INHERITED METHODS
 
 	/**

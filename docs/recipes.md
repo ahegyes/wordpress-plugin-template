@@ -1029,7 +1029,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 	}
 ```
 
-6. Delete the greeting: `src/Feature/`, `tests/Integration/Feature/` and `assets/src/greeting.scss`, then its entries in `package.json`:
+6. Delete the greeting: `src/Greeting/`, `tests/Integration/Greeting/` and `assets/src/greeting.scss`, then its entries in `package.json`:
 
 ```json
 "build:assets": "wp-scripts build editor=./assets/src/editor.ts --output-path=assets/build",

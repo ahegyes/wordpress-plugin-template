@@ -23,16 +23,6 @@ defined( 'ABSPATH' ) || exit;
 const DWS_TPL_OPTION_DELETE_DATA = Plugin::PREFIX . '_delete_data';
 
 /**
- * The option that holds 'yes' where the site greets returning customers on their account dashboard.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @var     string
- */
-const DWS_TPL_OPTION_FEATURE = Plugin::PREFIX . '_feature';
-
-/**
  * The option that holds the greeting.
  *
  * @since   1.0.0
@@ -41,6 +31,16 @@ const DWS_TPL_OPTION_FEATURE = Plugin::PREFIX . '_feature';
  * @var     string
  */
 const DWS_TPL_OPTION_GREETING = Plugin::PREFIX . '_greeting';
+
+/**
+ * The option that holds 'yes' where the site greets returning customers on their account dashboard.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @var     string
+ */
+const DWS_TPL_OPTION_GREETING_ENABLED = 'dws_tpl_greeting_enabled';
 
 /**
  * The option that holds the number of orders a customer places before the greeting shows.
@@ -71,9 +71,9 @@ const DWS_TPL_OPTION_REVISION = 'dws_tpl_revision';
  * @var     array<string, bool|int|string>
  */
 const DWS_TPL_OPTION_DEFAULTS = array(
-	DWS_TPL_OPTION_DELETE_DATA     => false,
-	DWS_TPL_OPTION_FEATURE         => false,
-	DWS_TPL_OPTION_GREETING_ORDERS => 1,
+	DWS_TPL_OPTION_DELETE_DATA      => false,
+	DWS_TPL_OPTION_GREETING_ENABLED => false,
+	DWS_TPL_OPTION_GREETING_ORDERS  => 1,
 );
 
 /**

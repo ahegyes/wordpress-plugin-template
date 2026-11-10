@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class SettingsTest extends TestCase {
-	protected const array KEYS = array( DWS_TPL_OPTION_FEATURE, DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS, DWS_TPL_OPTION_DELETE_DATA );
+	protected const array KEYS = array( DWS_TPL_OPTION_GREETING_ENABLED, DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS, DWS_TPL_OPTION_DELETE_DATA );
 
 	protected static SettingsTab $tab;
 
@@ -75,7 +75,7 @@ final class SettingsTest extends TestCase {
 		$form = $this->render();
 
 		self::assertSame( 'DWS Plugin Template', self::$tab->get_label() );
-		self::assertFalse( $form->getElementById( DWS_TPL_OPTION_FEATURE )?->hasAttribute( 'checked' ) );
+		self::assertFalse( $form->getElementById( DWS_TPL_OPTION_GREETING_ENABLED )?->hasAttribute( 'checked' ) );
 		self::assertSame( '', $form->getElementById( DWS_TPL_OPTION_GREETING )?->getAttribute( 'value' ) );
 		self::assertSame( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), $form->getElementById( DWS_TPL_OPTION_GREETING )?->getAttribute( 'placeholder' ) );
 		self::assertSame( '1', $form->getElementById( DWS_TPL_OPTION_GREETING_ORDERS )?->getAttribute( 'value' ) );
@@ -86,10 +86,10 @@ final class SettingsTest extends TestCase {
 	public function test_the_tab_words_each_field_by_what_it_does(): void {
 		$form = $this->render();
 		$rows = array(
-			DWS_TPL_OPTION_FEATURE         => array( 'Show the greeting', 'Greet returning customers' ),
-			DWS_TPL_OPTION_GREETING        => array( 'Message', 'Leave empty to show the default greeting in each customer\'s language.' ),
-			DWS_TPL_OPTION_GREETING_ORDERS => array( 'Orders before the greeting', 'Customers see the greeting once this many of their orders are paid.' ),
-			DWS_TPL_OPTION_DELETE_DATA     => array( 'Remove all data on uninstallation', 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later' ),
+			DWS_TPL_OPTION_GREETING_ENABLED => array( 'Show the greeting', 'Greet returning customers' ),
+			DWS_TPL_OPTION_GREETING         => array( 'Message', 'Leave empty to show the default greeting in each customer\'s language.' ),
+			DWS_TPL_OPTION_GREETING_ORDERS  => array( 'Orders before the greeting', 'Customers see the greeting once this many of their orders are paid.' ),
+			DWS_TPL_OPTION_DELETE_DATA      => array( 'Remove all data on uninstallation', 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later' ),
 		);
 
 		foreach ( $rows as $key => $texts ) {

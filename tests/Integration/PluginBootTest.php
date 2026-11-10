@@ -2,7 +2,7 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
-use DeepWebSolutions\PluginTemplate\Feature\Feature;
+use DeepWebSolutions\PluginTemplate\Greeting\GreetingFeature;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migration\MigrationRunner;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Logging\WooCommerceLogger;
@@ -19,7 +19,7 @@ final class PluginBootTest extends TestCase {
 		$plugin = dws_tpl_plugin();
 
 		self::assertSame( 'booted', $plugin->boot->status );
-		self::assertSame( array( Feature::class ), $plugin->kernel?->skipped );
+		self::assertSame( array( GreetingFeature::class ), $plugin->kernel?->skipped );
 	}
 
 	public function test_the_entry_loads_every_include_but_those_whose_names_start_with_an_underscore(): void {
