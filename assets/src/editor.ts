@@ -8,9 +8,9 @@ dispatch( commandsStore ).registerCommand( {
 	name: 'dws-plugin-template/insert-example-notice',
 	label: __( 'Insert an example notice', 'dws-plugin-template' ),
 	callback: ( { close } ) => {
-		dispatch( blockEditorStore ).insertBlocks(
-			createBlock( 'dws-plugin-template/example-notice' )
-		);
+		dispatch( blockEditorStore ).insertBlocks( [
+			createBlock( 'dws-plugin-template/example-notice' ),
+		] );
 		close();
 	},
 } );
