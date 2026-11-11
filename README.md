@@ -20,7 +20,7 @@ Create the plugin's repository from this template with GitHub's **Use this templ
 The workflow:
 - renames the entry file and replaces the template's names, description, prefix and ports in every tracked file outside `.github/workflows/`, which read the slug from `composer.json` instead, since GitHub refuses the workflow's own token for workflow changes;
 - makes `README.scaffold.md` the plugin's README, which lists the template's demo and what removing each part takes;
-- deletes the disabled example include and any changelog fragments, and refreshes the Composer lock's content hash;
+- deletes the disabled example include, the safeguard recipe's test and every changelog fragment but the initial entry, and refreshes the Composer lock's content hash;
 - fails when any name, description or port of the template is left, and otherwise pushes one commit to the branch it ran on.
 
 ## Naming
@@ -66,7 +66,7 @@ Update the dependencies within their constraints, and `@wordpress/*` to npm's la
 npm run packages-update:all
 ```
 
-Every pull request also rehearses the fill-in with sample inputs and gates the filled-in plugin, and rehearses the release on the built zip. The template itself publishes no release, even on a tag, and takes no changelog fragments, which the fill-in deletes. `tests/README.md` describes the suites and CI, `AGENTS.md` the conventions, `CONTRIBUTING.md` the changelog, and `SECURITY.md` how to report a vulnerability.
+Every pull request also rehearses the fill-in with sample inputs and gates the filled-in plugin, and rehearses the release on the built zip. The template itself publishes no release, even on a tag, and takes no changelog fragments but `changelog/initial-release`, the plugin's first entry, which the fill-in keeps while it deletes any other. `tests/README.md` describes the suites and CI, `AGENTS.md` the conventions, `CONTRIBUTING.md` the changelog, and `SECURITY.md` how to report a vulnerability.
 
 ## License
 
