@@ -1,7 +1,24 @@
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@wordpress/e2e-test-utils-playwright';
 
+const NAME = 'dws-plugin-template/example-notice';
+const TEXT = 'An example notice from DWS Plugin Template.';
+
 test.describe( 'Block editor', () => {
-	test( 'inserts the example notice from the command palette', async ( {
+	let post: number | null = null;
+
+	test.afterEach( async ( { requestUtils } ) => {
+		if ( null !== post ) {
+			await requestUtils.rest( {
+				method: 'DELETE',
+				path: `/wp/v2/posts/${ post }`,
+				params: { force: true },
+			} );
+			post = null;
+		}
+	} );
+
+	test( 'inserts the example notice from the command palette and publishes its Outlined style', async ( {
 		admin,
 		editor,
 		page,
@@ -18,13 +35,31 @@ test.describe( 'Block editor', () => {
 
 		await expect
 			.poll( editor.getBlocks )
+			.toMatchObject( [ { name: NAME } ] );
+		await expect( editor.canvas.getByText( TEXT ) ).toBeVisible();
+
+		await editor.openDocumentSettingsSidebar();
+		await page
+			.getByRole( 'region', { name: 'Editor settings' } )
+			.getByRole( 'button', { name: 'Outlined' } )
+			.click();
+		await expect
+			.poll( editor.getBlocks )
 			.toMatchObject( [
-				{ name: 'dws-plugin-template/example-notice' },
+				{ name: NAME, attributes: { className: 'is-style-outlined' } },
 			] );
-		await expect(
-			editor.canvas.getByText(
-				'An example notice from DWS Plugin Template.'
-			)
-		).toBeVisible();
+
+		post = await editor.publishPost();
+		expect( post ).not.toBeNull();
+		await page.goto( `/?p=${ post }` );
+
+		const notice = page.locator(
+			'.wp-block-dws-plugin-template-example-notice.is-style-outlined'
+		);
+		await expect( notice ).toHaveText( TEXT );
+		const results = await new AxeBuilder( { page } )
+			.include( '.wp-block-dws-plugin-template-example-notice' )
+			.analyze();
+		expect( results.violations ).toEqual( [] );
 	} );
 } );
