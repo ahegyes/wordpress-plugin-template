@@ -25,7 +25,9 @@ function dws_tpl_get_migration_steps(): array {
 }
 
 /**
- * Stores the defaults of the settings that need no translation, autoloaded, so a site that never saved them reads them without a query; a translated default is never stored, because it would keep the language the site had when the step ran.
+ * Stores the defaults of the settings that need no translation.
+ *
+ * A translated default is never stored, because it would keep the language the site had when the step ran.
  *
  * @since   1.0.0
  * @version 1.0.0

@@ -62,14 +62,14 @@ try {
 }
 
 /**
- * Reports a build that could not load, rethrowing in local and development environments and otherwise logging the error with its location and showing the build notice.
+ * Reports a build that could not load.
  *
  * @since   1.0.0
  * @version 1.0.0
  *
  * @param   Throwable $error The error that stopped the build.
  *
- * @throws  Throwable Thrown in local and development environments.
+ * @throws  Throwable Thrown when the site runs in a local or development environment.
  *
  * @return  void
  */

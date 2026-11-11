@@ -13,7 +13,7 @@ use DeepWebSolutions\PluginTemplate\Plugin;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Returns the plugin's stored data by kind, which covers every option, transient, user meta key and scheduled job under the plugin's prefix.
+ * Returns the plugin's stored data by kind.
  *
  * @since   1.0.0
  * @version 1.0.0

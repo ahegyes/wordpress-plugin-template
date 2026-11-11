@@ -13,7 +13,7 @@ use DeepWebSolutions\PluginTemplate\Plugin;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Returns the payload wp-scripts generates beside a built file, which lists its dependencies, script module imports included, and its version.
+ * Returns the payload wp-scripts generates beside a built file.
  *
  * @since   1.0.0
  * @version 1.0.0

@@ -1,6 +1,8 @@
 <?php declare( strict_types=1 );
 /**
- * Prints the example notice, which renders on each request so that every visitor reads it in their own language.
+ * Prints the example notice.
+ *
+ * It renders on each request, so every visitor reads it in their own language.
  *
  * @since   1.0.0
  * @version 1.0.0

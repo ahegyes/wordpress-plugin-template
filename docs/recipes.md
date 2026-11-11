@@ -24,7 +24,9 @@ Replace `includes/safeguards.php` with the helper and the safeguard. The file ru
 ```php
 <?php declare( strict_types=1 );
 /**
- * Holds the plugin's safeguards, which load before its floor gate, so they hold on a runtime below its floors and when the rest of the build fails to load.
+ * Holds the plugin's safeguards.
+ *
+ * They load before the floor gate, so they hold on a runtime below the plugin's floors and when the rest of the build fails to load.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -967,7 +969,7 @@ composer remove --dev --ignore-platform-req=php+ --no-interaction ahegyes/wp-fra
 
 3. In `dws-plugin-template.php`, delete the `Requires Plugins`, `WC requires at least` and `WC tested up to` headers, and in `tests/Unit/EntryHeadersTest.php` the row that ties `WC tested up to` to the locked WooCommerce.
 
-4. In `functions.php`, delete the `FeaturesUtil` import, the `before_woocommerce_init` hook and `dws_tpl_declare_compatibility()`, and drop "declares its WooCommerce feature compatibility" from the file's summary:
+4. In `functions.php`, delete the `FeaturesUtil` import, the `before_woocommerce_init` hook and `dws_tpl_declare_compatibility()`:
 
 ```php
 use DeepWebSolutions\PluginTemplate\Plugin;
