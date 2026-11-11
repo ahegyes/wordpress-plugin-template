@@ -62,7 +62,7 @@ final class SettingsTest extends TestCase {
 
 	#[After]
 	protected function forget_the_rejections(): void {
-		( new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' ) )->setValue( null, array() );
+		new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' )->setValue( null, array() );
 	}
 
 	public function test_the_tab_shows_the_greeting_and_data_fields_with_their_defaults(): void {
@@ -118,7 +118,7 @@ final class SettingsTest extends TestCase {
 		$this->save( array( DWS_TPL_OPTION_GREETING_ORDERS => $posted ) );
 
 		self::assertSame( '4', get_option( DWS_TPL_OPTION_GREETING_ORDERS ) );
-		self::assertSame( array( 'Orders before the greeting was not saved and keeps its previous value. The other changes were saved. Enter a whole number of 1 or more, such as 3.' ), ( new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' ) )->getValue() );
+		self::assertSame( array( 'Orders before the greeting was not saved and keeps its previous value. The other changes were saved. Enter a whole number of 1 or more, such as 3.' ), new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' )->getValue() );
 	}
 
 	#[DataProvider( 'whole_order_counts' )]

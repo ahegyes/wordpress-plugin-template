@@ -76,12 +76,12 @@ final class AccountDashboardGreetingTest extends TestCase {
 	}
 
 	public function test_the_greeting_style_loads_on_the_account_dashboard_only(): void {
-		( new AccountDashboardGreeting() )->enqueue_style();
+		new AccountDashboardGreeting()->enqueue_style();
 		self::assertFalse( wp_style_is( 'dws-plugin-template-greeting' ) );
 
 		add_filter( 'woocommerce_is_account_page', '__return_true' );
 		try {
-			( new AccountDashboardGreeting() )->enqueue_style();
+			new AccountDashboardGreeting()->enqueue_style();
 		} finally {
 			remove_filter( 'woocommerce_is_account_page', '__return_true' );
 		}
@@ -199,7 +199,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 
 	protected function print(): string {
 		\ob_start();
-		( new AccountDashboardGreeting() )->print_greeting();
+		new AccountDashboardGreeting()->print_greeting();
 		return (string) \ob_get_clean();
 	}
 }
