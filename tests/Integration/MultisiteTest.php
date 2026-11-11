@@ -2,6 +2,7 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
+use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RunsRequestsTrait;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -16,13 +17,13 @@ final class MultisiteTest extends TestCase {
 		$site_id = wp_insert_site(
 			array(
 				'domain' => get_network()?->domain,
-				'path'   => get_network()?->path . 'dws-tpl-second/',
+				'path'   => get_network()?->path . \str_replace( '_', '-', Plugin::PREFIX ) . '-second/',
 			)
 		);
 		self::assertIsInt( $site_id );
 
 		try {
-			$request = self::request( 'echo did_action( "dws_tpl/boot/succeeded" );', get_home_url( $site_id, '/' ) );
+			$request = self::request( 'echo did_action( "dws_tpl/boot/succeeded" );', '--url=' . get_home_url( $site_id, '/' ) );
 
 			self::assertSame( '1', $request['last'], $request['output'] );
 			self::assertSame( 'no', get_blog_option( $site_id, DWS_TPL_OPTION_DELETE_DATA ) );

@@ -3,6 +3,7 @@
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration\Greeting;
 
 use DeepWebSolutions\PluginTemplate\Greeting\AccountDashboardGreeting;
+use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
 use PHPUnit\Framework\Attributes\After;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -10,9 +11,9 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class AccountDashboardGreetingTest extends TestCase {
-	protected const array KEYS = array( DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS );
+	use RestoresOptionsTrait;
 
-	protected array $stored = array();
+	protected const array OPTIONS = array( DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS );
 
 	protected int $customer = 0;
 
@@ -34,10 +35,6 @@ final class AccountDashboardGreetingTest extends TestCase {
 
 	#[\Override]
 	protected function setUp(): void {
-		foreach ( self::KEYS as $key ) {
-			$this->stored[ $key ] = get_option( $key );
-		}
-
 		$customer = wp_insert_user(
 			array(
 				'user_login' => 'dws_tpl_customer_' . \wp_generate_password( 8, false ),
@@ -52,10 +49,6 @@ final class AccountDashboardGreetingTest extends TestCase {
 
 	#[After]
 	protected function clean_up(): void {
-		foreach ( $this->stored as $key => $value ) {
-			false === $value ? delete_option( $key ) : update_option( $key, $value );
-		}
-
 		foreach ( $this->orders as $order ) {
 			$order->delete( true );
 		}

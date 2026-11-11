@@ -22,7 +22,7 @@ final class UninstallTest extends TestCase {
 		\define( 'WP_UNINSTALL_PLUGIN', 'another-plugin/another-plugin.php' ); // A bulk uninstall keeps the first plugin's value for every later one.
 		$source = (string) \file_get_contents( DWS_TPL_FILE );
 		\file_put_contents( DWS_TPL_FILE, (string) \preg_replace( '/^(\s*\*\s*Requires PHP:\s*).*$/m', '${1}99.0', $source ) );
-		$log = (string) \tempnam( \sys_get_temp_dir(), 'dws-tpl-uninstall-' );
+		$log = (string) \tempnam( \sys_get_temp_dir(), \str_replace( '_', '-', Plugin::PREFIX ) . '-uninstall-' );
 		\ini_set( 'error_log', $log ); // phpcs:ignore WordPress.PHP.IniSet.Risky -- The child process's stderr would fail the test.
 
 		try {

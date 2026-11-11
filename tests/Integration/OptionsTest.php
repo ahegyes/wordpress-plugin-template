@@ -3,19 +3,19 @@
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
 use DeepWebSolutions\PluginTemplate\Plugin;
+use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
 use PHPUnit\Framework\Attributes\After;
-use PHPUnit\Framework\Attributes\Before;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class OptionsTest extends TestCase {
+	use RestoresOptionsTrait;
+
 	protected const string KEY = Plugin::PREFIX . '_options_test';
 
-	protected const array RESTORED = array( DWS_TPL_OPTION_DELETE_DATA, DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS );
-
-	protected array $stored = array();
+	protected const array OPTIONS = array( DWS_TPL_OPTION_DELETE_DATA, DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS );
 
 	public static function stored_bools(): array {
 		return array(
@@ -63,19 +63,9 @@ final class OptionsTest extends TestCase {
 		);
 	}
 
-	#[Before]
-	protected function store_rows(): void {
-		foreach ( self::RESTORED as $key ) {
-			$this->stored[ $key ] = get_option( $key );
-		}
-	}
-
 	#[After]
-	protected function restore_rows(): void {
+	protected function delete_the_test_option(): void {
 		delete_option( self::KEY );
-		foreach ( $this->stored as $key => $value ) {
-			false === $value ? delete_option( $key ) : update_option( $key, $value );
-		}
 	}
 
 	#[DataProvider( 'stored_bools' )]

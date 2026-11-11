@@ -4,7 +4,7 @@ namespace DeepWebSolutions\PluginTemplate\Tests\Integration\Greeting;
 
 use DeepWebSolutions\PluginTemplate\Greeting\GreetingFeature;
 use DeepWebSolutions\PluginTemplate\Plugin;
-use PHPUnit\Framework\Attributes\After;
+use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
@@ -12,7 +12,9 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class GreetingFeatureTest extends TestCase {
-	protected mixed $stored = false;
+	use RestoresOptionsTrait;
+
+	protected const array OPTIONS = array( DWS_TPL_OPTION_GREETING_ENABLED );
 
 	public static function stored_toggles(): array {
 		return array(
@@ -20,16 +22,6 @@ final class GreetingFeatureTest extends TestCase {
 			'off'   => array( 'no', false ),
 			'unset' => array( null, false ),
 		);
-	}
-
-	#[\Override]
-	protected function setUp(): void {
-		$this->stored = get_option( DWS_TPL_OPTION_GREETING_ENABLED );
-	}
-
-	#[After]
-	protected function restore_row(): void {
-		false === $this->stored ? delete_option( DWS_TPL_OPTION_GREETING_ENABLED ) : update_option( DWS_TPL_OPTION_GREETING_ENABLED, $this->stored );
 	}
 
 	#[DataProvider( 'stored_toggles' )]
