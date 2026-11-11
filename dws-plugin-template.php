@@ -1,5 +1,7 @@
 <?php declare( strict_types=1 );
 /**
+ * Loads the plugin's safeguards, then the rest of the plugin once the site meets its floors and its build is complete.
+ *
  * Plugin Name:          DWS Plugin Template
  * Plugin URI:           https://github.com/ahegyes/wordpress-plugin-template
  * Description:          WordPress plugins on the wp-framework packages start here, from one tested anatomy, so all are built alike and a fix found in one applies to all.
@@ -17,6 +19,9 @@
  * Update URI:           https://github.com/ahegyes/wordpress-plugin-template
  * Text Domain:          dws-plugin-template
  * Domain Path:          /languages
+ *
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @package DeepWebSolutions\PluginTemplate
  */
