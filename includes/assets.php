@@ -65,12 +65,11 @@ function dws_tpl_register_script( string $handle, string $path, array $args = ar
  *
  * @param   non-empty-string $handle The stylesheet's handle.
  * @param   non-empty-string $path   The built stylesheet's path, relative to the plugin's directory.
- * @param   string           $media  Optional. The media the stylesheet applies to. Default 'all'.
  *
  * @return  bool
  */
-function dws_tpl_register_style( string $handle, string $path, string $media = 'all' ): bool {
-	$registered = wp_register_style( $handle, plugin_dir_url( DWS_TPL_FILE ) . $path, array(), dws_tpl_get_asset( $path )['version'], $media );
+function dws_tpl_register_style( string $handle, string $path ): bool {
+	$registered = wp_register_style( $handle, plugin_dir_url( DWS_TPL_FILE ) . $path, array(), dws_tpl_get_asset( $path )['version'] );
 	if ( $registered ) {
 		wp_style_add_data( $handle, 'rtl', 'replace' );
 	}
