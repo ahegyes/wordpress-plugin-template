@@ -71,4 +71,4 @@ Whichever parts go, four settings follow what is left, since a plugin removes th
 Still to decide by hand:
 
 - WooCommerce's order tables: `dws_tpl_declare_compatibility()` in `functions.php` declares the plugin incompatible until its order code is verified on both storages.
-- `SECURITY.md`'s scope and the issue forms in `.github/ISSUE_TEMPLATE/`, whose wording describes this plugin's demo.
+- `SECURITY.md`'s scope, whose first out-of-scope line names the plugins generated from the template.

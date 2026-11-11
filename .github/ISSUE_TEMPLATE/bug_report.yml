@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a defect in the plugin template (the unmodified template, not a forked plugin).
+description: Report a defect in the plugin.
 labels: [bug, triage]
 body:
   - type: dropdown
@@ -7,21 +7,20 @@ body:
     attributes:
       label: Affected area
       options:
-        - Plugin runtime (composition root, components, framework wiring)
-        - Composer scoping pipeline (scoper.inc.php, post-autoload-dump)
-        - Changelog tooling (composer changelog:* scripts)
-        - CI workflows (quality.yml, tests.yml)
-        - wp-env / integration test infrastructure
-        - Documentation / readme
-        - Other / unsure
+        - Runtime (boot, components, framework wiring)
+        - Settings
+        - Blocks and scripts
+        - CI workflows (.github/workflows/) and release
+        - Documentation
+        - Other or unsure
     validations:
       required: true
 
   - type: input
-    id: commit
+    id: version
     attributes:
-      label: Plugin template commit / SHA
-      placeholder: 'trunk@<sha>'
+      label: Plugin version or commit
+      placeholder: 'x.y.z or trunk@<sha>'
     validations:
       required: true
 
@@ -29,7 +28,7 @@ body:
     id: php-version
     attributes:
       label: PHP version
-      placeholder: '8.5.0'
+      placeholder: 'x.y.z'
     validations:
       required: true
 
@@ -37,16 +36,24 @@ body:
     id: wp-version
     attributes:
       label: WordPress version
-      placeholder: '7.0'
+      placeholder: 'x.y.z'
+    validations:
+      required: true
+
+  - type: input
+    id: wc-version
+    attributes:
+      label: WooCommerce version, if active
+      placeholder: 'x.y.z'
 
   - type: textarea
     id: reproduction
     attributes:
       label: Steps to reproduce
       placeholder: |
-        1. Use this template via "Use this template" or git clone
-        2. Run `composer packages-install` / `npm install` / `npm run wp-env:start`
-        3. Observe Z
+        1. Activate the plugin.
+        2. Go to …
+        3. See …
     validations:
       required: true
 
@@ -67,5 +74,5 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: Relevant logs / stack traces / CI run URL
+      label: Relevant logs, stack traces or a CI run URL
       render: text
