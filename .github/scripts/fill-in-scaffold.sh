@@ -85,8 +85,7 @@ perl -pi -e 'BEGIN { ( $description = $ENV{DESCRIPTION} ) =~ s/(["\\])/\\$1/g } 
 # shellcheck disable=SC2016
 perl -pi -e 's/^TODO: one sentence saying why this plugin exists.*$/$ENV{DESCRIPTION}/' README.md
 
-# The plugin's first release writes the initial entry the template stages.
-find changelog -type f ! -name '.gitkeep' ! -name 'initial-release' -delete
+find changelog -type f ! -name '.gitkeep' -delete
 
 # The sweep renamed the package, so the lock's content hash follows, or composer validate --strict fails.
 composer update --lock --no-install --no-scripts --no-plugins --ignore-platform-req=php+ --no-interaction

@@ -31,10 +31,10 @@ A release writes the fragments into a new version block of `CHANGELOG.md`, whose
 composer changelog:write
 ```
 
-The first release has no earlier version to count from, so it names its own:
+The first release dates the `1.0.0 - unreleased` block the plugin starts with, adding the fragments to it, since a plain write would put a new version above it:
 
 ```sh
-composer changelog:write -- --use-version=1.0.0
+composer changelog:write -- --amend
 ```
 
 The release commit also sets the entry file's `Version:` header to that version, and `readme.txt`'s `Stable tag:` where the plugin has one, because the release refuses a tag that either differs from. It sets each `blocks/src/*/block.json`'s `version` too, which WordPress puts in the block's stylesheet URL and the Unit suite holds to the header.
