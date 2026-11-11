@@ -40,7 +40,7 @@ Start the multisite site, build the scripts and run the Integration suite's `mul
 composer test:integration:multisite
 ```
 
-Run the end-to-end suite, which starts the tests site when it is down and needs the built scripts and, once per machine, Playwright's Chromium:
+Run the end-to-end suite, which starts the tests site when it is down and needs the built scripts and Playwright's Chromium, installed initially and after a Playwright update that needs a new browser revision:
 
 ```sh
 npx playwright install chromium

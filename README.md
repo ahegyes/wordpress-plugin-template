@@ -43,13 +43,15 @@ Install the dependencies, prefix the framework into `vendor-prefixed/`, build th
 npm run setup
 ```
 
+wp-env publishes the development site on every network interface, with fixed development credentials, so other devices on the local network can reach it.
+
 Run the manifest and changelog checks, PHPCS, PHPStan, and the Unit and Integration suites on the tests site at <http://localhost:8812>:
 
 ```sh
 composer quality-check
 ```
 
-Install the browser the end-to-end suite runs in, once per machine, then run the suite:
+Install the browser the end-to-end suite runs in, initially and after a Playwright update that needs a new browser revision, then run the suite:
 
 ```sh
 npx playwright install chromium
