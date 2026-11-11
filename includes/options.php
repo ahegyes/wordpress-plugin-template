@@ -8,8 +8,6 @@
  * @package DeepWebSolutions\PluginTemplate
  */
 
-use DeepWebSolutions\PluginTemplate\Plugin;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -20,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @var     string
  */
-const DWS_TPL_OPTION_DELETE_DATA = Plugin::PREFIX . '_delete_data';
+const DWS_TPL_OPTION_DELETE_DATA = 'dws_tpl_delete_data';
 
 /**
  * The option that holds the greeting.
@@ -30,7 +28,7 @@ const DWS_TPL_OPTION_DELETE_DATA = Plugin::PREFIX . '_delete_data';
  *
  * @var     string
  */
-const DWS_TPL_OPTION_GREETING = Plugin::PREFIX . '_greeting';
+const DWS_TPL_OPTION_GREETING = 'dws_tpl_greeting';
 
 /**
  * The option that holds 'yes' where the site greets returning customers on their account dashboard.
@@ -50,7 +48,7 @@ const DWS_TPL_OPTION_GREETING_ENABLED = 'dws_tpl_greeting_enabled';
  *
  * @var     string
  */
-const DWS_TPL_OPTION_GREETING_ORDERS = Plugin::PREFIX . '_greeting_orders';
+const DWS_TPL_OPTION_GREETING_ORDERS = 'dws_tpl_greeting_orders';
 
 /**
  * The option in which the migration runner records the revision the plugin's data has reached.
