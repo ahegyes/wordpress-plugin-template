@@ -8,7 +8,7 @@ The entry file's headers state the floors: `Requires PHP`, `Requires at least` f
 
 ## Installation
 
-Download `dws-plugin-template.zip` from the repository's latest release, then upload it under Plugins → Add New Plugin → Upload Plugin. Later releases arrive through WordPress's own update check, from the repository the entry file's `Update URI` names.
+Download `dws-plugin-template.zip` from the repository's latest release, then upload it under Plugins → Add New Plugin → Upload Plugin. Later releases arrive through WordPress's own update check, from the repository the entry file's `Update URI` names, while that repository is public, since the check calls GitHub's API without authentication.
 
 ## Development
 
