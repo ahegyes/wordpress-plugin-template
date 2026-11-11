@@ -958,6 +958,13 @@ TODO: what the plugin does, for the directory's listing.
 ]
 ```
 
+Composer hands the arguments after `--` to every command in the array, so the first release runs the two apart, and `CONTRIBUTING.md`'s first-release command becomes:
+
+```sh
+vendor/bin/changelogger write --use-version=1.0.0
+vendor/bin/pronamic-changelog-md-to-wordpress-plugin-readme-txt
+```
+
 4. Lint the file in `.github/workflows/quality.yml`:
 
 ```yaml
