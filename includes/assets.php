@@ -13,7 +13,7 @@ use DeepWebSolutions\PluginTemplate\Plugin;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Returns the payload wp-scripts generates beside a built file, which lists its dependencies, script module imports included, and its version.
+ * Returns the payload wp-scripts generates beside a built file.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -29,7 +29,6 @@ function dws_tpl_get_asset( string $path ): array {
 	 * @var array{dependencies: list<non-empty-string|array{id: non-empty-string, import?: 'static'|'dynamic'}>, version: string, type?: string, handle?: string} $asset
 	 */
 	$asset = require plugin_dir_path( DWS_TPL_FILE ) . dirname( $path ) . '/' . pathinfo( $path, PATHINFO_FILENAME ) . '.asset.php';
-
 	return $asset;
 }
 
@@ -65,12 +64,11 @@ function dws_tpl_register_script( string $handle, string $path, array $args = ar
  *
  * @param   non-empty-string $handle The stylesheet's handle.
  * @param   non-empty-string $path   The built stylesheet's path, relative to the plugin's directory.
- * @param   string           $media  Optional. The media the stylesheet applies to. Default 'all'.
  *
  * @return  bool
  */
-function dws_tpl_register_style( string $handle, string $path, string $media = 'all' ): bool {
-	$registered = wp_register_style( $handle, plugin_dir_url( DWS_TPL_FILE ) . $path, array(), dws_tpl_get_asset( $path )['version'], $media );
+function dws_tpl_register_style( string $handle, string $path ): bool {
+	$registered = wp_register_style( $handle, plugin_dir_url( DWS_TPL_FILE ) . $path, array(), dws_tpl_get_asset( $path )['version'] );
 	if ( $registered ) {
 		wp_style_add_data( $handle, 'rtl', 'replace' );
 	}

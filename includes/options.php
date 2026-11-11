@@ -8,8 +8,6 @@
  * @package DeepWebSolutions\PluginTemplate
  */
 
-use DeepWebSolutions\PluginTemplate\Plugin;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -20,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @var     string
  */
-const DWS_TPL_OPTION_DELETE_DATA = Plugin::PREFIX . '_delete_data';
+const DWS_TPL_OPTION_DELETE_DATA = 'dws_tpl_delete_data';
 
 /**
  * The option that holds the greeting.
@@ -30,7 +28,7 @@ const DWS_TPL_OPTION_DELETE_DATA = Plugin::PREFIX . '_delete_data';
  *
  * @var     string
  */
-const DWS_TPL_OPTION_GREETING = Plugin::PREFIX . '_greeting';
+const DWS_TPL_OPTION_GREETING = 'dws_tpl_greeting';
 
 /**
  * The option that holds 'yes' where the site greets returning customers on their account dashboard.
@@ -50,7 +48,7 @@ const DWS_TPL_OPTION_GREETING_ENABLED = 'dws_tpl_greeting_enabled';
  *
  * @var     string
  */
-const DWS_TPL_OPTION_GREETING_ORDERS = Plugin::PREFIX . '_greeting_orders';
+const DWS_TPL_OPTION_GREETING_ORDERS = 'dws_tpl_greeting_orders';
 
 /**
  * The option in which the migration runner records the revision the plugin's data has reached.
@@ -88,7 +86,6 @@ const DWS_TPL_OPTION_DEFAULTS = array(
  */
 function dws_tpl_get_bool_option( string $key ): bool {
 	$default = dws_tpl_get_option_default( $key );
-
 	return filter_var( get_option( $key, $default ), FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE ) ?? ( true === $default );
 }
 
@@ -104,12 +101,11 @@ function dws_tpl_get_bool_option( string $key ): bool {
  */
 function dws_tpl_get_int_option( string $key ): int {
 	$default = dws_tpl_get_option_default( $key );
-
 	return filter_var( get_option( $key, $default ), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE ) ?? ( is_int( $default ) ? $default : 0 );
 }
 
 /**
- * Returns an option as a string, reading a missing or empty value of an option with a translated default as that default, only after init.
+ * Returns an option as a string, reading a missing or empty value of an option with a translated default as that default.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -130,7 +126,9 @@ function dws_tpl_get_string_option( string $key ): string {
 }
 
 /**
- * Returns an option's translated default, which exists only after init, or an empty string for an option without one.
+ * Returns an option's translated default, or an empty string for an option without one.
+ *
+ * Callers read it from init on, because WordPress flags translations loaded earlier.
  *
  * @since   1.0.0
  * @version 1.0.0

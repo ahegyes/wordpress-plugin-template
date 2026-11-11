@@ -24,7 +24,7 @@ on:
         required: true
         type: string
       wp-env-port:
-        description: 'Development wp-env port, such as "8821"; the tests and multisite environments take the next two'
+        description: 'Development wp-env port, such as "8831"; the tests and multisite environments take the next two'
         required: true
         type: string
 

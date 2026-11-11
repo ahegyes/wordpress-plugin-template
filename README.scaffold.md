@@ -4,11 +4,11 @@ TODO: one sentence saying why this plugin exists, its philosophy rather than a l
 
 ## Requirements
 
-The entry file's headers state the floors: `Requires PHP`, `Requires at least` for WordPress, and `Requires Plugins` with `WC requires at least` for WooCommerce. On a site below them, WordPress shows its own notice and none of the plugin's features load.
+The entry file's headers state the floors: `Requires PHP`, `Requires at least` for WordPress, and `Requires Plugins` with `WC requires at least` for WooCommerce. WordPress shows its own notice below the PHP or WordPress floor or without WooCommerce, and the plugin shows its own below WooCommerce's version floor; either way, none of the plugin's features load.
 
 ## Installation
 
-Download `dws-plugin-template.zip` from the repository's latest release, then upload it under Plugins → Add New Plugin → Upload Plugin. Later releases arrive through WordPress's own update check, from the repository the entry file's `Update URI` names.
+Download `dws-plugin-template.zip` from the repository's latest release, then upload it under Plugins → Add New Plugin → Upload Plugin. Later releases arrive through WordPress's own update check, from the repository the entry file's `Update URI` names, while that repository is public, since the check calls GitHub's API without authentication.
 
 ## Development
 
@@ -19,6 +19,8 @@ Install the dependencies, prefix the framework into `vendor-prefixed/`, build th
 ```sh
 npm run setup
 ```
+
+wp-env publishes the development site on every network interface, with fixed development credentials, so other devices on the local network can reach it.
 
 Rebuild the blocks and assets on every change:
 
@@ -32,7 +34,7 @@ Run the manifest and changelog checks, PHPCS, PHPStan, and the Unit and Integrat
 composer quality-check
 ```
 
-Install the browser the end-to-end suite runs in, once per machine, then run the suite against the tests site:
+Install the browser the end-to-end suite runs in, initially and after a Playwright update that needs a new browser revision, then run the suite against the tests site:
 
 ```sh
 npx playwright install chromium
@@ -61,7 +63,7 @@ The fill-in renamed the plugin and kept the template's demo, which boots and pas
 
 Whichever parts go, four settings follow what is left, since a plugin removes them in any order:
 
-- The entry's build gate checks `blocks/build/blocks-manifest.php` and `assets/build/editor.asset.php`, and the plugin stays off until both exist, so it checks only files the remaining build writes, and drops its built-file check once nothing is built.
+- The entry's build gate checks `blocks/build/blocks-manifest.php` and `assets/build/editor.asset.php`, and the plugin stays off until both exist, so it checks only files the remaining build writes, and drops its built-file check once nothing is built. `PartialDeployTest` hides each file the gate checks in a row of its own, so its rows follow the gate.
 - `lint:scripts` and `format:scripts` name only folders that still hold a script, since ESLint fails on a path that holds none.
 - `lint:styles` names only folders that still hold SCSS. Once none does, it keeps one pattern, such as `'assets/src/**/*.scss'`, and takes `--allow-empty-input`, since Stylelint fails when nothing matches, Quality runs it, and without a pattern wp-scripts lints every stylesheet in the project.
 - `build` stays, even once it runs nothing, since `npm run setup` and the Integration run call it.
@@ -69,4 +71,4 @@ Whichever parts go, four settings follow what is left, since a plugin removes th
 Still to decide by hand:
 
 - WooCommerce's order tables: `dws_tpl_declare_compatibility()` in `functions.php` declares the plugin incompatible until its order code is verified on both storages.
-- `SECURITY.md`'s scope and the issue forms in `.github/ISSUE_TEMPLATE/`, whose wording describes this plugin's demo.
+- `SECURITY.md`'s scope, whose first out-of-scope line names the plugins generated from the template.

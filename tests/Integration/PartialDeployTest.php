@@ -97,12 +97,12 @@ final class PartialDeployTest extends TestCase {
 	}
 
 	public function test_the_peer_getters_a_partial_deploy_defines_still_answer(): void {
-		$root = \dirname( DWS_TPL_FILE ) . '/src/Plugin.php'; // options.php reads it at include time, after metadata.php has loaded.
-		\rename( $root, "$root.hidden" );
+		$include = \dirname( DWS_TPL_FILE ) . '/includes/metadata_zz-throws.php'; // Sorts right after metadata.php, so no later include loads.
+		\file_put_contents( $include, "<?php\nthrow new RuntimeException( 'A partial deploy.' );\n" );
 		try {
 			$request = self::request( 'echo wp_json_encode( array( false !== has_action( "plugins_loaded", "dws_tpl_boot" ), dws_tpl_get_plugin_slug(), dws_tpl_get_plugin_name(), dws_tpl_get_plugin_version() ) );' );
 		} finally {
-			\rename( "$root.hidden", $root );
+			\unlink( $include );
 		}
 
 		self::assertSame( 0, $request['status'], $request['output'] );
@@ -124,8 +124,9 @@ final class PartialDeployTest extends TestCase {
 
 	#[RunInSeparateProcess]
 	public function test_an_uninstall_whose_engine_is_missing_keeps_the_data_and_lets_the_web_delete_the_files(): void {
+		$consent = get_option( DWS_TPL_OPTION_DELETE_DATA );
 		update_option( DWS_TPL_OPTION_DELETE_DATA, 'yes' );
-		$log = (string) \tempnam( \sys_get_temp_dir(), 'dws-tpl-uninstall-' );
+		$log = (string) \tempnam( \sys_get_temp_dir(), \str_replace( '_', '-', Plugin::PREFIX ) . '-uninstall-' );
 		\ini_set( 'error_log', $log ); // phpcs:ignore WordPress.PHP.IniSet.Risky -- The child process's stderr would fail the test.
 		\spl_autoload_register(
 			static function ( string $class_name ): void {
@@ -137,11 +138,13 @@ final class PartialDeployTest extends TestCase {
 			true
 		);
 
-		self::assertTrue( uninstall_plugin( plugin_basename( DWS_TPL_FILE ) ) );
-		self::assertSame( 'yes', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
-		self::assertStringContainsString( 'kept its data on uninstall', (string) \file_get_contents( $log ) );
-
-		\unlink( $log );
-		update_option( DWS_TPL_OPTION_DELETE_DATA, 'no' );
+		try {
+			self::assertTrue( uninstall_plugin( plugin_basename( DWS_TPL_FILE ) ) );
+			self::assertSame( 'yes', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
+			self::assertStringContainsString( 'kept its data on uninstall', (string) \file_get_contents( $log ) );
+		} finally {
+			\unlink( $log );
+			false === $consent ? delete_option( DWS_TPL_OPTION_DELETE_DATA ) : update_option( DWS_TPL_OPTION_DELETE_DATA, $consent );
+		}
 	}
 }

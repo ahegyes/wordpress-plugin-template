@@ -9,7 +9,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerc
 \defined( 'ABSPATH' ) || exit;
 
 /**
- * Adds the plugin's WooCommerce settings tab, which holds the greeting's settings and the consent to delete the plugin's data on uninstall.
+ * Adds the plugin's WooCommerce settings tab.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -116,7 +116,6 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 			),
 			$this
 		);
-
 		return $pages;
 	}
 

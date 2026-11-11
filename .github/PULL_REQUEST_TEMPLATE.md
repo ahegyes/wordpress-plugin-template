@@ -1,24 +1,23 @@
 # Summary
 
-<!-- What changes and why, in 1-2 sentences. -->
+<!-- What changes and why, in one or two sentences. -->
 
 ## Type of change
 
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Refactor
-- [ ] Build / CI / tooling
+- [ ] Build, CI or tooling
 - [ ] Documentation
 - [ ] Dependency update
 
 ## Checklist
 
 - [ ] Changelog fragment added (`composer changelog:add`)
-- [ ] Tests added/updated
+- [ ] Tests added or updated
 - [ ] `composer quality-check` passes locally
 - [ ] Plugin header updated if runtime requirements changed
 
-## Breaking changes for forks
+## Breaking changes
 
-<!-- Fill in if this PR changes the scoping pipeline, composer scripts, CI workflow contracts, or anything forks would have customized. Otherwise delete. -->
-
+<!-- Required if this pull request breaks the plugin's contract: an @api element, a hook it fires, an option, meta or capability name, or a REST route. Otherwise delete this section. -->

@@ -16,7 +16,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\Psr\Log\LoggerInterface as PsrLoggerI
 \defined( 'ABSPATH' ) || exit;
 
 /**
- * Composes the plugin from its logger, scheduler, migrations and components, inside the framework's boot boundary.
+ * Composes the plugin inside the framework's boot boundary.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -191,7 +191,6 @@ final class Plugin {
 
 		$this->kernel = new PluginKernel( new ContainerBuilder()->addDefinitions( $this->get_definitions( $this->logger, $this->scheduler ) )->build() );
 		$this->kernel->boot( self::COMPONENTS );
-
 		return true;
 	}
 

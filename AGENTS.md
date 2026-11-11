@@ -52,15 +52,19 @@ Each runs PHP 8.5 with WooCommerce from `vendor/` and its order tables on; CI ru
 
 ## Conventions
 
-1. **Placement.** `src/` holds only the composition root and its components. Code that registers no hooks, such as keys, readers, the footprint, migration steps and asset registrars, is `dws_tpl_` functions and `DWS_TPL_` constants in `includes/`, which parses on PHP 7.4: no `mixed` or union types, typed constants, `match` or first-class callables there. Container definitions are composition and stay in `Plugin::get_definitions()`.
+1. **Placement.** `src/` holds only the composition root and its components. Code that registers no hooks, such as keys, readers, the footprint, migration steps and asset registrars, is `dws_tpl_` functions and `DWS_TPL_` constants in `includes/`, which parses on PHP 7.4: no `mixed` or union types, typed constants, `match`, nullsafe calls or first-class callables there. Container definitions are composition and stay in `Plugin::get_definitions()`.
 2. **Variants.** A component that exists only in one build variant is a child in a branch of its parent's `get_child_component_classes()`, never a second entry in `COMPONENTS`.
 3. **Request context.** `is_admin()` is false on REST requests and true in admin-ajax ones, so an admin-only feature decides the request context in its callbacks, never in `should_load()`.
 4. **Add-ons.** An add-on extends a base plugin only through the base plugin's documented hooks. It reads a template-built base plugin's slug, name and version only through that plugin's `{prefix}_get_plugin_*()` getters, from `plugins_loaded` on, since the add-on may load first, and behind `function_exists()`, since a base plugin below its floors or with a partial build may stay active without defining them.
 5. **Request reads.** An integer or boolean is read as `filter_var( wp_unslash( $_POST['key'] ?? '' ), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE ) ?? $default` (`FILTER_VALIDATE_BOOL` for a boolean, where an absent key reads false, as an unchecked checkbox posts nothing), and a string through an `is_string()` guard and the field's sanitizer; never `filter_input()`, the `default` filter option or a cast on request input.
 6. **Options and data.** Options are read only through `includes/options.php`'s typed readers, safeguards excepted. Everything stored lives under `dws_tpl_`, or `_dws_tpl_` for hidden meta. The footprint covers the prefix's options, transients and user meta; object meta needs a `meta_prefixes` entry per type, and anything else its own entry.
-7. **Safeguards** live in `includes/safeguards.php`, call only WordPress and that file, and relax only through their own filter, through `dws_tpl_is_relaxed()` (`docs/recipes.md`). The entry loads them before the floor check, so they parse on PHP 7.4 and call only WordPress APIs present at the oldest WordPress the bootstrap package runs on, or guard them, which `phpstan.safeguards.neon` checks.
+7. **Safeguards** live in `includes/safeguards.php`, call WordPress, that file, and WooCommerce where the plugin requires it, and relax only through their own filter, through `dws_tpl_is_relaxed()` (`docs/recipes.md`). The entry loads them before the floor check, so they parse on PHP 7.4 and call only what their hook hands them, WordPress APIs present at the oldest WordPress the bootstrap package runs on and WooCommerce APIs present since 3.6, guarding anything newer with `function_exists()` or `method_exists()`. WordPress loads the plugin while WooCommerce is inactive, so a safeguard that calls WooCommerce is hooked from one function, which the file runs on `woocommerce_loaded`, or at once where that has fired already, as on the request that activates the plugin; WooCommerce fires it, since 3.6, once every plugin has loaded. `phpstan.safeguards.neon` reads the whole file, with WooCommerce's stubs loaded, and checks the WordPress floor; review checks the WooCommerce floor, which no tool reads.
 8. **Migrations** are append-only: a step converges from any partial state, verifies its writes and throws when one fails.
 9. **WordPress floor.** The plugin calls only APIs its `Requires at least` has, PHP's and JavaScript's alike: PHPStan's wp-compat reads the floor from that header, and CI runs the end-to-end suite on the floor's WordPress, which supplies the `@wordpress/*` scripts at runtime.
+
+## Contract
+
+The plugin's contract is the elements tagged `@api`, the hooks it fires, and its option, meta and capability names and REST routes; breaking it ships as the next major. Every other function, constant and class, `src/` included, is internal and changes in any release.
 
 ## Style
 
@@ -74,5 +78,5 @@ Each runs PHP 8.5 with WooCommerce from `vendor/` and its order tables on; CI ru
 ## Limitations
 
 - The fill-in pushes with the workflow's own token, which GitHub refuses for workflow changes, so it never edits `.github/workflows/`; the workflows read the slug from `composer.json`'s `extra.text-domain`.
-- Integration and end to end share the tests site, so a row that changes shared data in a separate process flushes the parent's object cache.
+- Integration and end to end share the tests site, so a row that changes shared data in a separate process restores it there, or flushes the parent's object cache in `#[AfterClass]`.
 - The release zip carries the TypeScript and SCSS sources beside the built files, since a plugin's repository may be private and the zip is then the only place its users find them.

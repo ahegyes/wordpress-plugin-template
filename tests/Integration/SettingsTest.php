@@ -4,19 +4,19 @@ namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Setting\SettingsTab;
+use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
 use PHPUnit\Framework\Attributes\After;
-use PHPUnit\Framework\Attributes\Before;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class SettingsTest extends TestCase {
-	protected const array KEYS = array( DWS_TPL_OPTION_GREETING_ENABLED, DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS, DWS_TPL_OPTION_DELETE_DATA );
+	use RestoresOptionsTrait;
+
+	protected const array OPTIONS = array( DWS_TPL_OPTION_GREETING_ENABLED, DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS, DWS_TPL_OPTION_DELETE_DATA );
 
 	protected static SettingsTab $tab;
-
-	protected array $stored = array();
 
 	#[\Override]
 	public static function setUpBeforeClass(): void {
@@ -60,24 +60,13 @@ final class SettingsTest extends TestCase {
 		);
 	}
 
-	#[Before]
-	protected function store_rows(): void {
-		foreach ( self::KEYS as $key ) {
-			$this->stored[ $key ] = get_option( $key );
-		}
-	}
-
 	#[After]
-	protected function restore_rows(): void {
-		foreach ( $this->stored as $key => $value ) {
-			false === $value ? delete_option( $key ) : update_option( $key, $value );
-		}
-
-		( new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' ) )->setValue( null, array() );
+	protected function forget_the_rejections(): void {
+		new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' )->setValue( null, array() );
 	}
 
 	public function test_the_tab_shows_the_greeting_and_data_fields_with_their_defaults(): void {
-		foreach ( self::KEYS as $key ) {
+		foreach ( self::OPTIONS as $key ) {
 			delete_option( $key );
 		}
 
@@ -109,7 +98,7 @@ final class SettingsTest extends TestCase {
 		self::assertSame( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
 	}
 
-	public function test_the_retention_opt_in_round_trips_through_woocommerces_save(): void {
+	public function test_the_uninstall_consent_round_trips_through_woocommerces_save(): void {
 		$this->save( array( DWS_TPL_OPTION_DELETE_DATA => '1' ) );
 
 		self::assertSame( 'yes', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
@@ -129,7 +118,7 @@ final class SettingsTest extends TestCase {
 		$this->save( array( DWS_TPL_OPTION_GREETING_ORDERS => $posted ) );
 
 		self::assertSame( '4', get_option( DWS_TPL_OPTION_GREETING_ORDERS ) );
-		self::assertSame( array( 'Orders before the greeting was not saved and keeps its previous value. The other changes were saved. Enter a whole number of 1 or more, such as 3.' ), ( new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' ) )->getValue() );
+		self::assertSame( array( 'Orders before the greeting was not saved and keeps its previous value. The other changes were saved. Enter a whole number of 1 or more, such as 3.' ), new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' )->getValue() );
 	}
 
 	#[DataProvider( 'whole_order_counts' )]
@@ -143,7 +132,6 @@ final class SettingsTest extends TestCase {
 	protected function render(): \Dom\HTMLDocument {
 		\ob_start();
 		\WC_Admin_Settings::output_fields( self::$tab->get_settings_for_section( '' ) );
-
 		return \Dom\HTMLDocument::createFromString( '<!DOCTYPE html><html><body>' . \ob_get_clean() . '</body></html>', \LIBXML_NOERROR );
 	}
 

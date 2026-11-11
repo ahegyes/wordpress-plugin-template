@@ -3,6 +3,9 @@
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration\Greeting;
 
 use DeepWebSolutions\PluginTemplate\Greeting\AccountDashboardGreeting;
+use DeepWebSolutions\PluginTemplate\Plugin;
+use DeepWebSolutions\PluginTemplate\Tests\Support\OrderStorageTrait;
+use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
 use PHPUnit\Framework\Attributes\After;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -10,17 +13,25 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class AccountDashboardGreetingTest extends TestCase {
-	protected const array KEYS = array( DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS );
+	use OrderStorageTrait;
+	use RestoresOptionsTrait;
 
-	protected array $stored = array();
+	protected const array OPTIONS = array( DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS );
+
+	protected const string TRANSLATION = 'Translated greeting';
 
 	protected int $customer = 0;
-
-	protected array $orders = array();
 
 	#[\Override]
 	public static function setUpBeforeClass(): void {
 		require_once ABSPATH . 'wp-admin/includes/user.php';
+	}
+
+	public static function untouched_greetings(): array {
+		return array(
+			'unsaved' => array( null ),
+			'empty'   => array( '' ),
+		);
 	}
 
 	public static function unpaid_statuses(): array {
@@ -34,13 +45,9 @@ final class AccountDashboardGreetingTest extends TestCase {
 
 	#[\Override]
 	protected function setUp(): void {
-		foreach ( self::KEYS as $key ) {
-			$this->stored[ $key ] = get_option( $key );
-		}
-
 		$customer = wp_insert_user(
 			array(
-				'user_login' => 'dws_tpl_customer_' . \wp_generate_password( 8, false ),
+				'user_login' => Plugin::PREFIX . '_customer_' . wp_generate_password( 8, false ),
 				'user_pass'  => wp_generate_password(),
 				'role'       => 'customer',
 			)
@@ -52,21 +59,13 @@ final class AccountDashboardGreetingTest extends TestCase {
 
 	#[After]
 	protected function clean_up(): void {
-		foreach ( $this->stored as $key => $value ) {
-			false === $value ? delete_option( $key ) : update_option( $key, $value );
-		}
-
-		foreach ( $this->orders as $order ) {
-			$order->delete( true );
-		}
-
 		wp_set_current_user( 0 );
 		wp_delete_user( $this->customer );
 		wp_dequeue_style( 'dws-plugin-template-greeting' );
 		wp_deregister_style( 'dws-plugin-template-greeting' );
 	}
 
-	public function test_the_greeting_prints_on_the_account_dashboard(): void {
+	public function test_the_greeting_hooks_the_account_dashboard_and_its_style(): void {
 		$detail = new AccountDashboardGreeting();
 		$detail->register_hooks();
 
@@ -77,12 +76,12 @@ final class AccountDashboardGreetingTest extends TestCase {
 	}
 
 	public function test_the_greeting_style_loads_on_the_account_dashboard_only(): void {
-		( new AccountDashboardGreeting() )->enqueue_style();
+		new AccountDashboardGreeting()->enqueue_style();
 		self::assertFalse( wp_style_is( 'dws-plugin-template-greeting' ) );
 
 		add_filter( 'woocommerce_is_account_page', '__return_true' );
 		try {
-			( new AccountDashboardGreeting() )->enqueue_style();
+			new AccountDashboardGreeting()->enqueue_style();
 		} finally {
 			remove_filter( 'woocommerce_is_account_page', '__return_true' );
 		}
@@ -149,6 +148,20 @@ final class AccountDashboardGreetingTest extends TestCase {
 		self::assertSame( '', $this->print() );
 	}
 
+	#[DataProvider( 'storages' )]
+	public function test_paid_orders_count_towards_the_set_number_on_every_order_storage( bool $hpos, bool $sync ): void {
+		$this->use_storage( $hpos, $sync );
+		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '2' );
+		$this->place_orders( 1 );
+		$this->place_orders( 1, 'failed' );
+
+		self::assertSame( '', $this->print() );
+
+		$this->place_orders( 1, 'processing' );
+
+		self::assertNotSame( '', $this->print() );
+	}
+
 	#[DataProvider( 'unpaid_statuses' )]
 	public function test_orders_that_are_not_paid_do_not_count_towards_the_set_number( string $status ): void {
 		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '2' );
@@ -158,24 +171,24 @@ final class AccountDashboardGreetingTest extends TestCase {
 		self::assertSame( '', $this->print() );
 	}
 
-	public function test_an_unsaved_greeting_prints_its_translated_default(): void {
-		delete_option( DWS_TPL_OPTION_GREETING );
-		delete_option( DWS_TPL_OPTION_GREETING_ORDERS );
+	#[DataProvider( 'untouched_greetings' )]
+	public function test_an_untouched_greeting_prints_its_translated_default( ?string $stored ): void {
+		\is_null( $stored ) ? delete_option( DWS_TPL_OPTION_GREETING ) : update_option( DWS_TPL_OPTION_GREETING, $stored );
+		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '1' );
 		$this->place_orders( 1 );
+		$translate = static fn (): string => self::TRANSLATION;
+		add_filter( 'gettext_' . Plugin::SLUG, $translate );
 
-		self::assertStringContainsString( esc_html( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ) ), $this->print() );
-	}
-
-	public function test_an_empty_greeting_prints_its_translated_default(): void {
-		update_option( DWS_TPL_OPTION_GREETING, '' );
-		$this->place_orders( 1 );
-
-		self::assertStringContainsString( esc_html( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ) ), $this->print() );
+		try {
+			self::assertStringContainsString( self::TRANSLATION, $this->print() );
+		} finally {
+			remove_filter( 'gettext_' . Plugin::SLUG, $translate );
+		}
 	}
 
 	protected function place_orders( int $count, string $status = 'completed' ): void {
 		for ( $placed = 0; $placed < $count; $placed++ ) {
-			$this->orders[] = wc_create_order(
+			$this->create_order(
 				array(
 					'customer_id' => $this->customer,
 					'status'      => $status,
@@ -186,8 +199,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 
 	protected function print(): string {
 		\ob_start();
-		( new AccountDashboardGreeting() )->print_greeting();
-
+		new AccountDashboardGreeting()->print_greeting();
 		return (string) \ob_get_clean();
 	}
 }

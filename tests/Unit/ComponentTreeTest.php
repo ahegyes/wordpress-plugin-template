@@ -13,13 +13,12 @@ final class ComponentTreeTest extends TestCase {
 		$walked  = array();
 		$pending = Plugin::COMPONENTS;
 		while ( array() !== $pending ) {
-			$class    = \array_shift( $pending );
+			$class = \array_shift( $pending );
+			self::assertNotContains( $class, $walked, "$class appears twice in the component tree." );
 			$walked[] = $class;
 			if ( \is_a( $class, CompositeComponentInterface::class, true ) ) {
-				\array_push( $pending, ...$class::get_child_component_classes() );
+				\array_unshift( $pending, ...$class::get_child_component_classes() );
 			}
 		}
-
-		self::assertSame( \array_values( \array_unique( $walked ) ), $walked );
 	}
 }

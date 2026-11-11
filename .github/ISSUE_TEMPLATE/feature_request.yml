@@ -1,5 +1,5 @@
 name: Feature request
-description: Propose a new capability for the plugin template scaffold.
+description: Propose a new capability for the plugin.
 labels: [enhancement, triage]
 body:
   - type: dropdown
@@ -7,13 +7,12 @@ body:
     attributes:
       label: Target area
       options:
-        - Plugin runtime scaffold (composition root, components, framework wiring)
-        - Composer scoping pipeline
-        - Changelog tooling
-        - CI workflows
-        - wp-env / integration test infrastructure
-        - Documentation / placeholder convention
-        - New area / unsure
+        - Runtime (boot, components, framework wiring)
+        - Settings
+        - Blocks and scripts
+        - CI workflows (.github/workflows/) and release
+        - Documentation
+        - New area or unsure
     validations:
       required: true
 
@@ -21,7 +20,7 @@ body:
     id: problem
     attributes:
       label: Problem
-      description: What is the template-user-facing problem this would solve?
+      description: What problem would this solve, and for whom?
     validations:
       required: true
 
@@ -29,7 +28,7 @@ body:
     id: proposal
     attributes:
       label: Proposed solution
-      description: How would you imagine this looking? Code or YAML samples welcome.
+      description: How would it work? Code samples are welcome.
     validations:
       required: true
 
@@ -37,15 +36,4 @@ body:
     id: alternatives
     attributes:
       label: Alternatives considered
-      description: What other approaches did you weigh? Why this one?
-
-  - type: dropdown
-    id: breaking
-    attributes:
-      label: Breaking change for existing forks?
-      options:
-        - 'No (additive — existing forks can ignore the new feature)'
-        - 'Yes (existing forks need to merge / adapt)'
-        - 'Unsure'
-    validations:
-      required: true
+      description: What other approaches did you weigh, and why this one?

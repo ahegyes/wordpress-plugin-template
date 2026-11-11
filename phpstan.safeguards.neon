@@ -9,6 +9,9 @@ parameters:
 	paths:
 		- dws-plugin-template.php
 		- includes/safeguards.php
+	# A safeguard calls WooCommerce where the plugin requires it.
+	scanFiles:
+		- vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
 	phpVersion: 70400
 	WPCompat:
 		requiresAtLeast: '5.2'

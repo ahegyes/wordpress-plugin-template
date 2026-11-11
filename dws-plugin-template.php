@@ -1,5 +1,7 @@
 <?php declare( strict_types=1 );
 /**
+ * Loads the plugin's safeguards, then the rest of the plugin once the site meets its floors and its build is complete.
+ *
  * Plugin Name:          DWS Plugin Template
  * Plugin URI:           https://github.com/ahegyes/wordpress-plugin-template
  * Description:          WordPress plugins on the wp-framework packages start here, from one tested anatomy, so all are built alike and a fix found in one applies to all.
@@ -17,6 +19,9 @@
  * Update URI:           https://github.com/ahegyes/wordpress-plugin-template
  * Text Domain:          dws-plugin-template
  * Domain Path:          /languages
+ *
+ * @since   1.0.0
+ * @version 1.0.0
  *
  * @package DeepWebSolutions\PluginTemplate
  */
@@ -57,14 +62,14 @@ try {
 }
 
 /**
- * Reports a build that could not load, rethrowing in local and development environments and otherwise logging the error with its location and showing the build notice.
+ * Reports a build that could not load.
  *
  * @since   1.0.0
  * @version 1.0.0
  *
  * @param   Throwable $error The error that stopped the build.
  *
- * @throws  Throwable Thrown in local and development environments.
+ * @throws  Throwable Thrown when the site runs in a local or development environment.
  *
  * @return  void
  */

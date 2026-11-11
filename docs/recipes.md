@@ -1,6 +1,6 @@
 # Recipes
 
-These are the changes most plugins built from this template make, each as the files to add or change. A recipe that stores data lists its keys for `includes/footprint.php`, which no check enforces. Options, transients and user meta under the plugin's `dws_tpl_` prefix are in the footprint already; meta on posts, terms, comments or orders needs its own `meta_prefixes` entry per object type.
+These are the changes most plugins built from this template make, each as the files to add or change. A recipe that stores data lists its keys for `includes/footprint.php`, which no check enforces beyond the option constants `FootprintTest` covers. Options, transients and user meta under the plugin's `dws_tpl_` prefix are in the footprint already; meta on posts, terms, comments or orders needs its own `meta_prefixes` entry per object type.
 
 - [A safeguard](#a-safeguard)
 - [A one-time notice](#a-one-time-notice)
@@ -17,14 +17,16 @@ These are the changes most plugins built from this template make, each as the fi
 
 ## A safeguard
 
-A safeguard is a restriction that holds even when the rest of the plugin fails to load, such as a capability that stays locked unless the plugin unlocks it. It lives in `includes/safeguards.php`, which the entry file loads before the floor gate and the autoloader, so it calls only WordPress and what that file defines. The plugin relaxes it only through the safeguard's own filter, with an explicit `false`, and only after `dws_tpl/boot/succeeded`, which fires once the plugin has booted, so a half-loaded build never relaxes it.
+A safeguard is a restriction that holds even when the rest of the plugin fails to load, such as a capability that stays locked unless the plugin unlocks it. It lives in `includes/safeguards.php`, which the entry file loads before the floor gate and the autoloader, so it calls only WordPress, what that file defines, and WooCommerce where the plugin requires it. The plugin relaxes it only through the safeguard's own filter, with an explicit `false`, and only after `dws_tpl/boot/succeeded`, which fires once the plugin has booted, so a half-loaded build never relaxes it.
 
-Replace `includes/safeguards.php` with the helper and the safeguard. The file runs on any runtime that parses the plugin, so it must parse on PHP 7.4 and call only WordPress APIs present at the oldest WordPress the bootstrap package runs on, or guard them, which `phpstan.safeguards.neon` checks:
+Replace `includes/safeguards.php` with the helper and the safeguard. The file runs on any runtime that parses the plugin, so it must parse on PHP 7.4 and call only what its hook hands it, WordPress APIs present at the oldest WordPress the bootstrap package runs on and WooCommerce APIs present since 3.6, guarding anything newer with `function_exists()` or `method_exists()`. WordPress loads the plugin while WooCommerce is inactive, so a safeguard that calls WooCommerce is hooked only once WooCommerce has loaded, as shown after the file. `phpstan.safeguards.neon` checks the WordPress floor, and review the WooCommerce one:
 
 ```php
 <?php declare( strict_types=1 );
 /**
- * Holds the plugin's safeguards, which load before its floor gate, so they hold on a runtime below its floors and when the rest of the build fails to load.
+ * Holds the plugin's safeguards.
+ *
+ * They load before the floor gate, so they hold on a runtime below the plugin's floors and when the rest of the build fails to load.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -67,7 +69,9 @@ function dws_tpl_map_export_capability( array $caps, string $cap ): array {
 	}
 
 	/**
-	 * Filters whether the data export stays locked; an explicit false unlocks it once the plugin has booted.
+	 * Filters whether the data export stays locked.
+	 *
+	 * Only an explicit false, once the plugin has booted, unlocks it, so a half-loaded build never relaxes it.
 	 *
 	 * @since   1.0.0
 	 * @version 1.0.0
@@ -79,6 +83,27 @@ function dws_tpl_map_export_capability( array $caps, string $cap ): array {
 ```
 
 Every further safeguard calls `dws_tpl_is_relaxed()` around its own literal `apply_filters()`, so each filter keeps its hook docblock and the helper's rule has one home.
+
+A safeguard that calls WooCommerce is hooked from one function, `dws_tpl_add_woocommerce_safeguards()`, which the file runs once WooCommerce has loaded. WooCommerce fires `woocommerce_loaded` once every plugin has loaded, and never while it is inactive, but the request that activates the plugin includes the file after that, so the file checks first. A request that activates WooCommerce too never fires it, so these safeguards hold from the next request. Add both to `includes/safeguards.php`, and hook each such safeguard in the function's body:
+
+```php
+if ( 0 < did_action( 'woocommerce_loaded' ) ) {
+	dws_tpl_add_woocommerce_safeguards();
+} else {
+	add_action( 'woocommerce_loaded', 'dws_tpl_add_woocommerce_safeguards' );
+}
+
+/**
+ * Hooks the safeguards that call WooCommerce.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @return  void
+ */
+function dws_tpl_add_woocommerce_safeguards(): void {
+}
+```
 
 A component relaxes the lock only around the operation that needs it, and removes the relaxation even when the operation throws:
 
@@ -185,9 +210,9 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Admin
 	protected function report_export( int $rows ): void {
 		$this->notices->add(
 			new Notice(
-				Plugin::PREFIX . '-export-' . time(), // A viewer's delivery outlives the notice, so each occasion takes a new id.
+				'export-' . wp_generate_uuid4(),
 				/* translators: %d: The number of rows. */
-				esc_html( sprintf( _n( 'The export wrote %d row.', 'The export wrote %d rows.', $rows, 'dws-plugin-template' ), $rows ) ),
+				esc_html( \sprintf( _n( 'The export wrote %d row.', 'The export wrote %d rows.', $rows, 'dws-plugin-template' ), $rows ) ),
 				NoticeType::Success
 			)
 		);
@@ -211,7 +236,7 @@ Add the option, its field and its default, a reader that guards the field and th
  *
  * @var     string
  */
-const DWS_TPL_OPTION_SETTINGS = Plugin::PREFIX . '_settings';
+const DWS_TPL_OPTION_SETTINGS = 'dws_tpl_settings';
 
 /**
  * The settings field that holds the limit.
@@ -249,7 +274,6 @@ function dws_tpl_get_int_setting( string $field ): int {
 	$default = DWS_TPL_SETTING_DEFAULTS[ $field ] ?? null;
 	$stored  = get_option( DWS_TPL_OPTION_SETTINGS );
 	$stored  = is_array( $stored ) && array_key_exists( $field, $stored ) ? $stored[ $field ] : $default;
-
 	return filter_var( $stored, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE ) ?? ( is_int( $default ) ? $default : 0 );
 }
 
@@ -560,10 +584,11 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 				'title' => __( 'DWS Plugin Template', 'dws-plugin-template' ),
 			),
 			array(
-				'type'  => 'checkbox',
-				'id'    => Plugin::PREFIX . '_payment_notes',
-				'title' => __( 'Payment notes', 'dws-plugin-template' ),
-				'desc'  => __( 'Add a note to each order when its payment completes', 'dws-plugin-template' ),
+				'type'    => 'checkbox',
+				'id'      => DWS_TPL_OPTION_PAYMENT_NOTES,
+				'title'   => __( 'Payment notes', 'dws-plugin-template' ),
+				'desc'    => __( 'Add a note to each order when its payment completes', 'dws-plugin-template' ),
+				'default' => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_PAYMENT_NOTES ] ),
 			),
 			array(
 				'type'    => 'multiselect',
@@ -618,8 +643,7 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 	 * @return  string[]
 	 */
 	public function add_settings_link( array $links ): array {
-		array_unshift( $links, sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . Plugin::PREFIX ) ), esc_html__( 'Settings', 'dws-plugin-template' ) ) );
-
+		\array_unshift( $links, \sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . Plugin::PREFIX ) ), esc_html__( 'Settings', 'dws-plugin-template' ) ) );
 		return $links;
 	}
 
@@ -627,9 +651,19 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 }
 ```
 
-WooCommerce stores each field in its own option under its id, flat rather than in a group: a checkbox stores `yes` or `no`, which `dws_tpl_get_bool_option()` reads, and a multiselect the list of the chosen keys, which a list reader reads. Add each key to `includes/options.php` with its default in `DWS_TPL_OPTION_DEFAULTS`, the multiselect's an empty array, whose `@var` then allows `list<string>`, and the list reader beside the other typed readers:
+WooCommerce stores each field in its own option under its id, flat rather than in a group: a checkbox stores `yes` or `no`, which `dws_tpl_get_bool_option()` reads, and a multiselect the list of the chosen keys, which a list reader reads. Add each key to `includes/options.php` with its default in `DWS_TPL_OPTION_DEFAULTS`, `false` for the checkbox and an empty array for the multiselect, whose `@var` then allows `list<string>`, and the list reader beside the other typed readers:
 
 ```php
+/**
+ * The option that holds 'yes' where the site adds a note to each order when its payment completes.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @var     string
+ */
+const DWS_TPL_OPTION_PAYMENT_NOTES = 'dws_tpl_payment_notes';
+
 /**
  * The option that holds the payment methods whose orders get the payment note.
  *
@@ -664,7 +698,7 @@ WooCommerce's save drops a multiselect key of `'0'` or `''`, so each key stays t
 
 A recurring job runs a hook at an interval through the plugin's scheduler, which uses Action Scheduler where it is loaded and WP-Cron otherwise. Either can run an invocation twice or skip one, so the job's callback leaves its data consistent after a duplicate or a missed run.
 
-Add the repair gate's option to `includes/options.php`:
+Add the repair gate's option to `includes/options.php`, with its default `0` in `DWS_TPL_OPTION_DEFAULTS`:
 
 ```php
 /**
@@ -675,10 +709,10 @@ Add the repair gate's option to `includes/options.php`:
  *
  * @var     string
  */
-const DWS_TPL_OPTION_RECURRING_ENSURED_AT = Plugin::PREFIX . '_recurring_ensured_at';
+const DWS_TPL_OPTION_RECURRING_ENSURED_AT = 'dws_tpl_recurring_ensured_at';
 ```
 
-Add the job as a component, `src/Pruning.php`, and list it in `Plugin::COMPONENTS`. It ensures the schedule on `wp_loaded` at most once an hour, writing the time first so concurrent requests skip, and again when Action Scheduler asks every day:
+Add the job as a component, `src/Pruning.php`, and list it in `Plugin::COMPONENTS`. It ensures the schedule on `wp_loaded` at most once an hour, and again when Action Scheduler asks every day. Writing the time first narrows the window in which two requests both ensure it, and `ensure_recurring()` repairs a duplicate chain on its next pass:
 
 ```php
 <?php declare( strict_types=1 );
@@ -761,11 +795,11 @@ final class Pruning implements ComponentInterface {
 	 */
 	public function repair_schedule(): void {
 		$ensured_at = dws_tpl_get_int_option( DWS_TPL_OPTION_RECURRING_ENSURED_AT );
-		if ( time() - $ensured_at < HOUR_IN_SECONDS ) {
+		if ( \time() - $ensured_at < HOUR_IN_SECONDS ) {
 			return;
 		}
 
-		update_option( DWS_TPL_OPTION_RECURRING_ENSURED_AT, time(), true );
+		update_option( DWS_TPL_OPTION_RECURRING_ENSURED_AT, \time(), true );
 		$this->ensure_schedule();
 	}
 
@@ -808,8 +842,8 @@ final class Pruning implements ComponentInterface {
 ```
 
 Then:
-- Add `Plugin::PREFIX . '/records/prune'` to `cron_hooks` in `includes/footprint.php`. Deactivation unschedules every hook there through the plugin's scheduler, and uninstall clears WP-Cron's copies, while Action Scheduler's are in the footprint's `as_groups` already.
-- Delete the repair gate's option on activation, so the next request ensures the jobs: add `register_activation_hook( DWS_TPL_FILE, 'dws_tpl_activate' );` to `functions.php` beside the deactivation hook, and a `dws_tpl_activate()` that calls `delete_option( DWS_TPL_OPTION_RECURRING_ENSURED_AT )`.
+- Add `Pruning::HOOK` to `cron_hooks` in `includes/footprint.php`, importing the class as the file imports `Plugin`. Deactivation unschedules every hook there through the plugin's scheduler, and uninstall clears WP-Cron's copies, while Action Scheduler's are in the footprint's `as_groups` already.
+- Delete the repair gate's option on activation, so the next request ensures the jobs: add `register_activation_hook( DWS_TPL_FILE, 'dws_tpl_activate' );` to `functions.php` beside the deactivation hook, and a `dws_tpl_activate()` that calls `delete_option( DWS_TPL_OPTION_RECURRING_ENSURED_AT )`. A plugin that also takes the rewrite-rules recipe keeps one `dws_tpl_activate()` that does both.
 - Change an interval in code only: `ensure_recurring()` replaces a schedule whose interval differs on the next pass of the repair gate. A "run now" schedules the same hook with an argument that sets it apart, or calls `prune()` directly.
 
 ## Rewrite rules after activation
@@ -836,7 +870,7 @@ function dws_tpl_activate(): void {
 }
 ```
 
-Add the same `delete_option( 'rewrite_rules' )` to `dws_tpl_deactivate()`, so the next request rebuilds the rules without them. Both act on the current site only, as WordPress's own activation does; a network activation leaves the other sites' rules until they next rebuild them.
+A plugin that also takes the recurring-jobs recipe keeps one `dws_tpl_activate()` that does both. Add the same `delete_option( 'rewrite_rules' )` to `dws_tpl_deactivate()`, so the next request rebuilds the rules without them. Both act on the current site only, as WordPress's own activation does; a network activation leaves the other sites' rules until they next rebuild them.
 
 ## A script module
 
@@ -876,10 +910,27 @@ The build writes `view.js` with a `view.asset.php` whose `type` is `module`, and
 A public hook's name is part of the plugin's contract, as its arguments, its options and its REST routes are. To rename one in a released plugin:
 
 1. Rename the literal at every `do_action()` or `apply_filters()` and in its docblock, which keeps its `@since` and moves its `@version` to the release.
-2. Add a changelog fragment with `composer changelog:add` that names the old and the new hook, with a major significance.
-3. Migrate stored data that holds the name, such as a scheduled job's hook, in a migration step that converges from any partial state: unschedule the old name, then ensure the new one.
+2. Fire the old name too, until the next major, through `do_action_deprecated()` or `apply_filters_deprecated()` with the release's version and the new name as its replacement. The old name goes first, so a filter's callbacks on the new name see the final value:
 
-Ship no deprecated alias: the major release is the migration path.
+```php
+$restricted = apply_filters_deprecated( 'dws_tpl/export/should_restrict', array( true ), '1.1.0', 'dws_tpl/data_export/should_restrict' );
+
+/**
+ * Filters whether the data export stays locked.
+ *
+ * Only an explicit false, once the plugin has booted, unlocks it, so a half-loaded build never relaxes it.
+ *
+ * @since   1.0.0
+ * @version 1.1.0
+ *
+ * @param   bool $restricted Whether the data export stays locked.
+ */
+$restricted = apply_filters( 'dws_tpl/data_export/should_restrict', $restricted );
+```
+
+3. Add a changelog fragment with `composer changelog:add` that names the old and the new hook, with a minor significance and the Deprecated type.
+4. Migrate stored data that holds the name, such as a scheduled job's hook, in a migration step that converges from any partial state: unschedule the old name, then ensure the new one.
+5. In the next major, delete the deprecated call, with a major fragment that names the old hook as removed.
 
 ## Distribution through wordpress.org
 
@@ -923,9 +974,16 @@ TODO: what the plugin does, for the directory's listing.
 
 ```json
 "changelog:write": [
-  "@php vendor/bin/changelogger write",
-  "@php vendor/bin/pronamic-changelog-md-to-wordpress-plugin-readme-txt"
+	"@php vendor/bin/changelogger write",
+	"@php vendor/bin/pronamic-changelog-md-to-wordpress-plugin-readme-txt"
 ]
+```
+
+Composer hands the arguments after `--` to every command in the array, so the first release runs the two apart, and `CONTRIBUTING.md`'s first-release command becomes:
+
+```sh
+vendor/bin/changelogger write --amend
+vendor/bin/pronamic-changelog-md-to-wordpress-plugin-readme-txt
 ```
 
 4. Lint the file in `.github/workflows/quality.yml`:
@@ -965,15 +1023,16 @@ composer remove --dev --ignore-platform-req=php+ --no-interaction ahegyes/wp-fra
 		- vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
 ```
 
+In `phpstan.safeguards.neon`, delete the whole `scanFiles` key, which lists only those stubs, with its comment.
+
 3. In `dws-plugin-template.php`, delete the `Requires Plugins`, `WC requires at least` and `WC tested up to` headers, and in `tests/Unit/EntryHeadersTest.php` the row that ties `WC tested up to` to the locked WooCommerce.
 
-4. In `functions.php`, delete the `FeaturesUtil` import, the `before_woocommerce_init` hook and `dws_tpl_declare_compatibility()`, and drop "declares its WooCommerce feature compatibility" from the file's summary:
+4. In `functions.php`, delete the `FeaturesUtil` import, the `before_woocommerce_init` hook and `dws_tpl_declare_compatibility()`, so the hooks after the includes loop read:
 
 ```php
-use DeepWebSolutions\PluginTemplate\Plugin;
+// ... the includes loop ...
 
-defined( 'ABSPATH' ) || exit;
-
+// The hooks come last, so an include that throws leaves nothing of the plugin hooked.
 add_action( 'plugins_loaded', 'dws_tpl_boot', 15 );
 register_deactivation_hook( DWS_TPL_FILE, 'dws_tpl_deactivate' );
 ```
@@ -989,7 +1048,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 	public const array COMPONENTS = array(
 		Scheduler::class,
 		AdminNotices::class,
-		Settings::class,
+		SettingsPage::class,
 		Blocks::class,
 	);
 
@@ -1024,7 +1083,6 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 
 		$this->kernel = new PluginKernel( new ContainerBuilder()->addDefinitions( $this->get_definitions( $this->logger, $this->scheduler ) )->build() );
 		$this->kernel->boot( self::COMPONENTS );
-
 		return true;
 	}
 ```
@@ -1036,122 +1094,20 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 "start:assets": "wp-scripts start editor=./assets/src/editor.ts --output-path=assets/build"
 ```
 
-7. Replace `src/Settings.php` with an options page under Settings, which stores both fields in one option through the Settings API:
+7. Delete `src/Settings.php`, and add the settings page from [A WordPress settings page](#a-wordpress-settings-page), with the consent to delete the plugin's data as a second field of its tab:
 
 ```php
-<?php declare( strict_types=1 );
-
-namespace DeepWebSolutions\PluginTemplate;
-
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\ComponentInterface;
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Settings\AdminPage\OptionsPage;
-use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Settings\AdminPage\OptionsPageDefinitionInterface;
-
-\defined( 'ABSPATH' ) || exit;
-
-/**
- * Adds the plugin's settings page under Settings, which holds the limit and the consent to delete the plugin's data on uninstall.
- *
- * @since   1.0.0
- * @version 1.0.0
- */
-final class Settings implements ComponentInterface, OptionsPageDefinitionInterface {
-	// region INHERITED METHODS
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @since   1.0.0
-	 * @version 1.0.0
-	 */
-	#[\Override]
-	public function register_hooks(): void {
-		new OptionsPage( Plugin::PREFIX, $this )->register_hooks();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @since   1.0.0
-	 * @version 1.0.0
-	 */
-	#[\Override]
-	public function get_options_page( string $page_id ): array {
-		return array(
-			'parent'     => 'options-general.php',
-			'capability' => 'manage_options',
-			'page_title' => __( 'DWS Plugin Template', 'dws-plugin-template' ),
-			'menu_title' => __( 'DWS Plugin Template', 'dws-plugin-template' ),
-			'tabs'       => array(
-				array(
-					'slug'   => 'general',
-					'title'  => __( 'General', 'dws-plugin-template' ),
-					'option' => DWS_TPL_OPTION_SETTINGS,
-					'fields' => array(
-						array(
-							'type'              => 'number',
-							'id'                => DWS_TPL_SETTING_LIMIT,
-							'title'             => __( 'Limit', 'dws-plugin-template' ),
-							'default'           => (string) DWS_TPL_SETTING_DEFAULTS[ DWS_TPL_SETTING_LIMIT ],
-							'custom_attributes' => array(
-								'min'  => '1',
-								'step' => '1',
-							),
-							'validate'          => 'dws_tpl_validate_limit',
-						),
 						array(
 							'type'  => 'checkbox',
 							'id'    => DWS_TPL_SETTING_DELETE_DATA,
 							'title' => __( 'Remove all data on uninstallation', 'dws-plugin-template' ),
 							'desc'  => __( 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later', 'dws-plugin-template' ),
 						),
-					),
-				),
-			),
-		);
-	}
-
-	// endregion
-}
 ```
 
-8. Replace `includes/options.php` with the one settings option, its fields, their defaults, and readers that guard each field. The file stays PHP 7.4-parseable, because Quality's syntax job lints `includes/`:
+8. In `includes/options.php`, delete the greeting's three keys with their defaults, text and validator, and `DWS_TPL_OPTION_DELETE_DATA`. The typed option readers stay for a standalone option, such as the recurring-jobs recipe's, with its default in `DWS_TPL_OPTION_DEFAULTS`; while the plugin has none, delete them with `DWS_TPL_OPTION_DEFAULTS`, `dws_tpl_get_option_text()` and `dws_tpl_get_option_default()`, since PHPStan refuses a lookup in an empty array. Add the settings-page recipe's settings option, field, default, reader and validator, then the consent field, its default `false` in `DWS_TPL_SETTING_DEFAULTS`, whose `@var` then reads `array<string, bool|int>`, and a reader for it:
 
 ```php
-<?php declare( strict_types=1 );
-/**
- * Holds the plugin's settings option, its fields and their defaults, and reads each field as its type, guarding the stored value.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @package DeepWebSolutions\PluginTemplate
- */
-
-use DeepWebSolutions\PluginTemplate\Plugin;
-
-defined( 'ABSPATH' ) || exit;
-
-/**
- * The option in which the migration runner records the revision the plugin's data has reached.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @var     string
- */
-const DWS_TPL_OPTION_REVISION = 'dws_tpl_revision';
-
-/**
- * The option that holds the settings page's fields, keyed by field id.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @var     string
- */
-const DWS_TPL_OPTION_SETTINGS = Plugin::PREFIX . '_settings';
-
 /**
  * The settings field that holds 'yes' where the site consents to uninstall removing the plugin's data.
  *
@@ -1161,29 +1117,6 @@ const DWS_TPL_OPTION_SETTINGS = Plugin::PREFIX . '_settings';
  * @var     string
  */
 const DWS_TPL_SETTING_DELETE_DATA = 'delete_data';
-
-/**
- * The settings field that holds the limit.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @var     string
- */
-const DWS_TPL_SETTING_LIMIT = 'limit';
-
-/**
- * The value each settings field reads as while nothing valid is stored.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @var     array<string, bool|int>
- */
-const DWS_TPL_SETTING_DEFAULTS = array(
-	DWS_TPL_SETTING_DELETE_DATA => false,
-	DWS_TPL_SETTING_LIMIT       => 1,
-);
 
 /**
  * Returns a settings field as a boolean, which reads checkbox values such as 'yes' and 'no'.
@@ -1196,77 +1129,10 @@ const DWS_TPL_SETTING_DEFAULTS = array(
  * @return  bool
  */
 function dws_tpl_get_bool_setting( string $field ): bool {
-	$default = dws_tpl_get_setting_default( $field );
-
-	return filter_var( dws_tpl_get_setting( $field, $default ), FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE ) ?? ( true === $default );
-}
-
-/**
- * Returns a settings field as an integer.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @param   string $field The field's id.
- *
- * @return  int
- */
-function dws_tpl_get_int_setting( string $field ): int {
-	$default = dws_tpl_get_setting_default( $field );
-
-	return filter_var( dws_tpl_get_setting( $field, $default ), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE ) ?? ( is_int( $default ) ? $default : 0 );
-}
-
-/**
- * Returns the limit as the settings page stores it, or an error when the submission is not a whole number of at least 1.
- *
- * The number input sends a whole number in any form a browser accepts, such as 03 or 3.0, so the submission parses as a float.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @param   mixed $submitted The submitted value.
- *
- * @return  int|WP_Error
- */
-function dws_tpl_validate_limit( $submitted ) {
-	$limit = is_string( $submitted ) ? filter_var( $submitted, FILTER_VALIDATE_FLOAT ) : false;
-	if ( false === $limit || $limit < 1 || $limit >= PHP_INT_MAX || floor( $limit ) !== $limit ) {
-		return new WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) );
-	}
-
-	return (int) $limit;
-}
-
-/**
- * Returns a settings field's stored value, or the fallback while the settings hold none.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @param   string $field    The field's id.
- * @param   mixed  $fallback The value to return while nothing is stored.
- *
- * @return  mixed
- */
-function dws_tpl_get_setting( string $field, $fallback ) {
-	$settings = get_option( DWS_TPL_OPTION_SETTINGS );
-
-	return is_array( $settings ) && array_key_exists( $field, $settings ) ? $settings[ $field ] : $fallback;
-}
-
-/**
- * Returns a settings field's default, or null for a field without one.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @param   string $field The field's id.
- *
- * @return  mixed
- */
-function dws_tpl_get_setting_default( string $field ) {
-	return DWS_TPL_SETTING_DEFAULTS[ $field ] ?? null;
+	$default = DWS_TPL_SETTING_DEFAULTS[ $field ] ?? null;
+	$stored  = get_option( DWS_TPL_OPTION_SETTINGS );
+	$stored  = is_array( $stored ) && array_key_exists( $field, $stored ) ? $stored[ $field ] : $default;
+	return filter_var( $stored, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE ) ?? ( true === $default );
 }
 ```
 
@@ -1308,24 +1174,26 @@ function dws_tpl_add_settings(): void {
 	);
 ```
 
-11. In `.wp-env.json` and `.wp-env.tests.json`, delete the WooCommerce mapping, and let `afterStart` only activate the plugin; `.wp-env.json`'s command takes no `--config`:
+11. In `.wp-env.json`, `.wp-env.tests.json` and `.wp-env.multisite.json`, delete the WooCommerce mapping, and let `afterStart` only activate the plugin, network-wide in the multisite one; `.wp-env.json`'s command takes no `--config`:
 
 ```json
 "mappings": {
-    "wp-content/plugins/dws-plugin-template": "."
+	"wp-content/plugins/dws-plugin-template": "."
 },
 "lifecycleScripts": {
-    "afterStart": "node_modules/.bin/wp-env --config .wp-env.tests.json run cli wp plugin activate dws-plugin-template"
+	"afterStart": "node_modules/.bin/wp-env --config .wp-env.tests.json run cli wp plugin activate dws-plugin-template"
 }
 ```
 
 12. Adapt the tests:
-- Delete `tests/EndToEnd/without-woocommerce.spec.ts`.
-- `OptionsTest` reads through `dws_tpl_get_bool_setting()` and `dws_tpl_get_int_setting()` from a `DWS_TPL_OPTION_SETTINGS` row; a malformed limit reads its default 1; the validator rows call `dws_tpl_validate_limit()`, which returns integers.
+- Delete `tests/EndToEnd/without-woocommerce.spec.ts` and `tests/Support/OrderStorageTrait.php`.
+- `OptionsTest` reads through `dws_tpl_get_bool_setting()` and `dws_tpl_get_int_setting()` from a `DWS_TPL_OPTION_SETTINGS` row; a malformed limit reads its default 1; the validator rows call `dws_tpl_validate_limit()`, which returns integers; the option readers' rows go if step 8 deleted the readers.
 - `MigrationsTest` expects `DWS_TPL_SETTING_DEFAULTS` stored autoloaded, a stored row kept as it is, and the throw when that option's `INSERT` fails.
 - `UninstallTest` consents through `array( DWS_TPL_SETTING_DELETE_DATA => 'yes' )`, seeds and asserts no Action Scheduler action, and expects the defaults stored again afterwards.
+- `PartialDeployTest`'s missing-engine row seeds and asserts consent through `array( DWS_TPL_SETTING_DELETE_DATA => 'yes' )` in `DWS_TPL_OPTION_SETTINGS`, and restores the row it read.
+- `MultisiteTest` reads the second site's consent from its `DWS_TPL_OPTION_SETTINGS` row.
 - `PluginBootTest` expects nothing in `$plugin->kernel->skipped`, and drops the `DWS_TPL_DEBUG` row with its `get_threshold()` helper and the `WooCommerceLogger` and `RunInSeparateProcess` imports.
-- `SettingsTest` builds `new OptionsPage( Plugin::PREFIX, new Settings() )` and calls its `register_settings()` in `setUpBeforeClass()`, which first requires `wp-admin/includes/template.php`. `tearDownAfterClass()` removes the page's `pre_update_option_` and `option_page_capability_` filters and calls `unregister_setting()`. Each test resets `$GLOBALS['wp_settings_errors']`, renders through `render_page()` and saves as `options.php` does:
+- `SettingsTest` builds `new OptionsPage( Plugin::PREFIX, new SettingsPage() )` and calls its `register_settings()` in `setUpBeforeClass()`, which first requires `wp-admin/includes/template.php`. `tearDownAfterClass()` removes the page's `pre_update_option_` and `option_page_capability_` filters and calls `unregister_setting()`. Each test resets `$GLOBALS['wp_settings_errors']`, renders through `render_page()` and saves as `options.php` does:
 
 ```php
 	// options.php saves a submission through update_option(), whose filter the page hooks for its own option page only.

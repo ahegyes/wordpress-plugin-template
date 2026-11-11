@@ -1,6 +1,6 @@
 <?php declare( strict_types=1 );
 /**
- * Defines the plugin's accessor, boots it on plugins_loaded, unschedules its jobs on deactivation, declares its WooCommerce feature compatibility and loads the files in includes/.
+ * Hooks the plugin into WordPress and loads the files in includes/.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -86,7 +86,9 @@ function dws_tpl_deactivate(): void {
 }
 
 /**
- * Declares whether the plugin works with WooCommerce's order tables, which each plugin built from the template sets from its own evidence.
+ * Declares that the plugin does not yet work with WooCommerce's order tables.
+ *
+ * Each WooCommerce feature flag is declared from evidence.
  *
  * @since   1.0.0
  * @version 1.0.0
