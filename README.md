@@ -28,7 +28,7 @@ Then turn on private vulnerability reporting and Dependabot alerts in the new re
 ## Naming
 
 - A WooCommerce plugin's display name reads `X for WooCommerce`, as WooCommerce's trademark guidelines ask, and its slug ends in `-for-woocommerce`.
-- The prefix is `dws_` and one segment of up to 22 lowercase letters and digits, such as `dws_lpmwc`, so no plugin's prefix starts with another's and the template's longest constants still pass PHPCS; the framework's admin notices refuse `dws_network` and `dws_hidden`; a WooCommerce plugin's segment ends in `wc`.
+- The prefix is `dws_` and one segment of up to 22 lowercase letters and digits, such as `dws_lpmwc`, so no plugin's `{prefix}_` starts with another's and the template's longest constants still pass PHPCS; the framework's admin notices refuse `dws_network` and `dws_hidden`; a WooCommerce plugin's segment ends in `wc`.
 - The namespace is flat: `DeepWebSolutions\<Name>\`, with no segment in between.
 - The repository is `wc-<name>` for a WooCommerce plugin and `wp-<name>` otherwise, as the plugin mirrors are named, and the fill-in names the Composer package `<owner>/<repository>` and the npm package `@<owner>/<repository>` after it.
 - Each plugin takes its own three consecutive wp-env ports, for its development, tests and multisite sites, apart from 8888 and 8889, which wp-env uses by default, and the template's own 8811, 8812 and 8813.

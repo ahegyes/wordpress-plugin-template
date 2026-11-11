@@ -4,7 +4,7 @@ TODO: one sentence saying why this plugin exists, its philosophy rather than a l
 
 ## Requirements
 
-The entry file's headers state the floors: `Requires PHP`, `Requires at least` for WordPress, and `Requires Plugins` with `WC requires at least` for WooCommerce. On a site below them, WordPress shows its own notice and none of the plugin's features load.
+The entry file's headers state the floors: `Requires PHP`, `Requires at least` for WordPress, and `Requires Plugins` with `WC requires at least` for WooCommerce. WordPress shows its own notice below the PHP or WordPress floor or without WooCommerce, and the plugin shows its own below WooCommerce's version floor; either way, none of the plugin's features load.
 
 ## Installation
 
@@ -63,7 +63,7 @@ The fill-in renamed the plugin and kept the template's demo, which boots and pas
 
 Whichever parts go, four settings follow what is left, since a plugin removes them in any order:
 
-- The entry's build gate checks `blocks/build/blocks-manifest.php` and `assets/build/editor.asset.php`, and the plugin stays off until both exist, so it checks only files the remaining build writes, and drops its built-file check once nothing is built.
+- The entry's build gate checks `blocks/build/blocks-manifest.php` and `assets/build/editor.asset.php`, and the plugin stays off until both exist, so it checks only files the remaining build writes, and drops its built-file check once nothing is built. `PartialDeployTest` hides each file the gate checks in a row of its own, so its rows follow the gate.
 - `lint:scripts` and `format:scripts` name only folders that still hold a script, since ESLint fails on a path that holds none.
 - `lint:styles` names only folders that still hold SCSS. Once none does, it keeps one pattern, such as `'assets/src/**/*.scss'`, and takes `--allow-empty-input`, since Stylelint fails when nothing matches, Quality runs it, and without a pattern wp-scripts lints every stylesheet in the project.
 - `build` stays, even once it runs nothing, since `npm run setup` and the Integration run call it.

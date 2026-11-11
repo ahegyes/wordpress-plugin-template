@@ -1,6 +1,6 @@
 # Recipes
 
-These are the changes most plugins built from this template make, each as the files to add or change. A recipe that stores data lists its keys for `includes/footprint.php`, which no check enforces. Options, transients and user meta under the plugin's `dws_tpl_` prefix are in the footprint already; meta on posts, terms, comments or orders needs its own `meta_prefixes` entry per object type.
+These are the changes most plugins built from this template make, each as the files to add or change. A recipe that stores data lists its keys for `includes/footprint.php`, which no check enforces beyond the option constants `FootprintTest` covers. Options, transients and user meta under the plugin's `dws_tpl_` prefix are in the footprint already; meta on posts, terms, comments or orders needs its own `meta_prefixes` entry per object type.
 
 - [A safeguard](#a-safeguard)
 - [A one-time notice](#a-one-time-notice)

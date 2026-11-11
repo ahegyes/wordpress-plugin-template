@@ -52,7 +52,7 @@ Each runs PHP 8.5 with WooCommerce from `vendor/` and its order tables on; CI ru
 
 ## Conventions
 
-1. **Placement.** `src/` holds only the composition root and its components. Code that registers no hooks, such as keys, readers, the footprint, migration steps and asset registrars, is `dws_tpl_` functions and `DWS_TPL_` constants in `includes/`, which parses on PHP 7.4: no `mixed` or union types, typed constants, `match` or first-class callables there. Container definitions are composition and stay in `Plugin::get_definitions()`.
+1. **Placement.** `src/` holds only the composition root and its components. Code that registers no hooks, such as keys, readers, the footprint, migration steps and asset registrars, is `dws_tpl_` functions and `DWS_TPL_` constants in `includes/`, which parses on PHP 7.4: no `mixed` or union types, typed constants, `match`, nullsafe calls or first-class callables there. Container definitions are composition and stay in `Plugin::get_definitions()`.
 2. **Variants.** A component that exists only in one build variant is a child in a branch of its parent's `get_child_component_classes()`, never a second entry in `COMPONENTS`.
 3. **Request context.** `is_admin()` is false on REST requests and true in admin-ajax ones, so an admin-only feature decides the request context in its callbacks, never in `should_load()`.
 4. **Add-ons.** An add-on extends a base plugin only through the base plugin's documented hooks. It reads a template-built base plugin's slug, name and version only through that plugin's `{prefix}_get_plugin_*()` getters, from `plugins_loaded` on, since the add-on may load first, and behind `function_exists()`, since a base plugin below its floors or with a partial build may stay active without defining them.
@@ -78,5 +78,5 @@ The plugin's contract is the elements tagged `@api`, the hooks it fires, and its
 ## Limitations
 
 - The fill-in pushes with the workflow's own token, which GitHub refuses for workflow changes, so it never edits `.github/workflows/`; the workflows read the slug from `composer.json`'s `extra.text-domain`.
-- Integration and end to end share the tests site, so a row that changes shared data in a separate process flushes the parent's object cache.
+- Integration and end to end share the tests site, so a row that changes shared data in a separate process restores it there, or flushes the parent's object cache in `#[AfterClass]`.
 - The release zip carries the TypeScript and SCSS sources beside the built files, since a plugin's repository may be private and the zip is then the only place its users find them.
