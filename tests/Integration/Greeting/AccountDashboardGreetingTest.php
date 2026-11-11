@@ -3,6 +3,7 @@
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration\Greeting;
 
 use DeepWebSolutions\PluginTemplate\Greeting\AccountDashboardGreeting;
+use DeepWebSolutions\PluginTemplate\Tests\Support\OrderStorageTrait;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
 use PHPUnit\Framework\Attributes\After;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -11,13 +12,12 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class AccountDashboardGreetingTest extends TestCase {
+	use OrderStorageTrait;
 	use RestoresOptionsTrait;
 
 	protected const array OPTIONS = array( DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS );
 
 	protected int $customer = 0;
-
-	protected array $orders = array();
 
 	#[\Override]
 	public static function setUpBeforeClass(): void {
@@ -49,10 +49,6 @@ final class AccountDashboardGreetingTest extends TestCase {
 
 	#[After]
 	protected function clean_up(): void {
-		foreach ( $this->orders as $order ) {
-			$order->delete( true );
-		}
-
 		wp_set_current_user( 0 );
 		wp_delete_user( $this->customer );
 		wp_dequeue_style( 'dws-plugin-template-greeting' );
@@ -142,6 +138,20 @@ final class AccountDashboardGreetingTest extends TestCase {
 		self::assertSame( '', $this->print() );
 	}
 
+	#[DataProvider( 'storages' )]
+	public function test_paid_orders_count_towards_the_set_number_on_every_order_storage( bool $hpos, bool $sync ): void {
+		$this->use_storage( $hpos, $sync );
+		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '2' );
+		$this->place_orders( 1 );
+		$this->place_orders( 1, 'failed' );
+
+		self::assertSame( '', $this->print() );
+
+		$this->place_orders( 1, 'processing' );
+
+		self::assertNotSame( '', $this->print() );
+	}
+
 	#[DataProvider( 'unpaid_statuses' )]
 	public function test_orders_that_are_not_paid_do_not_count_towards_the_set_number( string $status ): void {
 		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '2' );
@@ -168,7 +178,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 
 	protected function place_orders( int $count, string $status = 'completed' ): void {
 		for ( $placed = 0; $placed < $count; $placed++ ) {
-			$this->orders[] = wc_create_order(
+			$this->create_order(
 				array(
 					'customer_id' => $this->customer,
 					'status'      => $status,
