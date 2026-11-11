@@ -116,7 +116,6 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 			),
 			$this
 		);
-
 		return $pages;
 	}
 

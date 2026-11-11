@@ -251,7 +251,6 @@ function dws_tpl_get_int_setting( string $field ): int {
 	$default = DWS_TPL_SETTING_DEFAULTS[ $field ] ?? null;
 	$stored  = get_option( DWS_TPL_OPTION_SETTINGS );
 	$stored  = is_array( $stored ) && array_key_exists( $field, $stored ) ? $stored[ $field ] : $default;
-
 	return filter_var( $stored, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE ) ?? ( is_int( $default ) ? $default : 0 );
 }
 
@@ -621,7 +620,6 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 	 */
 	public function add_settings_link( array $links ): array {
 		array_unshift( $links, sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . Plugin::PREFIX ) ), esc_html__( 'Settings', 'dws-plugin-template' ) ) );
-
 		return $links;
 	}
 
@@ -1026,7 +1024,6 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 
 		$this->kernel = new PluginKernel( new ContainerBuilder()->addDefinitions( $this->get_definitions( $this->logger, $this->scheduler ) )->build() );
 		$this->kernel->boot( self::COMPONENTS );
-
 		return true;
 	}
 ```
@@ -1199,7 +1196,6 @@ const DWS_TPL_SETTING_DEFAULTS = array(
  */
 function dws_tpl_get_bool_setting( string $field ): bool {
 	$default = dws_tpl_get_setting_default( $field );
-
 	return filter_var( dws_tpl_get_setting( $field, $default ), FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE ) ?? ( true === $default );
 }
 
@@ -1215,7 +1211,6 @@ function dws_tpl_get_bool_setting( string $field ): bool {
  */
 function dws_tpl_get_int_setting( string $field ): int {
 	$default = dws_tpl_get_setting_default( $field );
-
 	return filter_var( dws_tpl_get_setting( $field, $default ), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE ) ?? ( is_int( $default ) ? $default : 0 );
 }
 
@@ -1253,7 +1248,6 @@ function dws_tpl_validate_limit( $submitted ) {
  */
 function dws_tpl_get_setting( string $field, $fallback ) {
 	$settings = get_option( DWS_TPL_OPTION_SETTINGS );
-
 	return is_array( $settings ) && array_key_exists( $field, $settings ) ? $settings[ $field ] : $fallback;
 }
 

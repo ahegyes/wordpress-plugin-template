@@ -34,7 +34,6 @@ trait OrderStorageTrait {
 		$order = wc_create_order( $args + array( 'status' => 'pending' ) );
 		self::assertInstanceOf( \WC_Order::class, $order );
 		$this->orders[] = $order->get_id();
-
 		return $order;
 	}
 

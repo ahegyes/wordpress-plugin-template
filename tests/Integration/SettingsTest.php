@@ -132,7 +132,6 @@ final class SettingsTest extends TestCase {
 	protected function render(): \Dom\HTMLDocument {
 		\ob_start();
 		\WC_Admin_Settings::output_fields( self::$tab->get_settings_for_section( '' ) );
-
 		return \Dom\HTMLDocument::createFromString( '<!DOCTYPE html><html><body>' . \ob_get_clean() . '</body></html>', \LIBXML_NOERROR );
 	}
 

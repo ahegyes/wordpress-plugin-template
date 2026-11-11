@@ -86,7 +86,6 @@ const DWS_TPL_OPTION_DEFAULTS = array(
  */
 function dws_tpl_get_bool_option( string $key ): bool {
 	$default = dws_tpl_get_option_default( $key );
-
 	return filter_var( get_option( $key, $default ), FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE ) ?? ( true === $default );
 }
 
@@ -102,7 +101,6 @@ function dws_tpl_get_bool_option( string $key ): bool {
  */
 function dws_tpl_get_int_option( string $key ): int {
 	$default = dws_tpl_get_option_default( $key );
-
 	return filter_var( get_option( $key, $default ), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE ) ?? ( is_int( $default ) ? $default : 0 );
 }
 

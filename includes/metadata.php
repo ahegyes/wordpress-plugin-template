@@ -40,7 +40,6 @@ function dws_tpl_get_plugin_slug(): string {
  */
 function dws_tpl_get_plugin_name(): string {
 	$name = get_file_data( DWS_TPL_FILE, array( 'Name' => 'Plugin Name' ) )['Name'];
-
 	return 0 < did_action( 'init' ) ? __( $name, 'dws-plugin-template' ) : $name; // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- The header's name reaches the POT through make-pot's header extraction.
 }
 

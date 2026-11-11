@@ -200,7 +200,6 @@ final class AccountDashboardGreetingTest extends TestCase {
 	protected function print(): string {
 		\ob_start();
 		( new AccountDashboardGreeting() )->print_greeting();
-
 		return (string) \ob_get_clean();
 	}
 }
