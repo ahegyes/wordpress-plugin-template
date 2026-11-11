@@ -62,6 +62,10 @@ Each runs PHP 8.5 with WooCommerce from `vendor/` and its order tables on; CI ru
 8. **Migrations** are append-only: a step converges from any partial state, verifies its writes and throws when one fails.
 9. **WordPress floor.** The plugin calls only APIs its `Requires at least` has, PHP's and JavaScript's alike: PHPStan's wp-compat reads the floor from that header, and CI runs the end-to-end suite on the floor's WordPress, which supplies the `@wordpress/*` scripts at runtime.
 
+## Contract
+
+The plugin's contract is the elements tagged `@api`, the hooks it fires, and its option, meta and capability names and REST routes; breaking it ships as the next major. Every other function, constant and class, `src/` included, is internal and changes in any release.
+
 ## Style
 
 - Every PHP file opens with `<?php declare( strict_types=1 );`, uses `array()`, `final` classes, `protected` over `private` and `#[\Override]` on overrides, and groups class members in `// region NAME` blocks outside `tests/`.

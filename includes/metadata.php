@@ -15,6 +15,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Returns the plugin's slug, which is the text domain its header declares.
  *
+ * @api
+ *
  * @since   1.0.0
  * @version 1.0.0
  *
@@ -29,6 +31,8 @@ function dws_tpl_get_plugin_slug(): string {
  *
  * WordPress flags translations loaded earlier.
  *
+ * @api
+ *
  * @since   1.0.0
  * @version 1.0.0
  *
@@ -42,6 +46,8 @@ function dws_tpl_get_plugin_name(): string {
 
 /**
  * Returns the plugin's version from its header.
+ *
+ * @api
  *
  * @since   1.0.0
  * @version 1.0.0
