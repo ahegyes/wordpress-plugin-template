@@ -15,13 +15,15 @@ Create the plugin's repository from this template with GitHub's **Use this templ
 | `plugin-slug` | `acme-orders-for-woocommerce` | the text domain and the names of the entry file and the release zip |
 | `php-namespace` | `AcmeOrders` | the namespace segment after `DeepWebSolutions\` |
 | `prefix` | `dws_aowc` | the prefix of every global function, constant, option and hook |
-| `wp-env-port` | `8821` | the development site's port; the tests site takes the next one |
+| `wp-env-port` | `8831` | the development site's port; the tests and multisite sites take the next two |
 
 The workflow:
 - renames the entry file and replaces the template's names, description, prefix and ports in every tracked file outside `.github/workflows/`, which read the slug from `composer.json` instead, since GitHub refuses the workflow's own token for workflow changes;
 - makes `README.scaffold.md` the plugin's README, which lists the template's demo and what removing each part takes;
 - deletes the disabled example include, the safeguard recipe's test and every changelog fragment but the initial entry, and refreshes the Composer lock's content hash;
 - fails when any name, description or port of the template is left, and otherwise pushes one commit to the branch it ran on.
+
+Then turn on private vulnerability reporting and Dependabot alerts in the new repository's settings: its `SECURITY.md` sends reports through the first and development-tool advisories to the second, and a repository made from a template copies none of the template's settings.
 
 ## Naming
 

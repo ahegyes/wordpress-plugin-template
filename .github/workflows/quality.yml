@@ -89,7 +89,7 @@ jobs:
           NS: AcmeOrders
           # The rehearsal fills in the longest prefix the script accepts, so its PHPCS run fails once the cap stops passing.
           PREFIX: dws_acmeextraordinarysales
-          PORT: '8821'
+          PORT: '8831'
           REPO: acme/acme-orders
         run: .github/scripts/fill-in-scaffold.sh
       - name: Install and scope the filled-in plugin
