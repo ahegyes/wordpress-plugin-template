@@ -2,6 +2,8 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
+use DeepWebSolutions\PluginTemplate\Plugin;
+use PHPUnit\Framework\Attributes\AfterClass;
 use PHPUnit\Framework\Attributes\BeforeClass;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -9,58 +11,37 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class SafeguardRecipeTest extends TestCase {
-	protected const string CAPABILITY = 'dws_tpl_export_data';
-
-	protected const string FILTER = 'dws_tpl/data_export/should_restrict';
-
 	#[BeforeClass]
 	public static function load_the_recipe(): void {
-		$recipes = \dirname( __DIR__, 2 ) . '/docs/recipes.md';
-		self::assertFileExists( $recipes );
-		\preg_match( '/```php\n(<\?php declare\( strict_types=1 \);\n(?:(?!```).)*?function dws_tpl_is_relaxed\((?:(?!```).)*)```/s', (string) \file_get_contents( $recipes ), $block );
-		self::assertArrayHasKey( 1, $block, 'docs/recipes.md holds no includes/safeguards.php block defining dws_tpl_is_relaxed().' );
+		$recipes = (string) \file_get_contents( \dirname( __DIR__, 2 ) . '/docs/recipes.md' );
+		foreach ( array( 'function dws_tpl_is_relaxed(', 'final class SafeguardsTest ' ) as $marker ) {
+			\preg_match( '/```php\n(<\?php declare\( strict_types=1 \);\n(?:(?!```).)*?' . \preg_quote( $marker, '/' ) . '(?:(?!```).)*)```/s', $recipes, $block );
+			self::assertArrayHasKey( 1, $block, "docs/recipes.md holds no PHP file defining $marker." );
 
-		$file = \sys_get_temp_dir() . '/dws-tpl-safeguard-recipe.php';
-		\file_put_contents( $file, $block[1] );
-		require_once $file;
-	}
-
-	public static function relaxations(): array {
-		return array(
-			'none'         => array( array(), false ),
-			'null'         => array( array( 'relaxation' => null ), false ),
-			'zero'         => array( array( 'relaxation' => 0 ), false ),
-			'empty-string' => array( array( 'relaxation' => '' ), false ),
-			'false'        => array( array( 'relaxation' => false ), true ),
-		);
-	}
-
-	#[DataProvider( 'relaxations' )]
-	public function test_only_an_explicit_false_relaxes_the_safeguard( array $spec, bool $relaxed ): void {
-		$relaxation = static fn (): mixed => $spec['relaxation'];
-		if ( \array_key_exists( 'relaxation', $spec ) ) {
-			add_filter( self::FILTER, $relaxation );
-		}
-
-		try {
-			self::assertSame( $relaxed ? array( 'manage_options' ) : array( 'do_not_allow' ), map_meta_cap( self::CAPABILITY, 0 ) );
-		} finally {
-			remove_filter( self::FILTER, $relaxation );
+			$file = (string) \tempnam( \sys_get_temp_dir(), \str_replace( '_', '-', Plugin::PREFIX ) . '-safeguard-recipe-' );
+			\file_put_contents( $file, $block[1] );
+			require_once $file;
+			\unlink( $file );
 		}
 	}
 
-	public function test_an_explicit_false_does_not_relax_the_safeguard_before_the_plugin_booted(): void {
-		global $wp_actions;
-		self::assertGreaterThan( 0, did_action( 'dws_tpl/boot/succeeded' ) );
-		$fired = $wp_actions['dws_tpl/boot/succeeded'];
-		unset( $wp_actions['dws_tpl/boot/succeeded'] );
-		add_filter( self::FILTER, '__return_false' );
+	#[AfterClass]
+	public static function remove_the_recipes_safeguard(): void {
+		remove_filter( 'map_meta_cap', 'dws_tpl_map_export_capability' );
+	}
 
-		try {
-			self::assertSame( array( 'do_not_allow' ), map_meta_cap( self::CAPABILITY, 0 ) );
-		} finally {
-			remove_filter( self::FILTER, '__return_false' );
-			$wp_actions['dws_tpl/boot/succeeded'] = $fired;
+	// The recipe's test class is loaded from its block, so PHPUnit never discovers it and this row runs each of its rows.
+	public function test_the_recipes_safeguard_passes_the_recipes_test(): void {
+		foreach ( new \ReflectionClass( SafeguardsTest::class )->getMethods( \ReflectionMethod::IS_PUBLIC ) as $test ) {
+			if ( ! \str_starts_with( $test->name, 'test_' ) ) {
+				continue;
+			}
+
+			$provider = $test->getAttributes( DataProvider::class )[0] ?? null;
+			$rows     = \is_null( $provider ) ? array( $test->name => array() ) : SafeguardsTest::{$provider->newInstance()->methodName()}();
+			foreach ( $rows as $name => $row ) {
+				$test->invoke( new SafeguardsTest( (string) $name ), ...$row );
+			}
 		}
 	}
 }
