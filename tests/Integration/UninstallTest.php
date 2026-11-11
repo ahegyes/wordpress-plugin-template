@@ -3,6 +3,7 @@
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
 use DeepWebSolutions\PluginTemplate\Plugin;
+use DeepWebSolutions\PluginTemplate\Tests\Support\RunsRequestsTrait;
 use PHPUnit\Framework\Attributes\AfterClass;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
@@ -10,6 +11,8 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class UninstallTest extends TestCase {
+	use RunsRequestsTrait;
+
 	protected const int USER = 1;
 
 	#[AfterClass]
@@ -71,6 +74,22 @@ final class UninstallTest extends TestCase {
 		// The other tests share the database, so the runner stores again what a new site starts with.
 		dws_tpl_plugin()->migrations?->run();
 		self::assertSame( 'no', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
+	}
+
+	#[RunInSeparateProcess]
+	public function test_an_uninstall_in_a_request_that_never_loaded_the_plugin_removes_its_data(): void {
+		update_option( DWS_TPL_OPTION_DELETE_DATA, 'yes' );
+
+		try {
+			// WordPress uninstalls a plugin in a request that never included it, as WP-CLI's --skip-plugins does here.
+			$request = self::request( 'require_once ABSPATH . "wp-admin/includes/plugin.php"; echo wp_json_encode( array( uninstall_plugin( "' . plugin_basename( DWS_TPL_FILE ) . '" ), get_option( "' . DWS_TPL_OPTION_DELETE_DATA . '" ) ) );', '--skip-plugins=' . Plugin::SLUG );
+
+			self::assertSame( '[true,false]', $request['last'], $request['output'] );
+		} finally {
+			wp_cache_flush();
+			// The other tests share the database, so the runner stores again what a new site starts with.
+			dws_tpl_plugin()->migrations?->run();
+		}
 	}
 
 	#[RunInSeparateProcess]
