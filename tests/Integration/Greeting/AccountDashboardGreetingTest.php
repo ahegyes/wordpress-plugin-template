@@ -3,6 +3,7 @@
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration\Greeting;
 
 use DeepWebSolutions\PluginTemplate\Greeting\AccountDashboardGreeting;
+use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Tests\Support\OrderStorageTrait;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
 use PHPUnit\Framework\Attributes\After;
@@ -17,11 +18,20 @@ final class AccountDashboardGreetingTest extends TestCase {
 
 	protected const array OPTIONS = array( DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS );
 
+	protected const string TRANSLATION = 'Translated greeting';
+
 	protected int $customer = 0;
 
 	#[\Override]
 	public static function setUpBeforeClass(): void {
 		require_once ABSPATH . 'wp-admin/includes/user.php';
+	}
+
+	public static function untouched_greetings(): array {
+		return array(
+			'unsaved' => array( null ),
+			'empty'   => array( '' ),
+		);
 	}
 
 	public static function unpaid_statuses(): array {
@@ -37,7 +47,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 	protected function setUp(): void {
 		$customer = wp_insert_user(
 			array(
-				'user_login' => 'dws_tpl_customer_' . \wp_generate_password( 8, false ),
+				'user_login' => Plugin::PREFIX . '_customer_' . wp_generate_password( 8, false ),
 				'user_pass'  => wp_generate_password(),
 				'role'       => 'customer',
 			)
@@ -55,7 +65,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 		wp_deregister_style( 'dws-plugin-template-greeting' );
 	}
 
-	public function test_the_greeting_prints_on_the_account_dashboard(): void {
+	public function test_the_greeting_hooks_the_account_dashboard_and_its_style(): void {
 		$detail = new AccountDashboardGreeting();
 		$detail->register_hooks();
 
@@ -161,19 +171,19 @@ final class AccountDashboardGreetingTest extends TestCase {
 		self::assertSame( '', $this->print() );
 	}
 
-	public function test_an_unsaved_greeting_prints_its_translated_default(): void {
-		delete_option( DWS_TPL_OPTION_GREETING );
-		delete_option( DWS_TPL_OPTION_GREETING_ORDERS );
+	#[DataProvider( 'untouched_greetings' )]
+	public function test_an_untouched_greeting_prints_its_translated_default( ?string $stored ): void {
+		\is_null( $stored ) ? delete_option( DWS_TPL_OPTION_GREETING ) : update_option( DWS_TPL_OPTION_GREETING, $stored );
+		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '1' );
 		$this->place_orders( 1 );
+		$translate = static fn (): string => self::TRANSLATION;
+		add_filter( 'gettext_' . Plugin::SLUG, $translate );
 
-		self::assertStringContainsString( esc_html( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ) ), $this->print() );
-	}
-
-	public function test_an_empty_greeting_prints_its_translated_default(): void {
-		update_option( DWS_TPL_OPTION_GREETING, '' );
-		$this->place_orders( 1 );
-
-		self::assertStringContainsString( esc_html( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ) ), $this->print() );
+		try {
+			self::assertStringContainsString( self::TRANSLATION, $this->print() );
+		} finally {
+			remove_filter( 'gettext_' . Plugin::SLUG, $translate );
+		}
 	}
 
 	protected function place_orders( int $count, string $status = 'completed' ): void {

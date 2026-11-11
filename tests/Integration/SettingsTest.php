@@ -98,7 +98,7 @@ final class SettingsTest extends TestCase {
 		self::assertSame( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
 	}
 
-	public function test_the_retention_opt_in_round_trips_through_woocommerces_save(): void {
+	public function test_the_uninstall_consent_round_trips_through_woocommerces_save(): void {
 		$this->save( array( DWS_TPL_OPTION_DELETE_DATA => '1' ) );
 
 		self::assertSame( 'yes', get_option( DWS_TPL_OPTION_DELETE_DATA ) );

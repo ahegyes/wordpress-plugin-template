@@ -15,11 +15,11 @@ use PHPUnit\Framework\TestCase;
 final class PluginBootTest extends TestCase {
 	use RunsRequestsTrait;
 
-	public function test_the_plugin_boots_with_the_greeting_gated_off_until_a_site_switches_it_on(): void {
+	public function test_the_plugin_boots_and_skips_the_greeting_while_its_gate_is_off(): void {
 		$plugin = dws_tpl_plugin();
 
 		self::assertSame( 'booted', $plugin->boundary->status );
-		self::assertSame( array( GreetingFeature::class ), $plugin->kernel?->skipped );
+		self::assertSame( GreetingFeature::should_load() ? array() : array( GreetingFeature::class ), $plugin->kernel?->skipped );
 	}
 
 	public function test_the_entry_loads_every_include_but_those_whose_names_start_with_an_underscore(): void {
@@ -69,9 +69,17 @@ final class PluginBootTest extends TestCase {
 		self::assertSame( self::get_threshold( new WooCommerceLogger( Plugin::SLUG, 'debug' ) ), self::get_threshold( $logger ) );
 	}
 
-	public function test_the_stored_data_is_at_the_revision_of_the_code(): void {
-		self::assertInstanceOf( MigrationRunner::class, dws_tpl_plugin()->migrations );
-		self::assertSame( \count( dws_tpl_get_migration_steps() ), MigrationRunner::get_revision( DWS_TPL_OPTION_REVISION ) );
+	public function test_a_request_brings_the_stored_data_to_the_revision_of_the_code(): void {
+		update_option( DWS_TPL_OPTION_REVISION, 0 );
+		try {
+			$request = self::request( 'echo ' . MigrationRunner::class . '::get_revision( "' . DWS_TPL_OPTION_REVISION . '" );' );
+		} finally {
+			wp_cache_flush(); // The request wrote the revision behind this process's cache.
+			update_option( DWS_TPL_OPTION_REVISION, \count( dws_tpl_get_migration_steps() ) );
+		}
+
+		self::assertSame( 0, $request['status'], $request['output'] );
+		self::assertSame( (string) \count( dws_tpl_get_migration_steps() ), $request['last'] );
 	}
 
 	protected static function get_threshold( WooCommerceLogger $logger ): mixed {

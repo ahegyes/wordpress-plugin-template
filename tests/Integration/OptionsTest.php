@@ -17,6 +17,8 @@ final class OptionsTest extends TestCase {
 
 	protected const array OPTIONS = array( DWS_TPL_OPTION_DELETE_DATA, DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS );
 
+	protected const string TRANSLATION = 'Translated greeting';
+
 	public static function stored_bools(): array {
 		return array(
 			'yes'       => array( 'yes', true ),
@@ -47,6 +49,14 @@ final class OptionsTest extends TestCase {
 			'string' => array( 'kept', 'kept' ),
 			'empty'  => array( '', '' ),
 			'array'  => array( array( 'kept' ), '' ),
+		);
+	}
+
+	public static function untouched_strings(): array {
+		return array(
+			'unsaved'      => array( null ),
+			'empty'        => array( '' ),
+			'not-a-string' => array( array( 'Hello' ) ),
 		);
 	}
 
@@ -101,25 +111,23 @@ final class OptionsTest extends TestCase {
 		self::assertSame( $expected, dws_tpl_get_string_option( self::KEY ) );
 	}
 
-	public function test_a_string_without_a_stored_value_reads_its_translated_default(): void {
-		delete_option( DWS_TPL_OPTION_GREETING );
+	#[DataProvider( 'untouched_strings' )]
+	public function test_a_string_without_a_usable_stored_value_reads_its_translated_default( mixed $stored ): void {
+		\is_null( $stored ) ? delete_option( DWS_TPL_OPTION_GREETING ) : update_option( DWS_TPL_OPTION_GREETING, $stored );
+		$translate = static fn (): string => self::TRANSLATION;
+		add_filter( 'gettext_' . Plugin::SLUG, $translate );
 
-		self::assertNotSame( '', dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ) );
-		self::assertSame( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
+		try {
+			self::assertSame( self::TRANSLATION, dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
+		} finally {
+			remove_filter( 'gettext_' . Plugin::SLUG, $translate );
+		}
+	}
 
-		update_option( DWS_TPL_OPTION_GREETING, '' );
-
-		self::assertSame( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
-
+	public function test_a_stored_string_reads_over_its_translated_default(): void {
 		update_option( DWS_TPL_OPTION_GREETING, 'Hello' );
 
 		self::assertSame( 'Hello', dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
-	}
-
-	public function test_a_string_that_is_not_a_string_reads_its_translated_default(): void {
-		update_option( DWS_TPL_OPTION_GREETING, array( 'Hello' ) );
-
-		self::assertSame( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
 	}
 
 	public function test_an_option_without_a_translated_default_has_no_text(): void {
