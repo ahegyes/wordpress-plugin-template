@@ -252,7 +252,7 @@ Add the option, its field, its default and a reader that guards the field to `sr
 	 *
 	 * @var     string
 	 */
-	public const string SETTINGS = Plugin::PREFIX . '_settings';
+	public const string SETTINGS = 'dws_tpl_settings';
 
 	/**
 	 * The settings field that holds the limit.
@@ -436,6 +436,20 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerc
  * @version 1.0.0
  */
 final class ProductData implements ComponentInterface, ProductDataTabDefinitionInterface {
+	// region FIELDS AND CONSTANTS
+
+	/**
+	 * The meta key that holds the box a product ships in.
+	 *
+	 * @since   1.0.0
+	 * @version 1.0.0
+	 *
+	 * @var     string
+	 */
+	public const string BOX = '_dws_tpl_box';
+
+	// endregion
+
 	// region MAGIC METHODS
 
 	/**
@@ -480,7 +494,7 @@ final class ProductData implements ComponentInterface, ProductDataTabDefinitionI
 					'fields' => array(
 						array(
 							'type'  => 'text',
-							'id'    => '_' . Plugin::PREFIX . '_box',
+							'id'    => self::BOX,
 							'label' => __( 'Box', 'dws-plugin-template' ),
 						),
 					),
@@ -493,7 +507,7 @@ final class ProductData implements ComponentInterface, ProductDataTabDefinitionI
 }
 ```
 
-Read the stored value with `ProductMeta::get_value( $product, '_dws_tpl_box' )`. The leading underscore hides the key from WordPress's Custom Fields box. Post meta is not in the footprint until its type is, so declare the prefix for uninstall in `Plugin::FOOTPRINT`, and add `meta_prefixes?: array<string, list<non-empty-string>>` to its `@var` shape:
+Read the stored value with `ProductMeta::get_value( $product, ProductData::BOX )`. The leading underscore hides the key from WordPress's Custom Fields box. Post meta is not in the footprint until its type is, so declare the prefix for uninstall in `Plugin::FOOTPRINT`, and add `meta_prefixes?: array<string, list<non-empty-string>>` to its `@var` shape:
 
 ```php
 'meta_prefixes'             => array( 'post' => array( '_' . self::PREFIX . '_' ) ),
@@ -526,6 +540,20 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Settings\E
  * @version 1.0.0
  */
 final class PostNote implements ComponentInterface, ObjectFormDefinitionInterface {
+	// region FIELDS AND CONSTANTS
+
+	/**
+	 * The meta key that holds a post's editorial note.
+	 *
+	 * @since   1.0.0
+	 * @version 1.0.0
+	 *
+	 * @var     string
+	 */
+	protected const string NOTE = '_dws_tpl_note';
+
+	// endregion
+
 	// region MAGIC METHODS
 
 	/**
@@ -571,7 +599,7 @@ final class PostNote implements ComponentInterface, ObjectFormDefinitionInterfac
 			'fields'     => array(
 				array(
 					'type'  => 'textarea',
-					'id'    => '_' . Plugin::PREFIX . '_note',
+					'id'    => self::NOTE,
 					'title' => __( 'Note', 'dws-plugin-template' ),
 				),
 			),
@@ -721,7 +749,7 @@ WooCommerce stores each field in its own option under its id, flat rather than i
 	 *
 	 * @var     string
 	 */
-	public const string PAYMENT_NOTES = Plugin::PREFIX . '_payment_notes';
+	public const string PAYMENT_NOTES = 'dws_tpl_payment_notes';
 
 	/**
 	 * The option that holds the payment methods whose orders get the payment note.
@@ -731,7 +759,7 @@ WooCommerce stores each field in its own option under its id, flat rather than i
 	 *
 	 * @var     string
 	 */
-	public const string PAYMENT_METHODS = Plugin::PREFIX . '_payment_methods';
+	public const string PAYMENT_METHODS = 'dws_tpl_payment_methods';
 
 	// ...
 
@@ -770,7 +798,7 @@ Add the repair gate's option to `src/Options.php`, with its default `0` in `DEFA
 	 *
 	 * @var     string
 	 */
-	public const string RECURRING_ENSURED_AT = Plugin::PREFIX . '_recurring_ensured_at';
+	public const string RECURRING_ENSURED_AT = 'dws_tpl_recurring_ensured_at';
 ```
 
 Add the job as a component, `src/Pruning.php`, and list it in `Plugin::COMPONENTS`. It ensures the schedule on `wp_loaded` at most once an hour, and again when Action Scheduler asks every day. Writing the time first narrows the window in which two requests both ensure it, and `ensure_recurring()` repairs a duplicate chain on its next pass:

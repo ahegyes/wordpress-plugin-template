@@ -21,7 +21,7 @@ final class Options {
 	 *
 	 * @var     string
 	 */
-	public const string DELETE_DATA = Plugin::PREFIX . '_delete_data';
+	public const string DELETE_DATA = 'dws_tpl_delete_data';
 
 	/**
 	 * The option that holds the greeting.
@@ -31,7 +31,7 @@ final class Options {
 	 *
 	 * @var     string
 	 */
-	public const string GREETING = Plugin::PREFIX . '_greeting';
+	public const string GREETING = 'dws_tpl_greeting';
 
 	/**
 	 * The option that holds 'yes' where the site greets returning customers on their account dashboard.
@@ -41,7 +41,7 @@ final class Options {
 	 *
 	 * @var     string
 	 */
-	public const string GREETING_ENABLED = Plugin::PREFIX . '_greeting_enabled';
+	public const string GREETING_ENABLED = 'dws_tpl_greeting_enabled';
 
 	/**
 	 * The option that holds the number of orders a customer places before the greeting shows.
@@ -51,7 +51,7 @@ final class Options {
 	 *
 	 * @var     string
 	 */
-	public const string GREETING_ORDERS = Plugin::PREFIX . '_greeting_orders';
+	public const string GREETING_ORDERS = 'dws_tpl_greeting_orders';
 
 	/**
 	 * The value each option reads as while nothing valid is stored.
