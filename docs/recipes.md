@@ -936,7 +936,7 @@ $restricted = apply_filters( 'dws_tpl/data_export/should_restrict', $restricted 
 
 A plugin listed on wordpress.org gets its updates and its language packs from there, so it drops the GitHub updater's header and adds the directory's `readme.txt`.
 
-1. In the entry file, delete the `Update URI` header, which turns the bundled updater inert, and the `load_plugin_textdomain()` line, since language packs load just in time.
+1. In the entry file, delete the `Update URI` header, which turns the bundled updater inert, the `Tested up to` header, which only that updater reads and Plugin Check refuses beside a `readme.txt`, with `EntryHeadersTest`'s row for it, and the `load_plugin_textdomain()` line, since language packs load just in time.
 2. Add `readme.txt`, whose `Stable tag` the release checks against the `Version` header, whose floors repeat the entry file's headers, and whose changelog block `composer changelog:write` fills:
 
 ```text
