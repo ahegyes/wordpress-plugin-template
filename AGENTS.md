@@ -5,20 +5,18 @@ A WordPress plugin built on the five wp-framework packages (`ahegyes/wp-framewor
 ## Layout
 
 ```
-dws-plugin-template.php      the entry: safeguards, bootstrap load.php, the updater, the floor check, the build gate, the autoloader
-functions.php                dws_tpl_plugin(), the boot on plugins_loaded 15, deactivation, the HPOS declaration (false), the includes/ loader
-uninstall.php                the framework's uninstall engine over the footprint, with DWS_TPL_OPTION_DELETE_DATA's consent
-src/                         the composition root and its components only
-├── Plugin.php               SLUG, PREFIX (dws_tpl), COMPONENTS, the logger, the scheduler, the migration runner and the kernel
-├── Settings.php             the WooCommerce settings tab dws_tpl: the greeting's fields and the uninstall consent
+dws-plugin-template.php      the entry: the safeguards, then, in one try, bootstrap load.php, the updater, the floor check, the build gate, the autoloader and functions.php, whose catch shows the build notice
+Safeguards.php               the safeguards, as static closures, which the entry requires before the floor check
+functions.php                the @api dws_tpl_plugin(), the includes/ loader, then the boot on plugins_loaded 15, the HPOS declaration (false) and deactivation, as static closures
+uninstall.php                the framework's uninstall engine over Plugin::FOOTPRINT, with Options::DELETE_DATA's consent
+src/                         the plugin's classes, each named for its concept
+├── Plugin.php               SLUG, PREFIX (dws_tpl), COMPONENTS, FOOTPRINT, the identity, the logger, the scheduler, the migration runner and the kernel
+├── Options.php              the option keys, their defaults and the typed readers
+├── Migrations.php           get_steps() over the protected steps, append-only
+├── Settings.php             the WooCommerce settings tab dws_tpl: the greeting's fields, their validator and the uninstall consent
 ├── Blocks.php               the blocks from blocks/build/blocks-manifest.php and the block-editor script
-└── Greeting/                the greeting: GreetingFeature, gated on DWS_TPL_OPTION_GREETING_ENABLED, and its AccountDashboardGreeting child
-includes/                    hook-free code as dws_tpl_ functions and DWS_TPL_ constants, loaded in name order, _-prefixed files skipped
-├── safeguards.php           restrictions that hold whenever the plugin cannot boot; loaded by the entry before the floor check
-├── options.php              the option keys, their defaults, the typed readers, the translated text and the validator
-├── footprint.php            dws_tpl_get_footprint(), every kind of data the plugin stores
-├── migrations.php           dws_tpl_get_migration_steps() and one function per step, append-only
-├── assets.php               the *.asset.php reader and the script and style registrars
+└── Greeting/                the greeting: GreetingFeature, gated on Options::GREETING_ENABLED, and its AccountDashboardGreeting child, which owns the default message
+includes/                    more @api functions and constants, grouped by topic, loaded in name order, _-prefixed files skipped
 └── metadata.php             the slug, name and version getters, the plugin's surface for a peer plugin
 blocks/src/, assets/src/     TypeScript, SCSS and each block's render.php, built into blocks/build/ and assets/build/ (untracked)
 models/, templates/          empty extension points
@@ -52,13 +50,13 @@ Each runs PHP 8.5 with WooCommerce from `vendor/` and its order tables on; CI ru
 
 ## Conventions
 
-1. **Placement.** `src/` holds only the composition root and its components. Code that registers no hooks, such as keys, readers, the footprint, migration steps and asset registrars, is `dws_tpl_` functions and `DWS_TPL_` constants in `includes/`, which parses on PHP 7.4: no `mixed` or union types, typed constants, `match`, nullsafe calls or first-class callables there. Container definitions are composition and stay in `Plugin::get_definitions()`.
+1. **Placement.** The global namespace holds only the plugin's contract: `functions.php` and `includes/` declare its `@api` functions and constants, and `functions.php` registers its hooks as static closures. Every other symbol is a member of a final class in `src/` named for its concept, `protected` wherever only its class uses it: the composition root, which holds the footprint, a component, `Options`, `Migrations` or another class that registers no hooks. No namespace or folder is named "Internal". Container definitions are composition and stay in `Plugin::get_definitions()`; a component takes the plugin's identity, or a service such as `Assets`, by constructor.
 2. **Variants.** A component that exists only in one build variant is a child in a branch of its parent's `get_child_component_classes()`, never a second entry in `COMPONENTS`.
 3. **Request context.** `is_admin()` is false on REST requests and true in admin-ajax ones, so an admin-only feature decides the request context in its callbacks, never in `should_load()`.
 4. **Add-ons.** An add-on extends a base plugin only through the base plugin's documented hooks. It reads a template-built base plugin's slug, name and version only through that plugin's `{prefix}_get_plugin_*()` getters, from `plugins_loaded` on, since the add-on may load first, and behind `function_exists()`, since a base plugin below its floors or with a partial build may stay active without defining them.
 5. **Request reads.** An integer or boolean is read as `filter_var( wp_unslash( $_POST['key'] ?? '' ), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE ) ?? $default` (`FILTER_VALIDATE_BOOL` for a boolean, where an absent key reads false, as an unchecked checkbox posts nothing), and a string through an `is_string()` guard and the field's sanitizer; never `filter_input()`, the `default` filter option or a cast on request input.
-6. **Options and data.** Options are read only through `includes/options.php`'s typed readers, safeguards excepted. Everything stored lives under `dws_tpl_`, or `_dws_tpl_` for hidden meta. The footprint covers the prefix's options, transients and user meta; object meta needs a `meta_prefixes` entry per type, and anything else its own entry.
-7. **Safeguards** live in `includes/safeguards.php`, call WordPress, that file, and WooCommerce where the plugin requires it, and relax only through their own filter, through `dws_tpl_is_relaxed()` (`docs/recipes.md`). The entry loads them before the floor check, so they parse on PHP 7.4 and call only what their hook hands them, WordPress APIs present at the oldest WordPress the bootstrap package runs on and WooCommerce APIs present since 3.6, guarding anything newer with `function_exists()` or `method_exists()`. WordPress loads the plugin while WooCommerce is inactive, so a safeguard that calls WooCommerce is hooked from one function, which the file runs on `woocommerce_loaded`, or at once where that has fired already, as on the request that activates the plugin; WooCommerce fires it, since 3.6, once every plugin has loaded. `phpstan.safeguards.neon` reads the whole file, with WooCommerce's stubs loaded, and checks the WordPress floor; review checks the WooCommerce floor, which no tool reads.
+6. **Options and data.** Options are read only through `Options`' typed readers, which translate nothing, safeguards excepted; a translated default belongs to the component that shows it, as the greeting's message does. Everything stored lives under `dws_tpl_`, or `_dws_tpl_` for hidden meta, but for scheduled jobs, whose hooks take the hook root as every hook does and whose Action Scheduler group is the bare `dws_tpl`. The footprint covers the prefix's options, transients and user meta; object meta needs a `meta_prefixes` entry per type, and anything else, such as a scheduled hook, its own entry.
+7. **Safeguards** live in `Safeguards.php`, a final class whose `register()` hooks each safeguard as a static closure, which no code can remove by name, so a safeguard relaxes only through its own filter, through the protected `is_relaxed()` (`docs/recipes.md`); only what other classes read is public. The entry requires the class by path before the floor check, so it parses on PHP 7.4 and call only what their hook hands them, WordPress APIs present at the oldest WordPress the bootstrap package runs on and WooCommerce APIs present since 3.6, guarding anything newer with `function_exists()` or `method_exists()`. WordPress loads the plugin while WooCommerce is inactive, so a safeguard that calls WooCommerce is hooked from one closure, which `register()` runs on `woocommerce_loaded`, or at once where that has fired already, as on the request that activates the plugin; WooCommerce fires it, since 3.6, once every plugin has loaded. `phpstan.safeguards.neon` reads the class and the entry, with WooCommerce's stubs loaded, and checks the WordPress floor; review checks the WooCommerce floor, which no tool reads.
 8. **Migrations** are append-only: a step converges from any partial state, verifies its writes and throws when one fails.
 9. **WordPress floor.** The plugin calls only APIs its `Requires at least` has, PHP's and JavaScript's alike: PHPStan's wp-compat reads the floor from that header, and CI runs the end-to-end suite on the floor's WordPress, which supplies the `@wordpress/*` scripts at runtime.
 
