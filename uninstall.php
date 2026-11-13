@@ -8,7 +8,9 @@
  * @package DeepWebSolutions\PluginTemplate
  */
 
+use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Requirements;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginIdentity;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Uninstall\Uninstaller;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Uninstall\MetaTypes;
 
@@ -34,6 +36,8 @@ try {
 	if ( ! class_exists( Uninstaller::class ) ) {
 		throw new RuntimeException( 'its uninstall engine is missing.' );
 	}
+
+	$dws_tpl_identity = new PluginIdentity( $dws_tpl_file, Plugin::SLUG, Plugin::PREFIX );
 } catch ( Throwable $error ) {
 	// WP-CLI then fails and keeps the files for a rerun on a complete build, while a web request deletes them and leaves the data.
 	if ( defined( 'WP_CLI' ) && true === WP_CLI ) {
@@ -46,7 +50,7 @@ try {
 
 try {
 	Uninstaller::run(
-		$dws_tpl_file,
+		$dws_tpl_identity,
 		$dws_tpl_footprint,
 		array(
 			'consent'    => array( 'option' => DWS_TPL_OPTION_DELETE_DATA ),

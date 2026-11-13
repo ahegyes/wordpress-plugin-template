@@ -58,9 +58,9 @@
 		"johnpbloch/wordpress-core": "^7.1",
 		"laravel/serializable-closure": "^2.2",
 		"php-di/php-di": "^7.1.1",
-		"php-stubs/woocommerce-stubs": "^11.2",
+		"php-stubs/woocommerce-stubs": "^11.3",
 		"phpunit/phpunit": "^13",
-		"wp-plugin/woocommerce": "^11.2"
+		"wp-plugin/woocommerce": "^11.3"
 	},
 
 	"minimum-stability": "dev",

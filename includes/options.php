@@ -51,16 +51,6 @@ const DWS_TPL_OPTION_GREETING_ENABLED = 'dws_tpl_greeting_enabled';
 const DWS_TPL_OPTION_GREETING_ORDERS = 'dws_tpl_greeting_orders';
 
 /**
- * The option in which the migration runner records the revision the plugin's data has reached.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @var     string
- */
-const DWS_TPL_OPTION_REVISION = 'dws_tpl_revision';
-
-/**
  * The value each option reads as while nothing valid is stored.
  *
  * @since   1.0.0

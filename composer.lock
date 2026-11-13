@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "131557a0ae2dc46ebbd539b11c6d2992",
+    "content-hash": "d1dead904139312560fe0aa9c50af89f",
     "packages": [],
     "packages-dev": [
         {
@@ -154,12 +154,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ahegyes/wp-framework-bootstrap.git",
-                "reference": "02dc34c2641643e48cda5364008c0bd157832f1a"
+                "reference": "540d66c264eb1e2e08859a2e58bae97413d9e434"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ahegyes/wp-framework-bootstrap/zipball/02dc34c2641643e48cda5364008c0bd157832f1a",
-                "reference": "02dc34c2641643e48cda5364008c0bd157832f1a",
+                "url": "https://api.github.com/repos/ahegyes/wp-framework-bootstrap/zipball/540d66c264eb1e2e08859a2e58bae97413d9e434",
+                "reference": "540d66c264eb1e2e08859a2e58bae97413d9e434",
                 "shasum": ""
             },
             "require": {
@@ -181,7 +181,7 @@
             "support": {
                 "source": "https://github.com/ahegyes/wp-framework-bootstrap/tree/trunk"
             },
-            "time": "2026-11-10T11:50:48+00:00"
+            "time": "2026-11-12T18:58:26+00:00"
         },
         {
             "name": "ahegyes/wp-framework-core",
@@ -189,12 +189,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ahegyes/wp-framework-core.git",
-                "reference": "e002d7760e8452fe9c583571d533e97d60317e28"
+                "reference": "6f191fb51f2887ce704a2c0248d9881839bea6e5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ahegyes/wp-framework-core/zipball/e002d7760e8452fe9c583571d533e97d60317e28",
-                "reference": "e002d7760e8452fe9c583571d533e97d60317e28",
+                "url": "https://api.github.com/repos/ahegyes/wp-framework-core/zipball/6f191fb51f2887ce704a2c0248d9881839bea6e5",
+                "reference": "6f191fb51f2887ce704a2c0248d9881839bea6e5",
                 "shasum": ""
             },
             "require": {
@@ -229,7 +229,7 @@
             "support": {
                 "source": "https://github.com/ahegyes/wp-framework-core/tree/trunk"
             },
-            "time": "2026-11-10T11:50:49+00:00"
+            "time": "2026-11-12T22:21:17+00:00"
         },
         {
             "name": "ahegyes/wp-framework-settings",
@@ -237,12 +237,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ahegyes/wp-framework-settings.git",
-                "reference": "2a5de7c03cdb62804e5d67972d0d9b9d72f79900"
+                "reference": "1aff9aa8c65550bb744950ed7bcd2362f37ffae0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ahegyes/wp-framework-settings/zipball/2a5de7c03cdb62804e5d67972d0d9b9d72f79900",
-                "reference": "2a5de7c03cdb62804e5d67972d0d9b9d72f79900",
+                "url": "https://api.github.com/repos/ahegyes/wp-framework-settings/zipball/1aff9aa8c65550bb744950ed7bcd2362f37ffae0",
+                "reference": "1aff9aa8c65550bb744950ed7bcd2362f37ffae0",
                 "shasum": ""
             },
             "require": {
@@ -271,7 +271,7 @@
             "support": {
                 "source": "https://github.com/ahegyes/wp-framework-settings/tree/trunk"
             },
-            "time": "2026-11-10T11:50:49+00:00"
+            "time": "2026-11-12T20:06:51+00:00"
         },
         {
             "name": "ahegyes/wp-framework-shared",
@@ -318,12 +318,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ahegyes/wp-framework-woocommerce.git",
-                "reference": "382115b0bd7711db6eb284d3167c0046d05bd171"
+                "reference": "01df7fb0739cdee77b356d7af6b085a8da5711bb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ahegyes/wp-framework-woocommerce/zipball/382115b0bd7711db6eb284d3167c0046d05bd171",
-                "reference": "382115b0bd7711db6eb284d3167c0046d05bd171",
+                "url": "https://api.github.com/repos/ahegyes/wp-framework-woocommerce/zipball/01df7fb0739cdee77b356d7af6b085a8da5711bb",
+                "reference": "01df7fb0739cdee77b356d7af6b085a8da5711bb",
                 "shasum": ""
             },
             "require": {
@@ -337,7 +337,7 @@
                     "dev-trunk": "2.x-dev"
                 },
                 "requires-wp": "7.1",
-                "requires-wc": "11.2",
+                "requires-wc": "11.3",
                 "requires-plugins": [
                     "woocommerce"
                 ],
@@ -359,7 +359,7 @@
             "support": {
                 "source": "https://github.com/ahegyes/wp-framework-woocommerce/tree/trunk"
             },
-            "time": "2026-11-10T11:50:49+00:00"
+            "time": "2026-11-12T20:06:51+00:00"
         },
         {
             "name": "automattic/jetpack-changelogger",
@@ -1063,23 +1063,23 @@
         },
         {
             "name": "jetbrains/phpstorm-stubs",
-            "version": "v2026.2",
+            "version": "v2026.3",
             "source": {
                 "type": "git",
-                "url": "https://github.com/JetBrains/phpstorm-stubs",
-                "reference": "709e512210784a7c0a677b3a89d35def844a59b9"
+                "url": "https://github.com/JetBrains/phpstorm-stubs.git",
+                "reference": "912ae721089fc48534d3a5795997ee8a2802b8cd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/JetBrains/phpstorm-stubs/zipball/709e512210784a7c0a677b3a89d35def844a59b9",
-                "reference": "709e512210784a7c0a677b3a89d35def844a59b9",
+                "url": "https://api.github.com/repos/JetBrains/phpstorm-stubs/zipball/912ae721089fc48534d3a5795997ee8a2802b8cd",
+                "reference": "912ae721089fc48534d3a5795997ee8a2802b8cd",
                 "shasum": ""
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^v3.86",
                 "nikic/php-parser": "^v5.6",
-                "phpdocumentor/reflection-docblock": "^5.6",
-                "phpunit/phpunit": "^12.3"
+                "phpdocumentor/reflection-docblock": "^6.0",
+                "phpunit/phpunit": "^13.2"
             },
             "type": "library",
             "autoload": {
@@ -1103,8 +1103,11 @@
                 "stubs",
                 "type"
             ],
-            "time": "2026-06-12T13:19:10+00:00",
-            "published-time": "2026-07-22T11:41:13+00:00"
+            "support": {
+                "source": "https://github.com/JetBrains/phpstorm-stubs/tree/v2026.3"
+            },
+            "time": "2026-10-19T10:54:17+00:00",
+            "published-time": "2026-11-11T13:34:29+00:00"
         },
         {
             "name": "johnbillion/wp-compat",
@@ -1664,16 +1667,16 @@
         },
         {
             "name": "php-stubs/woocommerce-stubs",
-            "version": "v11.2.2",
+            "version": "v11.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-stubs/woocommerce-stubs.git",
-                "reference": "d5c232c183c09689d75c177b01bef60e6dd53639"
+                "reference": "a897f9ad0552482e9d50d3937daab20dfb97265c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-stubs/woocommerce-stubs/zipball/d5c232c183c09689d75c177b01bef60e6dd53639",
-                "reference": "d5c232c183c09689d75c177b01bef60e6dd53639",
+                "url": "https://api.github.com/repos/php-stubs/woocommerce-stubs/zipball/a897f9ad0552482e9d50d3937daab20dfb97265c",
+                "reference": "a897f9ad0552482e9d50d3937daab20dfb97265c",
                 "shasum": ""
             },
             "require": {
@@ -1702,10 +1705,10 @@
             ],
             "support": {
                 "issues": "https://github.com/php-stubs/woocommerce-stubs/issues",
-                "source": "https://github.com/php-stubs/woocommerce-stubs/tree/v11.2.2"
+                "source": "https://github.com/php-stubs/woocommerce-stubs/tree/v11.3.0"
             },
-            "time": "2026-11-04T21:47:17+00:00",
-            "published-time": "2026-11-04T21:48:23+00:00"
+            "time": "2026-11-12T00:45:07+00:00",
+            "published-time": "2026-11-12T00:47:40+00:00"
         },
         {
             "name": "php-stubs/wordpress-stubs",
@@ -2776,16 +2779,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "13.4.6",
+            "version": "13.4.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "4821376960d0e1e5a7b7b700955ebcab33ecd71b"
+                "reference": "e6458d44279e3b4fc492d4c41fe8e677efed7a2c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/4821376960d0e1e5a7b7b700955ebcab33ecd71b",
-                "reference": "4821376960d0e1e5a7b7b700955ebcab33ecd71b",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/e6458d44279e3b4fc492d4c41fe8e677efed7a2c",
+                "reference": "e6458d44279e3b4fc492d4c41fe8e677efed7a2c",
                 "shasum": ""
             },
             "require": {
@@ -2799,7 +2802,7 @@
                 "phar-io/manifest": "^2.0.4",
                 "phar-io/version": "^3.2.1",
                 "php": ">=8.4.1",
-                "phpunit/php-code-coverage": "^14.5.0",
+                "phpunit/php-code-coverage": "^14.5.2",
                 "phpunit/php-file-iterator": "^7.0.2",
                 "phpunit/php-invoker": "^7.0.0",
                 "phpunit/php-text-template": "^6.0.1",
@@ -2815,7 +2818,7 @@
                 "sebastian/object-enumerator": "^8.1.0",
                 "sebastian/recursion-context": "^8.0.1",
                 "sebastian/type": "^7.0.2",
-                "sebastian/version": "^7.0.1",
+                "sebastian/version": "^7.1.0",
                 "staabm/side-effects-detector": "^1.0.5"
             },
             "bin": [
@@ -2856,7 +2859,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/13.4.6"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/13.4.7"
             },
             "funding": [
                 {
@@ -2864,8 +2867,8 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-11-02T07:12:28+00:00",
-            "published-time": "2026-11-02T07:13:08+00:00"
+            "time": "2026-11-13T11:10:10+00:00",
+            "published-time": "2026-11-13T11:11:23+00:00"
         },
         {
             "name": "psr/clock",
@@ -3130,12 +3133,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "d230c24b068602cc16c3c73be19f75f0c74afb32"
+                "reference": "a874c13980f04137c4adbcf86ae2cf1e7a74edb1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/d230c24b068602cc16c3c73be19f75f0c74afb32",
-                "reference": "d230c24b068602cc16c3c73be19f75f0c74afb32",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/a874c13980f04137c4adbcf86ae2cf1e7a74edb1",
+                "reference": "a874c13980f04137c4adbcf86ae2cf1e7a74edb1",
                 "shasum": ""
             },
             "conflict": {
@@ -3217,6 +3220,7 @@
                 "barzahlen/barzahlen-php": "<2.0.1",
                 "baserproject/basercms": "<=5.2.2",
                 "bassjobsen/bootstrap-3-typeahead": ">4.0.2",
+                "bazaarvoice/bazaarvoice-magento2-ext": ">=8,<9.1.11",
                 "bbpress/bbpress": "<2.6.5",
                 "bcit-ci/codeigniter": "<3.1.3",
                 "bcosca/fatfree": "<3.7.2",
@@ -3270,7 +3274,7 @@
                 "clickstorm/cs-seo": ">=6,<6.8|>=7,<7.5|>=8,<8.4|>=9,<9.3",
                 "co-stack/fal_sftp": "<0.2.6",
                 "cockpit-hq/cockpit": "<=2.14",
-                "code16/sharp": "<9.22.5",
+                "code16/sharp": "<9.23|>=10.0.0.0-beta1,<10.0.0.0-beta4",
                 "codeception/codeception": "<3.1.3|>=4,<4.1.22",
                 "codeigniter/framework": "<3.1.10",
                 "codeigniter4/framework": "<4.7.4",
@@ -3288,9 +3292,9 @@
                 "contao-components/colorbox": ">=1,<1.6.4.3-dev",
                 "contao-components/mediaelement": ">=2.14.2,<2.21.1",
                 "contao/comments-bundle": ">=2,<5.3.50|>=5.4,<5.7.12",
-                "contao/contao": ">=3,<3.5.37|>=4,<5.3.50|>=5.4,<5.7.12",
+                "contao/contao": ">=3,<3.5.37|>=4,<5.3.54|>=5.4,<5.7.17|>=6,<6.0.6",
                 "contao/core": "<3.5.39",
-                "contao/core-bundle": "<5.3.50|>=5.4,<5.7.12",
+                "contao/core-bundle": "<5.3.54|>=5.4,<5.7.17|>=6,<6.0.6",
                 "contao/listing-bundle": ">=3,<=3.5.30|>=4,<4.4.8",
                 "contao/managed-edition": "<=1.5",
                 "contao/newsletter-bundle": ">=5,<5.3.50|>=5.4,<5.7.12",
@@ -3500,6 +3504,7 @@
                 "gp247/core": "<1.1.24",
                 "gree/jose": "<2.2.1",
                 "gregwar/rst": "<1.0.3",
+                "grpc/grpc": "<1.84.1",
                 "grumpydictator/firefly-iii": "<=6.6.2",
                 "gugoan/economizzer": "<=0.9.0.0-beta1",
                 "guzzlehttp/guzzle": "<7.15.2|>=8,<8.0.1",
@@ -3725,7 +3730,7 @@
                 "nategood/httpful": "<1",
                 "neoan3-apps/template": "<1.1.1",
                 "neorazorx/facturascripts": "<2022.04",
-                "neos/flow": ">=1,<1.0.4|>=1.1,<1.1.1|>=2,<2.0.1|>=2.3,<2.3.16|>=3,<3.0.12|>=3.1,<3.1.10|>=3.2,<3.2.13|>=3.3,<3.3.13|>=4,<4.0.6",
+                "neos/flow": "<8.3.22|>=8.4,<8.4.7|>=9,<9.0.10|>=9.1,<9.1.5|>=9.2,<9.2.3",
                 "neos/form": ">=1.2,<4.3.3|>=5,<5.0.9|>=5.1,<5.1.3",
                 "neos/media-browser": "<7.3.19|>=8,<8.0.16|>=8.1,<8.1.11|>=8.2,<8.2.11|>=8.3,<8.3.9",
                 "neos/neos": ">=1.1,<1.1.3|>=1.2,<1.2.13|>=2,<2.0.4|>=2.3,<3.0.20|>=3.1,<3.1.18|>=3.2,<3.2.14|>=3.3,<5.3.10|>=7,<7.0.9|>=7.1,<7.1.7|>=7.2,<7.2.6|>=7.3,<7.3.4|>=8,<8.0.2",
@@ -3821,7 +3826,7 @@
                 "phpoffice/phpexcel": "<=1.8.2",
                 "phpoffice/phpspreadsheet": "<=1.30.6|>=2,<=2.1.18|>=2.2,<=2.4.7|>=3,<=3.10.7|>=4,<=5.9",
                 "phppgadmin/phppgadmin": "<=7.13",
-                "phpseclib/phpseclib": "<3.0.57|>=4,<4.0.1",
+                "phpseclib/phpseclib": "<3.0.58|>=4,<4.0.3",
                 "phpservermon/phpservermon": "<3.6",
                 "phpsysinfo/phpsysinfo": "<=3.4.5",
                 "phpunit/phpunit": "<8.5.52|>=9,<9.6.33|>=10,<10.5.62|>=11,<11.5.50|>=12,<12.5.8|>=12.5.21,<12.5.22|>=13.1.5,<13.1.6|>=13.4,<13.4.4",
@@ -4298,8 +4303,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-11-10T12:08:53+00:00",
-            "published-time": "2026-11-10T12:08:57+00:00"
+            "time": "2026-11-13T18:24:02+00:00",
+            "published-time": "2026-11-13T18:24:07+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -7306,15 +7311,15 @@
         },
         {
             "name": "wp-plugin/woocommerce",
-            "version": "11.2.2",
+            "version": "11.3.0",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/woocommerce/",
-                "reference": "tags/11.2.2"
+                "reference": "tags/11.3.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/woocommerce.11.2.2.zip"
+                "url": "https://downloads.wordpress.org/plugin/woocommerce.11.3.0.zip"
             },
             "require": {
                 "composer/installers": "~1.0|~2.0"
@@ -7333,8 +7338,8 @@
                 "issues": "https://wordpress.org/support/plugin/woocommerce",
                 "source": "https://plugins.svn.wordpress.org/woocommerce"
             },
-            "time": "2026-11-04T21:34:49+00:00",
-            "published-time": "2026-11-04T21:34:49+00:00"
+            "time": "2026-11-11T16:56:56+00:00",
+            "published-time": "2026-11-11T16:56:56+00:00"
         }
     ],
     "aliases": [],

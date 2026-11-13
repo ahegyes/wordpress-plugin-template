@@ -15,6 +15,8 @@ final class UninstallTest extends TestCase {
 
 	protected const int USER = 1;
 
+	protected const string REVISION = Plugin::PREFIX . '_revision';
+
 	#[AfterClass]
 	public static function forget_the_rows_the_uninstall_deleted(): void {
 		wp_cache_flush(); // The uninstall ran in a child process, so this process still caches the rows it deleted, such as a setting the tab saved.
@@ -47,7 +49,7 @@ final class UninstallTest extends TestCase {
 		set_transient( "{$prefix}boot_failure_seeded", 1, HOUR_IN_SECONDS );
 		update_user_option( self::USER, "{$prefix}hidden_notices", array( 'seeded' ) );
 		update_user_meta( self::USER, "{$prefix}network_hidden_notices", array( 'seeded' ) );
-		wp_schedule_single_event( \time() + HOUR_IN_SECONDS, "{$prefix}revision/migration/run" );
+		wp_schedule_single_event( \time() + HOUR_IN_SECONDS, 'dws_plugin_template/migration/run' );
 		as_schedule_single_action( \time() + HOUR_IN_SECONDS, "{$prefix}seeded", array(), Plugin::PREFIX );
 
 		self::assertTrue( uninstall_plugin( plugin_basename( DWS_TPL_FILE ) ) );
@@ -59,7 +61,7 @@ final class UninstallTest extends TestCase {
 		self::assertFalse( get_transient( "{$prefix}boot_failure_seeded" ) );
 		self::assertFalse( get_user_option( "{$prefix}hidden_notices", self::USER ) );
 		self::assertSame( '', get_user_meta( self::USER, "{$prefix}network_hidden_notices", true ) );
-		self::assertFalse( wp_next_scheduled( "{$prefix}revision/migration/run" ) );
+		self::assertFalse( wp_next_scheduled( 'dws_plugin_template/migration/run' ) );
 		self::assertSame(
 			array(),
 			as_get_scheduled_actions(
@@ -98,7 +100,7 @@ final class UninstallTest extends TestCase {
 
 		\define( 'WP_UNINSTALL_PLUGIN', plugin_basename( DWS_TPL_FILE ) );
 		update_option( DWS_TPL_OPTION_DELETE_DATA, 'yes' );
-		$failing = "DELETE FROM `$wpdb->options` WHERE `option_name` = '" . DWS_TPL_OPTION_REVISION . "'";
+		$failing = "DELETE FROM `$wpdb->options` WHERE `option_name` = '" . self::REVISION . "'";
 		add_filter( 'query', static fn ( string $query ): string => \str_contains( $query, $failing ) ? 'SELECT * FROM dws_tpl_missing_table' : $query );
 		add_filter( 'wp_die_handler', static fn (): \Closure => static fn ( string $message, string $title, array $args ): never => throw new \LogicException( $args['response'] . ' ' . $message ) );
 		$wpdb->suppress_errors();
@@ -107,12 +109,12 @@ final class UninstallTest extends TestCase {
 			include \dirname( DWS_TPL_FILE ) . '/uninstall.php';
 			self::fail( 'The uninstall finished.' );
 		} catch ( \LogicException $died ) {
-			self::assertStringStartsWith( '500 Uninstall could not remove everything: option ' . DWS_TPL_OPTION_REVISION, $died->getMessage() );
+			self::assertStringStartsWith( '500 Uninstall could not remove everything: option ' . self::REVISION, $died->getMessage() );
 			self::assertSame( 'yes', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
 		} finally {
 			remove_all_filters( 'query' );
 			delete_option( DWS_TPL_OPTION_DELETE_DATA );
-			delete_option( DWS_TPL_OPTION_REVISION );
+			delete_option( self::REVISION );
 			dws_tpl_plugin()->migrations?->run();
 		}
 	}

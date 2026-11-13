@@ -23,7 +23,7 @@ final class MultisiteTest extends TestCase {
 		self::assertIsInt( $site_id );
 
 		try {
-			$request = self::request( 'echo did_action( "dws_tpl/boot/succeeded" );', '--url=' . get_home_url( $site_id, '/' ) );
+			$request = self::request( 'echo did_action( "dws_plugin_template/boot/succeeded" );', '--url=' . get_home_url( $site_id, '/' ) );
 
 			self::assertSame( '1', $request['last'], $request['output'] );
 			self::assertSame( 'no', get_blog_option( $site_id, DWS_TPL_OPTION_DELETE_DATA ) );

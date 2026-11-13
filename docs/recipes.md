@@ -17,7 +17,7 @@ These are the changes most plugins built from this template make, each as the fi
 
 ## A safeguard
 
-A safeguard is a restriction that holds even when the rest of the plugin fails to load, such as a capability that stays locked unless the plugin unlocks it. It lives in `includes/safeguards.php`, which the entry file loads before the floor gate and the autoloader, so it calls only WordPress, what that file defines, and WooCommerce where the plugin requires it. The plugin relaxes it only through the safeguard's own filter, with an explicit `false`, and only after `dws_tpl/boot/succeeded`, which fires once the plugin has booted, so a half-loaded build never relaxes it.
+A safeguard is a restriction that holds even when the rest of the plugin fails to load, such as a capability that stays locked unless the plugin unlocks it. It lives in `includes/safeguards.php`, which the entry file loads before the floor gate and the autoloader, so it calls only WordPress, what that file defines, and WooCommerce where the plugin requires it. The plugin relaxes it only through the safeguard's own filter, with an explicit `false`, and only after `dws_plugin_template/boot/succeeded`, which fires once the plugin has booted, so a half-loaded build never relaxes it.
 
 Replace `includes/safeguards.php` with the helper and the safeguard. The file runs on any runtime that parses the plugin, so it must parse on PHP 7.4 and call only what its hook hands it, WordPress APIs present at the oldest WordPress the bootstrap package runs on and WooCommerce APIs present since 3.6, guarding anything newer with `function_exists()` or `method_exists()`. WordPress loads the plugin while WooCommerce is inactive, so a safeguard that calls WooCommerce is hooked only once WooCommerce has loaded, as shown after the file. `phpstan.safeguards.neon` checks the WordPress floor, and review the WooCommerce one:
 
@@ -49,7 +49,7 @@ add_filter( 'map_meta_cap', 'dws_tpl_map_export_capability', 10, 2 );
  * @return  bool
  */
 function dws_tpl_is_relaxed( $filtered ): bool {
-	return 0 < did_action( 'dws_tpl/boot/succeeded' ) && false === $filtered;
+	return 0 < did_action( 'dws_plugin_template/boot/succeeded' ) && false === $filtered;
 }
 
 /**
@@ -116,7 +116,7 @@ try {
 }
 ```
 
-Add the safeguard's failure test as `tests/Integration/SafeguardsTest.php`. The plugin has booted when the Integration suite runs, so the last row takes `dws_tpl/boot/succeeded` back for its duration:
+Add the safeguard's failure test as `tests/Integration/SafeguardsTest.php`. The plugin has booted when the Integration suite runs, so the last row takes `dws_plugin_template/boot/succeeded` back for its duration:
 
 ```php
 <?php declare( strict_types=1 );
@@ -157,16 +157,16 @@ final class SafeguardsTest extends TestCase {
 
 	public function test_an_explicit_false_does_not_relax_the_export_lock_before_the_plugin_booted(): void {
 		global $wp_actions;
-		self::assertGreaterThan( 0, did_action( 'dws_tpl/boot/succeeded' ) );
-		$fired = $wp_actions['dws_tpl/boot/succeeded'];
-		unset( $wp_actions['dws_tpl/boot/succeeded'] );
+		self::assertGreaterThan( 0, did_action( 'dws_plugin_template/boot/succeeded' ) );
+		$fired = $wp_actions['dws_plugin_template/boot/succeeded'];
+		unset( $wp_actions['dws_plugin_template/boot/succeeded'] );
 		add_filter( self::FILTER, '__return_false' );
 
 		try {
 			self::assertSame( array( 'do_not_allow' ), map_meta_cap( 'dws_tpl_export_data', 0 ) );
 		} finally {
 			remove_filter( self::FILTER, '__return_false' );
-			$wp_actions['dws_tpl/boot/succeeded'] = $fired;
+			$wp_actions['dws_plugin_template/boot/succeeded'] = $fired;
 		}
 	}
 }

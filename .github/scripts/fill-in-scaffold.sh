@@ -38,6 +38,7 @@ name_breakers="['\\\$/<>]"
 [[ $DESCRIPTION =~ [^[:space:]] && $DESCRIPTION != *'*/'* ]] || fail 'description must not be blank or contain */.'
 
 export SCREAMING_PREFIX="${PREFIX^^}"
+export HOOK_ROOT="${SLUG//-/_}"
 export TESTS_PORT=$(( PORT + 1 ))
 export MULTISITE_PORT=$(( PORT + 2 ))
 export REPO_NAME="${REPO#*/}"
@@ -63,6 +64,7 @@ git ls-files -z -- . ':!.github/workflows/' ':!.github/scripts/fill-in-scaffold.
 	s{ahegyes/wordpress-plugin-template}{$ENV{REPO}}g;
 	s/^# wordpress-plugin-template$/# $ENV{REPO_NAME}/;
 	s/dws-plugin-template/$ENV{SLUG}/g;
+	s/dws_plugin_template/$ENV{HOOK_ROOT}/g;
 	s/dws_tpl/$ENV{PREFIX}/g;
 	s/DWS_TPL/$ENV{SCREAMING_PREFIX}/g;
 	s/PluginTemplate/$ENV{NS}/g;
@@ -104,7 +106,7 @@ npm ci --ignore-scripts --no-audit --no-fund
 node_modules/.bin/wp-scripts format '{blocks/src,assets/src,tests/EndToEnd}/**/*.{js,jsx,ts,tsx}'
 
 status=0
-if git grep -n -I -E 'dws-plugin-template|dws_tpl|DWS_TPL|PluginTemplate|DWS Plugin Template|wordpress-plugin-template' -- . ':!.github/scripts/fill-in-scaffold.sh'; then
+if git grep -n -I -E 'dws-plugin-template|dws_plugin_template|dws_tpl|DWS_TPL|PluginTemplate|DWS Plugin Template|wordpress-plugin-template' -- . ':!.github/scripts/fill-in-scaffold.sh'; then
 	echo "::error::The fill-in left the template's names above."
 	status=1
 fi
