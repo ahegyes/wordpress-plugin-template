@@ -71,7 +71,7 @@ final class PartialDeployTest extends TestCase {
 		$include = \dirname( DWS_TPL_FILE ) . '/includes/zz-throws.php';
 		\file_put_contents( $include, "<?php\nthrow new RuntimeException( 'A partial deploy.' );\n" );
 		try {
-			$request = self::request( 'echo wp_json_encode( array( false !== has_action( "plugins_loaded", "dws_tpl_boot" ), false !== has_action( "all_admin_notices", "dws_tpl_render_build_notice" ) ) );' );
+			$request = self::request_provoking( 'did not finish loading', 'echo wp_json_encode( array( false !== has_action( "plugins_loaded", "dws_tpl_boot" ), false !== has_action( "all_admin_notices", "dws_tpl_render_build_notice" ) ) );' );
 		} finally {
 			\unlink( $include );
 		}
@@ -85,7 +85,7 @@ final class PartialDeployTest extends TestCase {
 		$include = \dirname( DWS_TPL_FILE ) . '/includes/zz-throws.php';
 		\file_put_contents( $include, "<?php\nthrow new RuntimeException( '$message' );\n" );
 		try {
-			$first  = self::request( 'echo 1;' );
+			$first  = self::request_provoking( 'did not finish loading', 'echo 1;' );
 			$second = self::request( 'echo 1;' );
 		} finally {
 			\unlink( $include );
@@ -100,7 +100,7 @@ final class PartialDeployTest extends TestCase {
 		$include = \dirname( DWS_TPL_FILE ) . '/includes/metadata_zz-throws.php'; // Sorts right after metadata.php, so no later include loads.
 		\file_put_contents( $include, "<?php\nthrow new RuntimeException( 'A partial deploy.' );\n" );
 		try {
-			$request = self::request( 'echo wp_json_encode( array( false !== has_action( "plugins_loaded", "dws_tpl_boot" ), dws_tpl_get_plugin_slug(), dws_tpl_get_plugin_name(), dws_tpl_get_plugin_version() ) );' );
+			$request = self::request_provoking( 'did not finish loading', 'echo wp_json_encode( array( false !== has_action( "plugins_loaded", "dws_tpl_boot" ), dws_tpl_get_plugin_slug(), dws_tpl_get_plugin_name(), dws_tpl_get_plugin_version() ) );' );
 		} finally {
 			\unlink( $include );
 		}
@@ -113,7 +113,7 @@ final class PartialDeployTest extends TestCase {
 		$root = \dirname( DWS_TPL_FILE ) . '/vendor-prefixed/ahegyes/wp-framework-core/src/PluginBoot.php'; // The composition root constructs it, and no include reads it.
 		\rename( $root, "$root.hidden" );
 		try {
-			$request = self::request( 'remove_action( "all_admin_notices", "dws_tpl_render_build_notice" ); do_action( "deactivate_" . plugin_basename( DWS_TPL_FILE ), false ); echo false !== has_action( "all_admin_notices", "dws_tpl_render_build_notice" ) ? "reported" : "silent";' );
+			$request = self::request_provoking( 'PluginBoot.php', 'remove_action( "all_admin_notices", "dws_tpl_render_build_notice" ); do_action( "deactivate_" . plugin_basename( DWS_TPL_FILE ), false ); echo false !== has_action( "all_admin_notices", "dws_tpl_render_build_notice" ) ? "reported" : "silent";' );
 		} finally {
 			\rename( "$root.hidden", $root );
 		}
