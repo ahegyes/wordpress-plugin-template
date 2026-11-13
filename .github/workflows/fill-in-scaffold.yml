@@ -20,7 +20,7 @@ on:
         required: true
         type: string
       prefix:
-        description: 'Prefix of the global functions, constants and stored data, dws_ plus one segment, such as "dws_ao"'
+        description: 'Prefix of the global functions, constants and stored data, dws_ plus one segment of up to 28 lowercase letters and digits, such as "dws_ao"'
         required: true
         type: string
       wp-env-port:
