@@ -3,6 +3,7 @@
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
 use DeepWebSolutions\PluginTemplate\Plugin;
+use DeepWebSolutions\PluginTemplate\RecipeSafeguards;
 use PHPUnit\Framework\Attributes\AfterClass;
 use PHPUnit\Framework\Attributes\BeforeClass;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -14,20 +15,28 @@ final class SafeguardRecipeTest extends TestCase {
 	#[BeforeClass]
 	public static function load_the_recipe(): void {
 		$recipes = (string) \file_get_contents( \dirname( __DIR__, 2 ) . '/docs/recipes.md' );
-		foreach ( array( 'function dws_tpl_is_relaxed(', 'final class SafeguardsTest ' ) as $marker ) {
+		foreach ( array( 'final class Safeguards ', 'final class SafeguardsTest ' ) as $marker ) {
 			\preg_match( '/```php\n(<\?php declare\( strict_types=1 \);\n(?:(?!```).)*?' . \preg_quote( $marker, '/' ) . '(?:(?!```).)*)```/s', $recipes, $block );
 			self::assertArrayHasKey( 1, $block, "docs/recipes.md holds no PHP file defining $marker." );
 
 			$file = (string) \tempnam( \sys_get_temp_dir(), \str_replace( '_', '-', Plugin::PREFIX ) . '-safeguard-recipe-' );
-			\file_put_contents( $file, $block[1] );
+			\file_put_contents( $file, \str_replace( 'final class Safeguards ', 'final class RecipeSafeguards ', $block[1] ) ); // The plugin's own Safeguards class is loaded already.
 			require_once $file;
 			\unlink( $file );
 		}
+
+		RecipeSafeguards::register();
 	}
 
 	#[AfterClass]
 	public static function remove_the_recipes_safeguard(): void {
-		remove_filter( 'map_meta_cap', 'dws_tpl_map_export_capability' );
+		foreach ( $GLOBALS['wp_filter']['map_meta_cap']->callbacks as $priority => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				if ( $callback['function'] instanceof \Closure && RecipeSafeguards::class === new \ReflectionFunction( $callback['function'] )->getClosureScopeClass()?->getName() ) {
+					remove_filter( 'map_meta_cap', $callback['function'], $priority );
+				}
+			}
+		}
 	}
 
 	// The recipe's test class is loaded from its block, so PHPUnit never discovers it and this row runs each of its rows.
