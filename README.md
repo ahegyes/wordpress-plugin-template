@@ -12,9 +12,9 @@ Create the plugin's repository from this template with GitHub's **Use this templ
 | --- | --- | --- |
 | `plugin-name` | `Acme Orders for WooCommerce` | the display name in the plugin header, the strings and the docs |
 | `description` | `Acme Orders keeps every order a store takes in one place.` | the entry's `Description` header, `composer.json`'s and `package.json`'s `description` and the README's opening sentence; set the repository's GitHub description to the same sentence |
-| `plugin-slug` | `acme-orders-for-woocommerce` | the text domain and the names of the entry file and the release zip |
+| `plugin-slug` | `acme-orders-for-woocommerce` | the text domain, the root of the hook names in snake case, and the names of the entry file and the release zip |
 | `php-namespace` | `AcmeOrders` | the namespace segment after `DeepWebSolutions\` |
-| `prefix` | `dws_aowc` | the prefix of every global function, constant, option and hook |
+| `prefix` | `dws_aowc` | the prefix of the global functions and constants, and of the names the plugin stores its data under |
 | `wp-env-port` | `8831` | the development site's port; the tests and multisite sites take the next two |
 
 The workflow:

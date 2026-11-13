@@ -78,7 +78,7 @@ function dws_tpl_map_export_capability( array $caps, string $cap ): array {
 	 *
 	 * @param   bool $restricted Whether the data export stays locked.
 	 */
-	return dws_tpl_is_relaxed( apply_filters( 'dws_tpl/data_export/should_restrict', true ) ) ? array( 'manage_options' ) : array( 'do_not_allow' );
+	return dws_tpl_is_relaxed( apply_filters( 'dws_plugin_template/data_export/should_restrict', true ) ) ? array( 'manage_options' ) : array( 'do_not_allow' );
 }
 ```
 
@@ -108,11 +108,11 @@ function dws_tpl_add_woocommerce_safeguards(): void {
 A component relaxes the lock only around the operation that needs it, and removes the relaxation even when the operation throws:
 
 ```php
-add_filter( 'dws_tpl/data_export/should_restrict', '__return_false' );
+add_filter( 'dws_plugin_template/data_export/should_restrict', '__return_false' );
 try {
 	$this->export(); // Checks current_user_can( 'dws_tpl_export_data' ).
 } finally {
-	remove_filter( 'dws_tpl/data_export/should_restrict', '__return_false' );
+	remove_filter( 'dws_plugin_template/data_export/should_restrict', '__return_false' );
 }
 ```
 
@@ -129,7 +129,7 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversNothing]
 final class SafeguardsTest extends TestCase {
-	protected const string FILTER = 'dws_tpl/data_export/should_restrict';
+	protected const string FILTER = 'dws_plugin_template/data_export/should_restrict';
 
 	public static function relaxations(): array {
 		return array(
@@ -913,7 +913,7 @@ A public hook's name is part of the plugin's contract, as its arguments, its opt
 2. Fire the old name too, until the next major, through `do_action_deprecated()` or `apply_filters_deprecated()` with the release's version and the new name as its replacement. The old name goes first, so a filter's callbacks on the new name see the final value:
 
 ```php
-$restricted = apply_filters_deprecated( 'dws_tpl/export/should_restrict', array( true ), '1.1.0', 'dws_tpl/data_export/should_restrict' );
+$restricted = apply_filters_deprecated( 'dws_plugin_template/export/should_restrict', array( true ), '1.1.0', 'dws_plugin_template/data_export/should_restrict' );
 
 /**
  * Filters whether the data export stays locked.
@@ -925,7 +925,7 @@ $restricted = apply_filters_deprecated( 'dws_tpl/export/should_restrict', array(
  *
  * @param   bool $restricted Whether the data export stays locked.
  */
-$restricted = apply_filters( 'dws_tpl/data_export/should_restrict', $restricted );
+$restricted = apply_filters( 'dws_plugin_template/data_export/should_restrict', $restricted );
 ```
 
 3. Add a changelog fragment with `composer changelog:add` that names the old and the new hook, with a minor significance and the Deprecated type.
