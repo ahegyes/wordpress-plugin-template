@@ -39,9 +39,11 @@ test.describe( 'Block editor', () => {
 		await expect( editor.canvas.getByText( TEXT ) ).toBeVisible();
 
 		await editor.openDocumentSettingsSidebar();
-		await page
-			.getByRole( 'region', { name: 'Editor settings' } )
-			.getByRole( 'button', { name: 'Outlined' } )
+		const sidebar = page.getByRole( 'region', { name: 'Editor settings' } );
+		// WordPress 7.2 renders block styles as radios, which earlier releases render as buttons.
+		await sidebar
+			.getByRole( 'radio', { name: 'Outlined' } )
+			.or( sidebar.getByRole( 'button', { name: 'Outlined' } ) )
 			.click();
 		await expect
 			.poll( editor.getBlocks )
