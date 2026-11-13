@@ -5,6 +5,8 @@ namespace DeepWebSolutions\PluginTemplate\Tests\Integration\Greeting;
 use DeepWebSolutions\PluginTemplate\Greeting\AccountDashboardGreeting;
 use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Asset\Assets;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginIdentity;
 use DeepWebSolutions\PluginTemplate\Tests\Support\OrderStorageTrait;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
 use PHPUnit\Framework\Attributes\After;
@@ -68,7 +70,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 	}
 
 	public function test_the_greeting_hooks_the_account_dashboard_and_its_style(): void {
-		$detail = new AccountDashboardGreeting();
+		$detail = new AccountDashboardGreeting( self::make_assets() );
 		$detail->register_hooks();
 
 		self::assertSame( 10, has_action( 'woocommerce_account_dashboard', array( $detail, 'print_greeting' ) ) );
@@ -78,12 +80,12 @@ final class AccountDashboardGreetingTest extends TestCase {
 	}
 
 	public function test_the_greeting_style_loads_on_the_account_dashboard_only(): void {
-		new AccountDashboardGreeting()->enqueue_style();
+		new AccountDashboardGreeting( self::make_assets() )->enqueue_style();
 		self::assertFalse( wp_style_is( 'dws-plugin-template-greeting' ) );
 
 		add_filter( 'woocommerce_is_account_page', '__return_true' );
 		try {
-			new AccountDashboardGreeting()->enqueue_style();
+			new AccountDashboardGreeting( self::make_assets() )->enqueue_style();
 		} finally {
 			remove_filter( 'woocommerce_is_account_page', '__return_true' );
 		}
@@ -98,7 +100,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 		add_filter( 'woocommerce_is_account_page', '__return_true' );
 		$wp->query_vars['orders'] = '';
 		try {
-			new AccountDashboardGreeting()->enqueue_style();
+			new AccountDashboardGreeting( self::make_assets() )->enqueue_style();
 		} finally {
 			unset( $wp->query_vars['orders'] );
 			remove_filter( 'woocommerce_is_account_page', '__return_true' );
@@ -111,7 +113,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 		wp_set_current_user( 0 );
 		add_filter( 'woocommerce_is_account_page', '__return_true' );
 		try {
-			new AccountDashboardGreeting()->enqueue_style();
+			new AccountDashboardGreeting( self::make_assets() )->enqueue_style();
 		} finally {
 			remove_filter( 'woocommerce_is_account_page', '__return_true' );
 		}
@@ -123,7 +125,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 		wp_register_style( 'dws-plugin-template-greeting', 'https://example.org/other.css', array(), '1' );
 		add_filter( 'woocommerce_is_account_page', '__return_true' );
 		try {
-			new AccountDashboardGreeting()->enqueue_style();
+			new AccountDashboardGreeting( self::make_assets() )->enqueue_style();
 		} finally {
 			remove_filter( 'woocommerce_is_account_page', '__return_true' );
 		}
@@ -201,7 +203,11 @@ final class AccountDashboardGreetingTest extends TestCase {
 
 	protected function print(): string {
 		\ob_start();
-		new AccountDashboardGreeting()->print_greeting();
+		new AccountDashboardGreeting( self::make_assets() )->print_greeting();
 		return (string) \ob_get_clean();
+	}
+
+	protected static function make_assets(): Assets {
+		return new Assets( new PluginIdentity( DWS_TPL_FILE, Plugin::SLUG, Plugin::PREFIX ) );
 	}
 }

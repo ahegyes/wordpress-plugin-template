@@ -4,6 +4,7 @@ namespace DeepWebSolutions\PluginTemplate\Greeting;
 
 use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Asset\Assets;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\ComponentInterface;
 
 \defined( 'ABSPATH' ) || exit;
@@ -15,6 +16,22 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Compo
  * @version 1.0.0
  */
 final class AccountDashboardGreeting implements ComponentInterface {
+	// region MAGIC METHODS
+
+	/**
+	 * Constructor.
+	 *
+	 * @since   1.0.0
+	 * @version 1.0.0
+	 *
+	 * @param   Assets $assets The registrar of the plugin's built scripts and styles.
+	 */
+	public function __construct(
+		protected Assets $assets
+	) {}
+
+	// endregion
+
 	// region INHERITED METHODS
 
 	/**
@@ -90,7 +107,7 @@ final class AccountDashboardGreeting implements ComponentInterface {
 			return;
 		}
 
-		if ( dws_tpl_register_style( Plugin::SLUG . '-greeting', 'assets/build/greeting.css' ) ) {
+		if ( $this->assets->register_style( Plugin::SLUG . '-greeting', 'assets/build/greeting.css' ) ) {
 			wp_enqueue_style( Plugin::SLUG . '-greeting' );
 		}
 	}

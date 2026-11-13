@@ -2,6 +2,7 @@
 
 namespace DeepWebSolutions\PluginTemplate;
 
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Asset\Assets;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\ComponentInterface;
 
 \defined( 'ABSPATH' ) || exit;
@@ -13,6 +14,22 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Compo
  * @version 1.0.0
  */
 final class Blocks implements ComponentInterface {
+	// region MAGIC METHODS
+
+	/**
+	 * Constructor.
+	 *
+	 * @since   1.0.0
+	 * @version 1.0.0
+	 *
+	 * @param   Assets $assets The registrar of the plugin's built scripts and styles.
+	 */
+	public function __construct(
+		protected Assets $assets
+	) {}
+
+	// endregion
+
 	// region INHERITED METHODS
 
 	/**
@@ -52,7 +69,7 @@ final class Blocks implements ComponentInterface {
 	 * @return  void
 	 */
 	public function enqueue_editor_script(): void {
-		if ( dws_tpl_register_script( Plugin::SLUG . '-editor', 'assets/build/editor.js' ) ) {
+		if ( $this->assets->register_script( Plugin::SLUG . '-editor', 'assets/build/editor.js' ) ) {
 			wp_enqueue_script( Plugin::SLUG . '-editor' );
 		}
 	}

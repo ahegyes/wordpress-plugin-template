@@ -3,6 +3,7 @@
 namespace DeepWebSolutions\PluginTemplate;
 
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\AdminNotice\AdminNotices;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Asset\Assets;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migration\MigrationRunner;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginBoot;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginIdentity;
@@ -242,6 +243,7 @@ final class Plugin {
 			Scheduler::class          => static fn (): Scheduler => $scheduler,
 			SchedulerInterface::class => static fn (): Scheduler => $scheduler,
 			AdminNotices::class       => static fn (): AdminNotices => new AdminNotices( $identity, $logger ),
+			Assets::class             => static fn (): Assets => new Assets( $identity ),
 		);
 	}
 
