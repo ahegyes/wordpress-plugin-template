@@ -11,6 +11,7 @@ These are the changes most plugins built from this template make, each as the fi
 - [Recurring jobs](#recurring-jobs)
 - [Rewrite rules after activation](#rewrite-rules-after-activation)
 - [A script module](#a-script-module)
+- [A setting another plugin reads](#a-setting-another-plugin-reads)
 - [Renaming a public hook](#renaming-a-public-hook)
 - [Distribution through wordpress.org](#distribution-through-wordpressorg)
 - [Without WooCommerce](#without-woocommerce)
@@ -956,6 +957,32 @@ Build the blocks' modules with their scripts, by adding `--experimental-modules`
 
 The build writes `view.js` with a `view.asset.php` whose `type` is `module`, and `src/Blocks.php`'s registration from the manifest picks it up.
 
+## A setting another plugin reads
+
+Another plugin can always read the plugin's options through `get_option()`, since their names are contract. Where an integration needs one setting as the plugin reads it, add one `@api` function for it to a file in `includes/` named for its topic, which imports `Options`, as `includes/greeting.php` does. For the settings page's limit:
+
+```php
+/**
+ * Returns the limit the plugin applies.
+ *
+ * @api
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @return  int
+ */
+function dws_tpl_get_limit(): int {
+	return Options::get_int_setting( Options::SETTING_LIMIT );
+}
+```
+
+- Name the function for the one thing it answers and type its return. A generic `dws_tpl_get_option( $key )` would make every setting's type and default contract at once.
+- Delegate to `Options`, which the plugin's own code keeps calling, so the read has one implementation.
+- Apply a filter only where the plugin's own code reads the setting through the same filter, so both read the same value.
+- Another plugin calls the function from `plugins_loaded` on and behind `function_exists()`, as AGENTS.md's add-on convention asks of every `@api` function, since the plugin may load later or stay active below its floors without defining it.
+- Tag the function `@api`, which `GlobalsTest` checks. It is contract from its first release, so a break of it ships as the next major, as AGENTS.md's Contract section says.
+
 ## Renaming a public hook
 
 A public hook's name is part of the plugin's contract, as its arguments, its options and its REST routes are. To rename one in a released plugin:
@@ -1150,7 +1177,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 	}
 ```
 
-6. Delete the greeting: `src/Greeting/`, `tests/Integration/Greeting/` and `assets/src/greeting.scss`, then its entries in `package.json`:
+6. Delete the greeting: `src/Greeting/`, `includes/greeting.php`, `tests/Integration/Greeting/` and `assets/src/greeting.scss`, then its entries in `package.json`:
 
 ```json
 "build:assets": "wp-scripts build editor=./assets/src/editor.ts --output-path=assets/build",
