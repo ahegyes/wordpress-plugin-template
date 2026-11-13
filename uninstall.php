@@ -8,6 +8,7 @@
  * @package DeepWebSolutions\PluginTemplate
  */
 
+use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\Requirements;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginIdentity;
@@ -29,9 +30,8 @@ try {
 	}
 
 	require_once __DIR__ . '/vendor/autoload.php';
-	require_once __DIR__ . '/includes/footprint.php';
-	require_once __DIR__ . '/includes/options.php';
-	$dws_tpl_footprint  = dws_tpl_get_footprint();
+	$dws_tpl_footprint  = Plugin::FOOTPRINT;
+	$dws_tpl_consent    = Options::DELETE_DATA;
 	$dws_tpl_meta_types = MetaTypes::DEFINITIONS;
 	if ( ! class_exists( Uninstaller::class ) ) {
 		throw new RuntimeException( 'its uninstall engine is missing.' );
@@ -53,7 +53,7 @@ try {
 		$dws_tpl_identity,
 		$dws_tpl_footprint,
 		array(
-			'consent'    => array( 'option' => DWS_TPL_OPTION_DELETE_DATA ),
+			'consent'    => array( 'option' => $dws_tpl_consent ),
 			'meta_types' => $dws_tpl_meta_types,
 		)
 	);

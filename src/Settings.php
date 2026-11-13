@@ -2,6 +2,7 @@
 
 namespace DeepWebSolutions\PluginTemplate;
 
+use DeepWebSolutions\PluginTemplate\Greeting\AccountDashboardGreeting;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\ComponentInterface;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Setting\SectionFieldsDefinitionInterface;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Setting\SettingsTab;
@@ -45,30 +46,30 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 			),
 			array(
 				'type'    => 'checkbox',
-				'id'      => DWS_TPL_OPTION_GREETING_ENABLED,
+				'id'      => Options::GREETING_ENABLED,
 				'title'   => __( 'Show the greeting', 'dws-plugin-template' ),
 				'desc'    => __( 'Greet returning customers', 'dws-plugin-template' ),
-				'default' => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_GREETING_ENABLED ] ),
+				'default' => wc_bool_to_string( Options::DEFAULTS[ Options::GREETING_ENABLED ] ),
 			),
 			array(
 				'type'        => 'text',
-				'id'          => DWS_TPL_OPTION_GREETING,
+				'id'          => Options::GREETING,
 				'title'       => __( 'Message', 'dws-plugin-template' ),
 				'desc'        => __( 'Leave empty to show the default greeting in each customer\'s language.', 'dws-plugin-template' ),
 				'default'     => '',
-				'placeholder' => dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), // A default would be saved in the admin's language with the first save of the tab.
+				'placeholder' => AccountDashboardGreeting::get_default_message(), // A default would be saved in the admin's language with the first save of the tab.
 			),
 			array(
 				'type'              => 'number',
-				'id'                => DWS_TPL_OPTION_GREETING_ORDERS,
+				'id'                => Options::GREETING_ORDERS,
 				'title'             => __( 'Orders before the greeting', 'dws-plugin-template' ),
 				'desc'              => __( 'Customers see the greeting once this many of their orders are paid.', 'dws-plugin-template' ),
-				'default'           => (string) DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_GREETING_ORDERS ],
+				'default'           => (string) Options::DEFAULTS[ Options::GREETING_ORDERS ],
 				'custom_attributes' => array(
 					'min'  => '1',
 					'step' => '1',
 				),
-				'validate'          => 'dws_tpl_validate_greeting_orders',
+				'validate'          => self::validate_greeting_orders( ... ),
 			),
 			array(
 				'type' => 'sectionend',
@@ -81,10 +82,10 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 			),
 			array(
 				'type'    => 'checkbox',
-				'id'      => DWS_TPL_OPTION_DELETE_DATA,
+				'id'      => Options::DELETE_DATA,
 				'title'   => __( 'Remove all data on uninstallation', 'dws-plugin-template' ),
 				'desc'    => __( 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later', 'dws-plugin-template' ),
-				'default' => wc_bool_to_string( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_DELETE_DATA ] ),
+				'default' => wc_bool_to_string( Options::DEFAULTS[ Options::DELETE_DATA ] ),
 			),
 			array(
 				'type' => 'sectionend',
@@ -117,6 +118,31 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 			$this
 		);
 		return $pages;
+	}
+
+	// endregion
+
+	// region HELPERS
+
+	/**
+	 * Returns the number of orders before the greeting shows as the digits WooCommerce stores, or an error when the submission is not a whole number of at least 1.
+	 *
+	 * The number input sends a whole number in any form a browser accepts, such as 03 or 3.0, so the submission parses as a float.
+	 *
+	 * @since   1.0.0
+	 * @version 1.0.0
+	 *
+	 * @param   mixed $submitted The submitted value.
+	 *
+	 * @return  string|\WP_Error
+	 */
+	protected static function validate_greeting_orders( mixed $submitted ): string|\WP_Error {
+		$orders = \is_string( $submitted ) ? \filter_var( $submitted, \FILTER_VALIDATE_FLOAT ) : false;
+		if ( false === $orders || $orders < 1 || $orders >= \PHP_INT_MAX || \floor( $orders ) !== $orders ) {
+			return new \WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) );
+		}
+
+		return (string) (int) $orders;
 	}
 
 	// endregion

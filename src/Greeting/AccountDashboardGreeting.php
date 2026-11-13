@@ -2,6 +2,7 @@
 
 namespace DeepWebSolutions\PluginTemplate\Greeting;
 
+use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\ComponentInterface;
 
@@ -30,6 +31,24 @@ final class AccountDashboardGreeting implements ComponentInterface {
 
 	// endregion
 
+	// region METHODS
+
+	/**
+	 * Returns the greeting's default message in the visitor's language, which shows wherever the stored message is empty.
+	 *
+	 * The default is never stored, so that saving the settings does not fix one language for every customer. Callers read it from init on, because WordPress flags translations loaded earlier.
+	 *
+	 * @since   1.0.0
+	 * @version 1.0.0
+	 *
+	 * @return  string
+	 */
+	public static function get_default_message(): string {
+		return __( 'Welcome back, and thank you for shopping with us again.', 'dws-plugin-template' );
+	}
+
+	// endregion
+
 	// region HOOKS
 
 	/**
@@ -41,12 +60,7 @@ final class AccountDashboardGreeting implements ComponentInterface {
 	 * @return  void
 	 */
 	public function print_greeting(): void {
-		$greeting = dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING );
-		if ( '' === $greeting ) {
-			return;
-		}
-
-		$threshold = dws_tpl_get_int_option( DWS_TPL_OPTION_GREETING_ORDERS );
+		$threshold = Options::get_int( Options::GREETING_ORDERS );
 		$paid      = wc_get_orders(
 			array(
 				'customer_id' => get_current_user_id(),
@@ -59,7 +73,8 @@ final class AccountDashboardGreeting implements ComponentInterface {
 			return;
 		}
 
-		wc_print_notice( esc_html( $greeting ), 'notice', array( Plugin::SLUG => 'greeting' ) );
+		$greeting = Options::get_string( Options::GREETING );
+		wc_print_notice( esc_html( '' === $greeting ? self::get_default_message() : $greeting ), 'notice', array( Plugin::SLUG => 'greeting' ) );
 	}
 
 	/**

@@ -62,6 +62,23 @@ final class Plugin {
 	);
 
 	/**
+	 * The plugin's stored data by kind, which uninstall and deactivation read.
+	 *
+	 * @since   1.0.0
+	 * @version 1.0.0
+	 *
+	 * @var     array{option_prefixes: list<non-empty-string>, user_meta_site_prefixes: list<non-empty-string>, user_meta_global_prefixes: list<non-empty-string>, network_options: list<non-empty-string>, cron_hooks: list<non-empty-string>, as_groups: list<non-empty-string>}
+	 */
+	public const array FOOTPRINT = array(
+		'option_prefixes'           => array( self::PREFIX . '_', '_transient_' . self::PREFIX . '_', '_transient_timeout_' . self::PREFIX . '_' ),
+		'user_meta_site_prefixes'   => array( self::PREFIX . '_' ),
+		'user_meta_global_prefixes' => array( self::PREFIX . '_' ),
+		'network_options'           => array( self::PREFIX . '_network_notices' ),
+		'cron_hooks'                => array( 'dws_plugin_template/migration/run' ),
+		'as_groups'                 => array( self::PREFIX ),
+	);
+
+	/**
 	 * The boot boundary, whose status tells whether the plugin booted.
 	 *
 	 * @since   1.0.0
@@ -164,7 +181,7 @@ final class Plugin {
 	 */
 	public function deactivate(): void {
 		foreach ( array( 'cron_hooks', 'as_hooks' ) as $kind ) {
-			foreach ( dws_tpl_get_footprint()[ $kind ] ?? array() as $hook ) {
+			foreach ( self::FOOTPRINT[ $kind ] ?? array() as $hook ) {
 				$unscheduled = $this->scheduler->unschedule_hook( $hook );
 				if ( true !== $unscheduled ) {
 					$this->logger->warning(
@@ -198,7 +215,7 @@ final class Plugin {
 			return false;
 		}
 
-		$this->migrations = new MigrationRunner( $this->identity, dws_tpl_get_migration_steps(), $this->logger, $this->scheduler );
+		$this->migrations = new MigrationRunner( $this->identity, Migrations::get_steps(), $this->logger, $this->scheduler );
 		$this->migrations->register_hooks();
 
 		$this->kernel = new PluginKernel( new ContainerBuilder()->addDefinitions( $this->get_definitions( $this->identity, $this->logger, $this->scheduler ) )->build() );
