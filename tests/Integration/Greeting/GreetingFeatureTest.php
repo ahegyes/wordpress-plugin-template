@@ -28,10 +28,11 @@ final class GreetingFeatureTest extends TestCase {
 	}
 
 	#[DataProvider( 'stored_toggles' )]
-	public function test_the_greeting_loads_only_where_a_site_switches_it_on( ?string $stored, bool $expected ): void {
+	public function test_the_greeting_loads_and_the_api_reports_it_on_only_where_a_site_switches_it_on( ?string $stored, bool $expected ): void {
 		\is_null( $stored ) ? delete_option( Options::GREETING_ENABLED ) : update_option( Options::GREETING_ENABLED, $stored );
 
 		self::assertSame( $expected, GreetingFeature::should_load() );
+		self::assertSame( $expected, dws_tpl_is_greeting_enabled() );
 	}
 
 	#[RunInSeparateProcess]
