@@ -17,91 +17,106 @@ These are the changes most plugins built from this template make, each as the fi
 
 ## A safeguard
 
-A safeguard is a restriction that holds even when the rest of the plugin fails to load, such as a capability that stays locked unless the plugin unlocks it. It lives in `includes/safeguards.php`, which the entry file loads before the floor gate and the autoloader, so it calls only WordPress, what that file defines, and WooCommerce where the plugin requires it. The plugin relaxes it only through the safeguard's own filter, with an explicit `false`, and only after `dws_plugin_template/boot/succeeded`, which fires once the plugin has booted, so a half-loaded build never relaxes it.
+A safeguard is a restriction that holds even when the rest of the plugin fails to load, such as a capability that stays locked unless the plugin unlocks it. It lives in `Safeguards.php` at the plugin's root, which the entry file requires by path before the floor gate and the autoloader, so it calls only WordPress, what its class defines, and WooCommerce where the plugin requires it. Each safeguard is a static closure, which no code can remove by name, so the plugin relaxes it only through the safeguard's own filter, with an explicit `false`, and only after `dws_plugin_template/boot/succeeded`, which fires once the plugin has booted, so a half-loaded build never relaxes it.
 
-Replace `includes/safeguards.php` with the helper and the safeguard. The file runs on any runtime that parses the plugin, so it must parse on PHP 7.4 and call only what its hook hands it, WordPress APIs present at the oldest WordPress the bootstrap package runs on and WooCommerce APIs present since 3.6, guarding anything newer with `function_exists()` or `method_exists()`. WordPress loads the plugin while WooCommerce is inactive, so a safeguard that calls WooCommerce is hooked only once WooCommerce has loaded, as shown after the file. `phpstan.safeguards.neon` checks the WordPress floor, and review the WooCommerce one:
+Replace `Safeguards.php` with the class below, its helper and the safeguard. The file runs on any runtime that parses the plugin, so it must parse on PHP 7.4 and call only what its hook hands it, WordPress APIs present at the oldest WordPress the bootstrap package runs on and WooCommerce APIs present since 3.6, guarding anything newer with `function_exists()` or `method_exists()`. WordPress loads the plugin while WooCommerce is inactive, so a safeguard that calls WooCommerce is hooked only once WooCommerce has loaded, as shown after the file. `phpstan.safeguards.neon` checks the WordPress floor, and review the WooCommerce one:
 
 ```php
 <?php declare( strict_types=1 );
+
+namespace DeepWebSolutions\PluginTemplate;
+
+\defined( 'ABSPATH' ) || exit;
+
 /**
- * Holds the plugin's safeguards.
+ * Holds the plugin's safeguards, the restrictions that hold even when the rest of the plugin fails to load.
  *
- * They load before the floor gate, so they hold on a runtime below the plugin's floors and when the rest of the build fails to load.
+ * The entry requires it by path before the floor gate, so it parses on PHP 7.4 and calls only what the oldest WordPress the bootstrap package runs on provides.
  *
  * @since   1.0.0
  * @version 1.0.0
- *
- * @package DeepWebSolutions\PluginTemplate
  */
-
-defined( 'ABSPATH' ) || exit;
-
-add_filter( 'map_meta_cap', 'dws_tpl_map_export_capability', 10, 2 );
-
-/**
- * Returns whether a safeguard's filtered value relaxes it, which takes an explicit false once the plugin has finished booting.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @param   mixed $filtered The value the safeguard's filter returned for true.
- *
- * @return  bool
- */
-function dws_tpl_is_relaxed( $filtered ): bool {
-	return 0 < did_action( 'dws_plugin_template/boot/succeeded' ) && false === $filtered;
-}
-
-/**
- * Maps the data export capability to do_not_allow, or to managing options while the plugin relaxes the export lock.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @param   string[] $caps The primitive capabilities the capability maps to.
- * @param   string   $cap  The capability being checked.
- *
- * @return  string[]
- */
-function dws_tpl_map_export_capability( array $caps, string $cap ): array {
-	if ( 'dws_tpl_export_data' !== $cap ) {
-		return $caps;
-	}
+final class Safeguards {
+	// region MAGIC METHODS
 
 	/**
-	 * Filters whether the data export stays locked.
+	 * Constructor.
 	 *
-	 * Only an explicit false, once the plugin has booted, unlocks it, so a half-loaded build never relaxes it.
+	 * @since   1.0.0
+	 * @version 1.0.0
+	 */
+	protected function __construct() {}
+
+	// endregion
+
+	// region METHODS
+
+	/**
+	 * Hooks the safeguards, as static closures, so that only their own filters relax them.
 	 *
 	 * @since   1.0.0
 	 * @version 1.0.0
 	 *
-	 * @param   bool $restricted Whether the data export stays locked.
+	 * @return  void
 	 */
-	return dws_tpl_is_relaxed( apply_filters( 'dws_plugin_template/data_export/should_restrict', true ) ) ? array( 'manage_options' ) : array( 'do_not_allow' );
+	public static function register(): void {
+		add_filter(
+			'map_meta_cap',
+			static function ( array $caps, string $cap ): array {
+				if ( 'dws_tpl_export_data' !== $cap ) {
+					return $caps;
+				}
+
+				/**
+				 * Filters whether the data export stays locked.
+				 *
+				 * Only an explicit false, once the plugin has booted, unlocks it, so a half-loaded build never relaxes it.
+				 *
+				 * @since   1.0.0
+				 * @version 1.0.0
+				 *
+				 * @param   bool $restricted Whether the data export stays locked.
+				 */
+				return self::is_relaxed( apply_filters( 'dws_plugin_template/data_export/should_restrict', true ) ) ? array( 'manage_options' ) : array( 'do_not_allow' );
+			},
+			10,
+			2
+		);
+	}
+
+	// endregion
+
+	// region HELPERS
+
+	/**
+	 * Returns whether a safeguard's filtered value relaxes it, which takes an explicit false once the plugin has finished booting.
+	 *
+	 * @since   1.0.0
+	 * @version 1.0.0
+	 *
+	 * @param   mixed $filtered The value the safeguard's filter returned for true.
+	 *
+	 * @return  bool
+	 */
+	protected static function is_relaxed( $filtered ): bool {
+		return 0 < did_action( 'dws_plugin_template/boot/succeeded' ) && false === $filtered;
+	}
+
+	// endregion
 }
 ```
 
-Every further safeguard calls `dws_tpl_is_relaxed()` around its own literal `apply_filters()`, so each filter keeps its hook docblock and the helper's rule has one home.
+Every further safeguard is another static closure in `register()` that calls `self::is_relaxed()` around its own literal `apply_filters()`, so each filter keeps its hook docblock and the helper's rule has one home. A value other classes read, such as a lock decision, is a public static of the class, and everything else stays protected.
 
-A safeguard that calls WooCommerce is hooked from one function, `dws_tpl_add_woocommerce_safeguards()`, which the file runs once WooCommerce has loaded. WooCommerce fires `woocommerce_loaded` once every plugin has loaded, and never while it is inactive, but the request that activates the plugin includes the file after that, so the file checks first. A request that activates WooCommerce too never fires it, so these safeguards hold from the next request. Add both to `includes/safeguards.php`, and hook each such safeguard in the function's body:
+A safeguard that calls WooCommerce is hooked from one closure, which `register()` runs once WooCommerce has loaded. WooCommerce fires `woocommerce_loaded` once every plugin has loaded, and never while it is inactive, but the request that activates the plugin includes the file after that, so `register()` checks first. A request that activates WooCommerce too never fires it, so these safeguards hold from the next request. Add the closure to `register()`, and hook each such safeguard in its body:
 
 ```php
+$add_woocommerce_safeguards = static function (): void {
+};
 if ( 0 < did_action( 'woocommerce_loaded' ) ) {
-	dws_tpl_add_woocommerce_safeguards();
+	$add_woocommerce_safeguards();
 } else {
-	add_action( 'woocommerce_loaded', 'dws_tpl_add_woocommerce_safeguards' );
-}
-
-/**
- * Hooks the safeguards that call WooCommerce.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @return  void
- */
-function dws_tpl_add_woocommerce_safeguards(): void {
+	add_action( 'woocommerce_loaded', $add_woocommerce_safeguards );
 }
 ```
 

@@ -51,8 +51,8 @@ git mv --force README.scaffold.md README.md
 # The scaffold README becomes the plugin's README.md, which .distignore already excludes.
 perl -ni -e 'print unless /^README\.scaffold\.md$/' .distignore
 git rm --quiet includes/_disabled-example.php
-# The template's recipe test loads the recipe's safeguard helper, which a plugin that applies the recipe declares
-# itself, so only the recipe's own test stays.
+# The template's recipe test loads the recipe's SafeguardsTest, which a plugin that applies the recipe declares
+# itself, so only the plugin's own copy stays.
 git rm --quiet tests/Integration/SafeguardRecipeTest.php
 git mv dws-plugin-template.php "$SLUG.php"
 

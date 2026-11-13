@@ -1,6 +1,6 @@
 <?php declare( strict_types=1 );
 /**
- * Hooks the plugin into WordPress and loads the files in includes/.
+ * Loads the files in includes/, defines the plugin's accessor, boots the plugin on plugins_loaded, declares its WooCommerce feature compatibility and unschedules its jobs on deactivation.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -26,9 +26,25 @@ foreach ( $dws_tpl_includes as $dws_tpl_include ) {
 }
 
 // The hooks come last, so an include that throws leaves nothing of the plugin hooked.
-add_action( 'plugins_loaded', 'dws_tpl_boot', 15 );
-add_action( 'before_woocommerce_init', 'dws_tpl_declare_compatibility' );
-register_deactivation_hook( DWS_TPL_FILE, 'dws_tpl_deactivate' );
+add_action(
+	'plugins_loaded',
+	static function (): void {
+		dws_tpl_plugin()->boot();
+	},
+	15
+);
+add_action(
+	'before_woocommerce_init',
+	static function (): void {
+		FeaturesUtil::declare_compatibility( 'custom_order_tables', DWS_TPL_FILE, false ); // Each WooCommerce feature flag is declared from evidence.
+	}
+);
+register_deactivation_hook(
+	DWS_TPL_FILE,
+	static function (): void {
+		dws_tpl_plugin()->deactivate();
+	}
+);
 
 /**
  * Returns the plugin's composition root, built on first use.
@@ -45,56 +61,4 @@ function dws_tpl_plugin(): Plugin {
 	}
 
 	return $plugin;
-}
-
-/**
- * Boots the plugin, reporting a composition root that cannot be built as an incomplete build.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @return  void
- */
-function dws_tpl_boot(): void {
-	try {
-		$plugin = dws_tpl_plugin();
-	} catch ( Throwable $error ) {
-		dws_tpl_handle_build_error( $error );
-		return;
-	}
-
-	$plugin->boot(); // PluginBoot reports a failed composition itself, and a hook listener's throw is not a build error.
-}
-
-/**
- * Unschedules the plugin's jobs on the site it is deactivated on, reporting a composition root that cannot be built as an incomplete build.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @return  void
- */
-function dws_tpl_deactivate(): void {
-	try {
-		$plugin = dws_tpl_plugin();
-	} catch ( Throwable $error ) {
-		dws_tpl_handle_build_error( $error );
-		return;
-	}
-
-	$plugin->deactivate();
-}
-
-/**
- * Declares that the plugin does not yet work with WooCommerce's order tables.
- *
- * Each WooCommerce feature flag is declared from evidence.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @return  void
- */
-function dws_tpl_declare_compatibility(): void {
-	FeaturesUtil::declare_compatibility( 'custom_order_tables', DWS_TPL_FILE, false );
 }

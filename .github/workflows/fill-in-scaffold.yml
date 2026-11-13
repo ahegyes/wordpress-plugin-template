@@ -76,7 +76,7 @@ jobs:
         env:
           SLUG: ${{ inputs.plugin-slug }}
         run: |
-          for file in "$SLUG.php" uninstall.php includes/*.php; do
+          for file in "$SLUG.php" uninstall.php Safeguards.php; do
             php -l "$file"
           done
 
