@@ -4,6 +4,7 @@ namespace DeepWebSolutions\PluginTemplate\Tests\Unit;
 
 use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginIdentity;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Uninstall\Uninstaller;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
@@ -15,6 +16,11 @@ final class FootprintTest extends TestCase {
 
 	public function test_the_prefix_has_one_segment_after_dws_so_no_prefix_in_its_family_starts_with_another(): void {
 		self::assertMatchesRegularExpression( '/^dws_[a-z0-9]+$/', Plugin::PREFIX );
+	}
+
+	// Quality rehearses the fill-in at the longest prefix it accepts, which this row holds to the framework's own bound.
+	public function test_the_prefix_makes_an_identity_the_framework_accepts(): void {
+		self::assertSame( Plugin::PREFIX, new PluginIdentity( __FILE__, Plugin::SLUG, Plugin::PREFIX )->prefix );
 	}
 
 	public function test_every_kind_is_one_the_uninstall_engine_removes(): void {
