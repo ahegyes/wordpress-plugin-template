@@ -2,6 +2,7 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
+use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RunsRequestsTrait;
 use PHPUnit\Framework\Attributes\AfterClass;
@@ -43,7 +44,7 @@ final class UninstallTest extends TestCase {
 	#[RunInSeparateProcess]
 	public function test_a_consenting_uninstall_removes_a_row_of_every_kind_the_framework_roots_store(): void {
 		$prefix = Plugin::PREFIX . '_';
-		update_option( DWS_TPL_OPTION_DELETE_DATA, 'yes' );
+		update_option( Options::DELETE_DATA, 'yes' );
 		update_option( "{$prefix}notices", array( 'seeded' ) );
 		update_network_option( null, "{$prefix}network_notices", array( 'seeded' ) );
 		set_transient( "{$prefix}boot_failure_seeded", 1, HOUR_IN_SECONDS );
@@ -55,7 +56,7 @@ final class UninstallTest extends TestCase {
 		self::assertTrue( uninstall_plugin( plugin_basename( DWS_TPL_FILE ) ) );
 		wp_cache_flush();
 
-		self::assertFalse( get_option( DWS_TPL_OPTION_DELETE_DATA ) );
+		self::assertFalse( get_option( Options::DELETE_DATA ) );
 		self::assertFalse( get_option( "{$prefix}notices" ) );
 		self::assertFalse( get_network_option( null, "{$prefix}network_notices" ) );
 		self::assertFalse( get_transient( "{$prefix}boot_failure_seeded" ) );
@@ -75,16 +76,16 @@ final class UninstallTest extends TestCase {
 
 		// The other tests share the database, so the runner stores again what a new site starts with.
 		dws_tpl_plugin()->migrations?->run();
-		self::assertSame( 'no', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
+		self::assertSame( 'no', get_option( Options::DELETE_DATA ) );
 	}
 
 	#[RunInSeparateProcess]
 	public function test_an_uninstall_in_a_request_that_never_loaded_the_plugin_removes_its_data(): void {
-		update_option( DWS_TPL_OPTION_DELETE_DATA, 'yes' );
+		update_option( Options::DELETE_DATA, 'yes' );
 
 		try {
 			// WordPress uninstalls a plugin in a request that never included it, as WP-CLI's --skip-plugins does here.
-			$request = self::request( 'require_once ABSPATH . "wp-admin/includes/plugin.php"; echo wp_json_encode( array( uninstall_plugin( "' . plugin_basename( DWS_TPL_FILE ) . '" ), get_option( "' . DWS_TPL_OPTION_DELETE_DATA . '" ) ) );', '--skip-plugins=' . Plugin::SLUG );
+			$request = self::request( 'require_once ABSPATH . "wp-admin/includes/plugin.php"; echo wp_json_encode( array( uninstall_plugin( "' . plugin_basename( DWS_TPL_FILE ) . '" ), get_option( "' . Options::DELETE_DATA . '" ) ) );', '--skip-plugins=' . Plugin::SLUG );
 
 			self::assertSame( '[true,false]', $request['last'], $request['output'] );
 		} finally {
@@ -99,7 +100,7 @@ final class UninstallTest extends TestCase {
 		global $wpdb;
 
 		\define( 'WP_UNINSTALL_PLUGIN', plugin_basename( DWS_TPL_FILE ) );
-		update_option( DWS_TPL_OPTION_DELETE_DATA, 'yes' );
+		update_option( Options::DELETE_DATA, 'yes' );
 		$failing = "DELETE FROM `$wpdb->options` WHERE `option_name` = '" . self::REVISION . "'";
 		add_filter( 'query', static fn ( string $query ): string => \str_contains( $query, $failing ) ? 'SELECT * FROM dws_tpl_missing_table' : $query );
 		add_filter( 'wp_die_handler', static fn (): \Closure => static fn ( string $message, string $title, array $args ): never => throw new \LogicException( $args['response'] . ' ' . $message ) );
@@ -110,10 +111,10 @@ final class UninstallTest extends TestCase {
 			self::fail( 'The uninstall finished.' );
 		} catch ( \LogicException $died ) {
 			self::assertStringStartsWith( '500 Uninstall could not remove everything: option ' . self::REVISION, $died->getMessage() );
-			self::assertSame( 'yes', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
+			self::assertSame( 'yes', get_option( Options::DELETE_DATA ) );
 		} finally {
 			remove_all_filters( 'query' );
-			delete_option( DWS_TPL_OPTION_DELETE_DATA );
+			delete_option( Options::DELETE_DATA );
 			delete_option( self::REVISION );
 			dws_tpl_plugin()->migrations?->run();
 		}

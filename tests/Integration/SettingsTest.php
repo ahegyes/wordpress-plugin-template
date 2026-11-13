@@ -2,7 +2,10 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
+use DeepWebSolutions\PluginTemplate\Greeting\AccountDashboardGreeting;
+use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
+use DeepWebSolutions\PluginTemplate\Settings;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Setting\SettingsTab;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
 use PHPUnit\Framework\Attributes\After;
@@ -14,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 final class SettingsTest extends TestCase {
 	use RestoresOptionsTrait;
 
-	protected const array OPTIONS = array( DWS_TPL_OPTION_GREETING_ENABLED, DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS, DWS_TPL_OPTION_DELETE_DATA );
+	protected const array OPTIONS = array( Options::GREETING_ENABLED, Options::GREETING, Options::GREETING_ORDERS, Options::DELETE_DATA );
 
 	protected static SettingsTab $tab;
 
@@ -44,10 +47,10 @@ final class SettingsTest extends TestCase {
 
 	public static function field_texts(): array {
 		return array(
-			'toggle'    => array( DWS_TPL_OPTION_GREETING_ENABLED, 'Show the greeting', 'Greet returning customers' ),
-			'message'   => array( DWS_TPL_OPTION_GREETING, 'Message', 'Leave empty to show the default greeting in each customer\'s language.' ),
-			'threshold' => array( DWS_TPL_OPTION_GREETING_ORDERS, 'Orders before the greeting', 'Customers see the greeting once this many of their orders are paid.' ),
-			'consent'   => array( DWS_TPL_OPTION_DELETE_DATA, 'Remove all data on uninstallation', 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later' ),
+			'toggle'    => array( Options::GREETING_ENABLED, 'Show the greeting', 'Greet returning customers' ),
+			'message'   => array( Options::GREETING, 'Message', 'Leave empty to show the default greeting in each customer\'s language.' ),
+			'threshold' => array( Options::GREETING_ORDERS, 'Orders before the greeting', 'Customers see the greeting once this many of their orders are paid.' ),
+			'consent'   => array( Options::DELETE_DATA, 'Remove all data on uninstallation', 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later' ),
 		);
 	}
 
@@ -57,6 +60,19 @@ final class SettingsTest extends TestCase {
 			'leading-zero'  => array( '03' ),
 			'zero-decimals' => array( '3.0' ),
 			'exponent'      => array( '0.3e1' ),
+		);
+	}
+
+	public static function submitted_order_counts(): array {
+		return array(
+			'one'      => array( '1', '1' ),
+			'padded'   => array( ' 3 ', '3' ),
+			'zero'     => array( '0', null ),
+			'negative' => array( '-3', null ),
+			'decimal'  => array( '2.5', null ),
+			'word'     => array( 'three', null ),
+			'empty'    => array( '', null ),
+			'array'    => array( array( '3' ), null ),
 		);
 	}
 
@@ -73,12 +89,12 @@ final class SettingsTest extends TestCase {
 		$form = $this->render();
 
 		self::assertSame( 'DWS Plugin Template', self::$tab->get_label() );
-		self::assertFalse( $form->getElementById( DWS_TPL_OPTION_GREETING_ENABLED )?->hasAttribute( 'checked' ) );
-		self::assertSame( '', $form->getElementById( DWS_TPL_OPTION_GREETING )?->getAttribute( 'value' ) );
-		self::assertSame( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), $form->getElementById( DWS_TPL_OPTION_GREETING )?->getAttribute( 'placeholder' ) );
-		self::assertSame( '1', $form->getElementById( DWS_TPL_OPTION_GREETING_ORDERS )?->getAttribute( 'value' ) );
-		self::assertSame( '1', $form->getElementById( DWS_TPL_OPTION_GREETING_ORDERS )?->getAttribute( 'min' ) );
-		self::assertFalse( $form->getElementById( DWS_TPL_OPTION_DELETE_DATA )?->hasAttribute( 'checked' ) );
+		self::assertFalse( $form->getElementById( Options::GREETING_ENABLED )?->hasAttribute( 'checked' ) );
+		self::assertSame( '', $form->getElementById( Options::GREETING )?->getAttribute( 'value' ) );
+		self::assertSame( AccountDashboardGreeting::get_default_message(), $form->getElementById( Options::GREETING )?->getAttribute( 'placeholder' ) );
+		self::assertSame( '1', $form->getElementById( Options::GREETING_ORDERS )?->getAttribute( 'value' ) );
+		self::assertSame( '1', $form->getElementById( Options::GREETING_ORDERS )?->getAttribute( 'min' ) );
+		self::assertFalse( $form->getElementById( Options::DELETE_DATA )?->hasAttribute( 'checked' ) );
 	}
 
 	#[DataProvider( 'field_texts' )]
@@ -90,43 +106,50 @@ final class SettingsTest extends TestCase {
 	}
 
 	public function test_a_save_that_leaves_the_message_untouched_stores_no_translated_text(): void {
-		delete_option( DWS_TPL_OPTION_GREETING );
+		delete_option( Options::GREETING );
 
-		$this->save( array( DWS_TPL_OPTION_GREETING => $this->render()->getElementById( DWS_TPL_OPTION_GREETING )?->getAttribute( 'value' ) ) );
+		$this->save( array( Options::GREETING => $this->render()->getElementById( Options::GREETING )?->getAttribute( 'value' ) ) );
 
-		self::assertSame( '', get_option( DWS_TPL_OPTION_GREETING ) );
-		self::assertSame( dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING ), dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
+		self::assertSame( '', get_option( Options::GREETING ) );
 	}
 
 	public function test_the_uninstall_consent_round_trips_through_woocommerces_save(): void {
-		$this->save( array( DWS_TPL_OPTION_DELETE_DATA => '1' ) );
+		$this->save( array( Options::DELETE_DATA => '1' ) );
 
-		self::assertSame( 'yes', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
-		self::assertTrue( dws_tpl_get_bool_option( DWS_TPL_OPTION_DELETE_DATA ) );
-		self::assertTrue( $this->render()->getElementById( DWS_TPL_OPTION_DELETE_DATA )?->hasAttribute( 'checked' ) );
+		self::assertSame( 'yes', get_option( Options::DELETE_DATA ) );
+		self::assertTrue( Options::get_bool( Options::DELETE_DATA ) );
+		self::assertTrue( $this->render()->getElementById( Options::DELETE_DATA )?->hasAttribute( 'checked' ) );
 
 		$this->save( array() );
 
-		self::assertSame( 'no', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
-		self::assertFalse( dws_tpl_get_bool_option( DWS_TPL_OPTION_DELETE_DATA ) );
+		self::assertSame( 'no', get_option( Options::DELETE_DATA ) );
+		self::assertFalse( Options::get_bool( Options::DELETE_DATA ) );
 	}
 
 	#[DataProvider( 'invalid_order_counts' )]
 	public function test_an_order_count_that_is_not_a_whole_number_of_at_least_one_keeps_the_stored_count( string $posted ): void {
-		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '4' );
+		update_option( Options::GREETING_ORDERS, '4' );
 
-		$this->save( array( DWS_TPL_OPTION_GREETING_ORDERS => $posted ) );
+		$this->save( array( Options::GREETING_ORDERS => $posted ) );
 
-		self::assertSame( '4', get_option( DWS_TPL_OPTION_GREETING_ORDERS ) );
+		self::assertSame( '4', get_option( Options::GREETING_ORDERS ) );
 		self::assertSame( array( 'Orders before the greeting was not saved and keeps its previous value. The other changes were saved. Enter a whole number of 1 or more, such as 3.' ), new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' )->getValue() );
 	}
 
 	#[DataProvider( 'whole_order_counts' )]
 	public function test_a_whole_order_count_of_at_least_one_is_stored_as_its_digits( string $posted ): void {
-		$this->save( array( DWS_TPL_OPTION_GREETING_ORDERS => $posted ) );
+		$this->save( array( Options::GREETING_ORDERS => $posted ) );
 
-		self::assertSame( '3', get_option( DWS_TPL_OPTION_GREETING_ORDERS ) );
-		self::assertSame( 3, dws_tpl_get_int_option( DWS_TPL_OPTION_GREETING_ORDERS ) );
+		self::assertSame( '3', get_option( Options::GREETING_ORDERS ) );
+		self::assertSame( 3, Options::get_int( Options::GREETING_ORDERS ) );
+	}
+
+	#[DataProvider( 'submitted_order_counts' )]
+	public function test_an_order_count_validates_as_a_whole_number_of_at_least_one( mixed $submitted, ?string $expected ): void {
+		$field     = \array_find( new Settings()->get_section_fields( Plugin::PREFIX, '' ), static fn ( array $field ): bool => Options::GREETING_ORDERS === $field['id'] );
+		$validated = \is_array( $field ) && \is_callable( $field['validate'] ?? null ) ? $field['validate']( $submitted ) : null;
+
+		\is_null( $expected ) ? self::assertInstanceOf( \WP_Error::class, $validated ) : self::assertSame( $expected, $validated );
 	}
 
 	protected function render(): \Dom\HTMLDocument {

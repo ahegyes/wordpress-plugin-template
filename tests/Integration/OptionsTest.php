@@ -2,6 +2,7 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
+use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
 use PHPUnit\Framework\Attributes\After;
@@ -15,7 +16,7 @@ final class OptionsTest extends TestCase {
 
 	protected const string KEY = Plugin::PREFIX . '_options_test';
 
-	protected const array OPTIONS = array( DWS_TPL_OPTION_DELETE_DATA, DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS );
+	protected const array OPTIONS = array( Options::DELETE_DATA, Options::GREETING, Options::GREETING_ORDERS );
 
 	protected const string TRANSLATION = 'Translated greeting';
 
@@ -52,27 +53,6 @@ final class OptionsTest extends TestCase {
 		);
 	}
 
-	public static function untouched_strings(): array {
-		return array(
-			'unsaved'      => array( null ),
-			'empty'        => array( '' ),
-			'not-a-string' => array( array( 'Hello' ) ),
-		);
-	}
-
-	public static function submitted_order_counts(): array {
-		return array(
-			'one'      => array( '1', '1' ),
-			'padded'   => array( ' 3 ', '3' ),
-			'zero'     => array( '0', null ),
-			'negative' => array( '-3', null ),
-			'decimal'  => array( '2.5', null ),
-			'word'     => array( 'three', null ),
-			'empty'    => array( '', null ),
-			'array'    => array( array( '3' ), null ),
-		);
-	}
-
 	#[After]
 	protected function delete_the_test_option(): void {
 		delete_option( self::KEY );
@@ -80,64 +60,46 @@ final class OptionsTest extends TestCase {
 
 	#[DataProvider( 'stored_bools' )]
 	public function test_a_bool_reads_the_stored_checkbox_value_or_false( mixed $stored, bool $expected ): void {
-		update_option( DWS_TPL_OPTION_DELETE_DATA, $stored );
+		update_option( Options::DELETE_DATA, $stored );
 
-		self::assertSame( $expected, dws_tpl_get_bool_option( DWS_TPL_OPTION_DELETE_DATA ) );
+		self::assertSame( $expected, Options::get_bool( Options::DELETE_DATA ) );
 	}
 
 	public function test_a_missing_option_reads_its_default(): void {
-		delete_option( DWS_TPL_OPTION_DELETE_DATA );
+		delete_option( Options::DELETE_DATA );
 
-		self::assertSame( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_DELETE_DATA ], dws_tpl_get_bool_option( DWS_TPL_OPTION_DELETE_DATA ) );
+		self::assertSame( Options::DEFAULTS[ Options::DELETE_DATA ], Options::get_bool( Options::DELETE_DATA ) );
 	}
 
 	#[DataProvider( 'stored_ints' )]
 	public function test_an_int_reads_a_whole_number_or_zero( mixed $stored, int $expected ): void {
 		update_option( self::KEY, $stored );
 
-		self::assertSame( $expected, dws_tpl_get_int_option( self::KEY ) );
+		self::assertSame( $expected, Options::get_int( self::KEY ) );
 	}
 
 	public function test_an_int_that_is_not_a_whole_number_reads_its_default(): void {
-		update_option( DWS_TPL_OPTION_GREETING_ORDERS, 'seven' );
+		update_option( Options::GREETING_ORDERS, 'seven' );
 
-		self::assertSame( DWS_TPL_OPTION_DEFAULTS[ DWS_TPL_OPTION_GREETING_ORDERS ], dws_tpl_get_int_option( DWS_TPL_OPTION_GREETING_ORDERS ) );
+		self::assertSame( Options::DEFAULTS[ Options::GREETING_ORDERS ], Options::get_int( Options::GREETING_ORDERS ) );
 	}
 
 	#[DataProvider( 'stored_strings' )]
 	public function test_a_string_reads_a_stored_string_or_the_empty_string( mixed $stored, string $expected ): void {
 		update_option( self::KEY, $stored );
 
-		self::assertSame( $expected, dws_tpl_get_string_option( self::KEY ) );
+		self::assertSame( $expected, Options::get_string( self::KEY ) );
 	}
 
-	#[DataProvider( 'untouched_strings' )]
-	public function test_a_string_without_a_usable_stored_value_reads_its_translated_default( mixed $stored ): void {
-		\is_null( $stored ) ? delete_option( DWS_TPL_OPTION_GREETING ) : update_option( DWS_TPL_OPTION_GREETING, $stored );
+	public function test_a_string_without_a_stored_value_reads_as_empty_and_untranslated(): void {
+		delete_option( Options::GREETING );
 		$translate = static fn (): string => self::TRANSLATION;
 		add_filter( 'gettext_' . Plugin::SLUG, $translate );
 
 		try {
-			self::assertSame( self::TRANSLATION, dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
+			self::assertSame( '', Options::get_string( Options::GREETING ) );
 		} finally {
 			remove_filter( 'gettext_' . Plugin::SLUG, $translate );
 		}
-	}
-
-	public function test_a_stored_string_reads_over_its_translated_default(): void {
-		update_option( DWS_TPL_OPTION_GREETING, 'Hello' );
-
-		self::assertSame( 'Hello', dws_tpl_get_string_option( DWS_TPL_OPTION_GREETING ) );
-	}
-
-	public function test_an_option_without_a_translated_default_has_no_text(): void {
-		self::assertSame( '', dws_tpl_get_option_text( DWS_TPL_OPTION_GREETING_ENABLED ) );
-	}
-
-	#[DataProvider( 'submitted_order_counts' )]
-	public function test_an_order_count_validates_as_a_whole_number_of_at_least_one( mixed $submitted, ?string $expected ): void {
-		$validated = dws_tpl_validate_greeting_orders( $submitted );
-
-		\is_null( $expected ) ? self::assertInstanceOf( \WP_Error::class, $validated ) : self::assertSame( $expected, $validated );
 	}
 }

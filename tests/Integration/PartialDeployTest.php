@@ -2,6 +2,7 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
+use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Uninstall\Uninstaller;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RunsRequestsTrait;
@@ -77,8 +78,8 @@ final class PartialDeployTest extends TestCase {
 
 	#[RunInSeparateProcess]
 	public function test_an_uninstall_whose_engine_is_missing_keeps_the_data_and_lets_the_web_delete_the_files(): void {
-		$consent = get_option( DWS_TPL_OPTION_DELETE_DATA );
-		update_option( DWS_TPL_OPTION_DELETE_DATA, 'yes' );
+		$consent = get_option( Options::DELETE_DATA );
+		update_option( Options::DELETE_DATA, 'yes' );
 		$log = (string) \tempnam( \sys_get_temp_dir(), \str_replace( '_', '-', Plugin::PREFIX ) . '-uninstall-' );
 		\ini_set( 'error_log', $log ); // phpcs:ignore WordPress.PHP.IniSet.Risky -- The child process's stderr would fail the test.
 		\spl_autoload_register(
@@ -93,11 +94,11 @@ final class PartialDeployTest extends TestCase {
 
 		try {
 			self::assertTrue( uninstall_plugin( plugin_basename( DWS_TPL_FILE ) ) );
-			self::assertSame( 'yes', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
+			self::assertSame( 'yes', get_option( Options::DELETE_DATA ) );
 			self::assertStringContainsString( 'kept its data on uninstall', (string) \file_get_contents( $log ) );
 		} finally {
 			\unlink( $log );
-			false === $consent ? delete_option( DWS_TPL_OPTION_DELETE_DATA ) : update_option( DWS_TPL_OPTION_DELETE_DATA, $consent );
+			false === $consent ? delete_option( Options::DELETE_DATA ) : update_option( Options::DELETE_DATA, $consent );
 		}
 	}
 }

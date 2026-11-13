@@ -3,6 +3,7 @@
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
 use DeepWebSolutions\PluginTemplate\Greeting\GreetingFeature;
+use DeepWebSolutions\PluginTemplate\Migrations;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migration\MigrationRunner;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginIdentity;
@@ -65,11 +66,11 @@ final class PluginBootTest extends TestCase {
 			$request = self::request( 'echo ' . MigrationRunner::class . '::get_revision( "' . self::REVISION . '" );' );
 		} finally {
 			wp_cache_flush(); // The request wrote the revision behind this process's cache.
-			update_option( self::REVISION, \count( dws_tpl_get_migration_steps() ) );
+			update_option( self::REVISION, \count( Migrations::get_steps() ) );
 		}
 
 		self::assertSame( 0, $request['status'], $request['output'] );
-		self::assertSame( (string) \count( dws_tpl_get_migration_steps() ), $request['last'] );
+		self::assertSame( (string) \count( Migrations::get_steps() ), $request['last'] );
 	}
 
 	protected static function get_threshold( WooCommerceLogger $logger ): mixed {
