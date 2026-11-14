@@ -5,7 +5,6 @@ namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 use DeepWebSolutions\PluginTemplate\Greeting\AccountDashboardGreeting;
 use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
-use DeepWebSolutions\PluginTemplate\Settings;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Setting\SettingsTab;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
 use PHPUnit\Framework\Attributes\After;
@@ -36,12 +35,11 @@ final class SettingsTest extends TestCase {
 
 	public static function invalid_order_counts(): array {
 		return array(
-			'zero'     => array( '0' ),
-			'negative' => array( '-2' ),
-			'decimal'  => array( '2.5' ),
-			'word'     => array( 'three' ),
-			'empty'    => array( '' ),
-			'too-big'  => array( '1e20' ),
+			'zero'     => array( '0', 'Enter a number of at least 1.' ),
+			'negative' => array( '-2', 'Enter a number of at least 1.' ),
+			'decimal'  => array( '2.5', 'Enter a number in steps of 1 from 1.' ),
+			'word'     => array( 'three', 'Enter a number, such as 12 or 3.5.' ),
+			'too-big'  => array( '1e20', 'Enter a number, such as 12 or 3.5.' ),
 		);
 	}
 
@@ -63,19 +61,6 @@ final class SettingsTest extends TestCase {
 		);
 	}
 
-	public static function submitted_order_counts(): array {
-		return array(
-			'one'      => array( '1', '1' ),
-			'padded'   => array( ' 3 ', '3' ),
-			'zero'     => array( '0', null ),
-			'negative' => array( '-3', null ),
-			'decimal'  => array( '2.5', null ),
-			'word'     => array( 'three', null ),
-			'empty'    => array( '', null ),
-			'array'    => array( array( '3' ), null ),
-		);
-	}
-
 	#[After]
 	protected function forget_the_rejections(): void {
 		new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' )->setValue( null, array() );
@@ -94,6 +79,7 @@ final class SettingsTest extends TestCase {
 		self::assertSame( AccountDashboardGreeting::get_default_message(), $form->getElementById( Options::GREETING )?->getAttribute( 'placeholder' ) );
 		self::assertSame( '1', $form->getElementById( Options::GREETING_ORDERS )?->getAttribute( 'value' ) );
 		self::assertSame( '1', $form->getElementById( Options::GREETING_ORDERS )?->getAttribute( 'min' ) );
+		self::assertSame( '1', $form->getElementById( Options::GREETING_ORDERS )?->getAttribute( 'placeholder' ) );
 		self::assertFalse( $form->getElementById( Options::DELETE_DATA )?->hasAttribute( 'checked' ) );
 	}
 
@@ -138,13 +124,26 @@ final class SettingsTest extends TestCase {
 	}
 
 	#[DataProvider( 'invalid_order_counts' )]
-	public function test_an_order_count_that_is_not_a_whole_number_of_at_least_one_keeps_the_stored_count( string $posted ): void {
+	public function test_an_order_count_that_is_not_a_whole_number_of_at_least_one_keeps_the_stored_count( string $posted, string $reason ): void {
 		update_option( Options::GREETING_ORDERS, '4' );
 
 		$this->save( array( Options::GREETING_ORDERS => $posted ) );
 
 		self::assertSame( '4', get_option( Options::GREETING_ORDERS ) );
-		self::assertSame( array( 'Orders before the greeting was not saved and keeps its previous value. The other changes were saved. Enter a whole number of 1 or more, such as 3.' ), new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' )->getValue() );
+		self::assertSame( array( "Orders before the greeting was not saved and keeps its previous value. The other changes were saved. $reason" ), new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' )->getValue() );
+	}
+
+	public function test_an_emptied_order_count_reads_as_the_default_its_placeholder_shows(): void {
+		update_option( Options::GREETING_ORDERS, '4' );
+
+		$this->save( array( Options::GREETING_ORDERS => '' ) );
+		$control = $this->render()->getElementById( Options::GREETING_ORDERS );
+
+		self::assertSame( '', get_option( Options::GREETING_ORDERS ) );
+		self::assertSame( 1, Options::get_int( Options::GREETING_ORDERS ) );
+		self::assertSame( array(), new \ReflectionProperty( \WC_Admin_Settings::class, 'errors' )->getValue() );
+		self::assertSame( '', $control?->getAttribute( 'value' ) );
+		self::assertSame( '1', $control?->getAttribute( 'placeholder' ) );
 	}
 
 	#[DataProvider( 'whole_order_counts' )]
@@ -153,14 +152,6 @@ final class SettingsTest extends TestCase {
 
 		self::assertSame( '3', get_option( Options::GREETING_ORDERS ) );
 		self::assertSame( 3, Options::get_int( Options::GREETING_ORDERS ) );
-	}
-
-	#[DataProvider( 'submitted_order_counts' )]
-	public function test_an_order_count_validates_as_a_whole_number_of_at_least_one( mixed $submitted, ?string $expected ): void {
-		$field     = \array_find( new Settings()->get_section_fields( Plugin::PREFIX, '' ), static fn ( array $field ): bool => Options::GREETING_ORDERS === $field['id'] );
-		$validated = \is_array( $field ) && \is_callable( $field['validate'] ?? null ) ? $field['validate']( $submitted ) : null;
-
-		\is_null( $expected ) ? self::assertInstanceOf( \WP_Error::class, $validated ) : self::assertSame( $expected, $validated );
 	}
 
 	protected function render(): \Dom\HTMLDocument {

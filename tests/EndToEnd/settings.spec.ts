@@ -1,10 +1,9 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@wordpress/e2e-test-utils-playwright';
 import type { Locator, Page } from '@playwright/test';
+import { cli } from './cli';
 
 const SAVED = 'Your settings have been saved.';
-const REJECTED =
-	'Orders before the greeting was not saved and keeps its previous value. The other changes were saved. Enter a whole number of 1 or more, such as 3.';
 
 const tabTo = async ( page: Page, target: Locator ): Promise< void > => {
 	for ( let presses = 0; presses < 10; presses++ ) {
@@ -45,7 +44,7 @@ test.describe( 'Settings tab', () => {
 		expect( results.violations ).toEqual( [] );
 	} );
 
-	test( 'saves the order threshold by keyboard, rejects an empty one and keeps the saved value until a valid one replaces it', async ( {
+	test( 'saves the order threshold by keyboard, and an emptied one as the default its placeholder shows', async ( {
 		page,
 	} ) => {
 		const threshold = page.getByLabel( 'Orders before the greeting' );
@@ -58,17 +57,23 @@ test.describe( 'Settings tab', () => {
 
 		await threshold.focus();
 		await typeAndSave( page, '' );
-		await expect( page.getByText( REJECTED ) ).toBeVisible();
-		await expect( threshold ).toHaveValue( '3' );
-		const rejected = await new AxeBuilder( { page } )
+		await expect( page.getByText( SAVED ) ).toBeVisible();
+		await expect( threshold ).toHaveValue( '' );
+		await expect( threshold ).toHaveAttribute( 'placeholder', '1' );
+		expect(
+			cli(
+				'eval',
+				'var_export( get_option( "dws_tpl_greeting_orders" ) );'
+			)
+		).toBe( "''" );
+		const emptied = await new AxeBuilder( { page } )
 			.include( '#mainform' )
 			.analyze();
-		expect( rejected.violations ).toEqual( [] );
+		expect( emptied.violations ).toEqual( [] );
 
 		await threshold.focus();
 		await typeAndSave( page, '1' );
 		await expect( page.getByText( SAVED ) ).toBeVisible();
-		await expect( page.getByText( REJECTED ) ).toBeHidden();
 		await expect( threshold ).toHaveValue( '1' );
 	} );
 } );
