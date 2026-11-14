@@ -22,10 +22,10 @@ done
 # A namespace that is a reserved word, such as List, parses from PHP 8.0 only, which the fill-in job's PHP 7.4 syntax
 # check refuses.
 [[ $NS =~ ^[A-Za-z][A-Za-z0-9]*$ ]] || fail 'php-namespace must match ^[A-Za-z][A-Za-z0-9]*$.'
-# One segment after dws_ keeps every prefix in one plugin's family from starting another plugin's; past 22 characters
-# the template's longest option constants fail PHPCS's array alignment, which Quality's rehearsal at the cap checks,
-# and the framework's admin notices refuse a network or hidden segment.
-[[ $PREFIX =~ ^dws_[a-z0-9]{1,22}$ && $PREFIX != dws_network && $PREFIX != dws_hidden ]] || fail 'prefix must match ^dws_[a-z0-9]{1,22}$ and must not be dws_network or dws_hidden.'
+# One segment after dws_ keeps every prefix in one plugin's family from starting another plugin's; the framework's
+# identity takes a prefix of at most 32 characters, which Quality's rehearsal at the cap checks, and its admin notices
+# refuse a network or hidden segment.
+[[ $PREFIX =~ ^dws_[a-z0-9]{1,28}$ && $PREFIX != dws_network && $PREFIX != dws_hidden ]] || fail 'prefix must match ^dws_[a-z0-9]{1,28}$ and must not be dws_network or dws_hidden.'
 # The ports land in JSON numbers, where a leading zero is invalid, and the tests and multisite environments take the
 # next two; none may be the template's own 8811, 8812 or 8813, which the leftover check below refuses.
 [[ $PORT =~ ^[1-9][0-9]{0,4}$ && $PORT -le 65533 && ( $PORT -lt 8809 || $PORT -gt 8813 ) ]] ||
@@ -38,6 +38,7 @@ name_breakers="['\\\$/<>]"
 [[ $DESCRIPTION =~ [^[:space:]] && $DESCRIPTION != *'*/'* ]] || fail 'description must not be blank or contain */.'
 
 export SCREAMING_PREFIX="${PREFIX^^}"
+export HOOK_ROOT="${SLUG//-/_}"
 export TESTS_PORT=$(( PORT + 1 ))
 export MULTISITE_PORT=$(( PORT + 2 ))
 export REPO_NAME="${REPO#*/}"
@@ -50,8 +51,8 @@ git mv --force README.scaffold.md README.md
 # The scaffold README becomes the plugin's README.md, which .distignore already excludes.
 perl -ni -e 'print unless /^README\.scaffold\.md$/' .distignore
 git rm --quiet includes/_disabled-example.php
-# The template's recipe test loads the recipe's safeguard helper, which a plugin that applies the recipe declares
-# itself, so only the recipe's own test stays.
+# The template's recipe test loads the recipe's SafeguardsTest, which a plugin that applies the recipe declares
+# itself, so only the plugin's own copy stays.
 git rm --quiet tests/Integration/SafeguardRecipeTest.php
 git mv dws-plugin-template.php "$SLUG.php"
 
@@ -63,6 +64,7 @@ git ls-files -z -- . ':!.github/workflows/' ':!.github/scripts/fill-in-scaffold.
 	s{ahegyes/wordpress-plugin-template}{$ENV{REPO}}g;
 	s/^# wordpress-plugin-template$/# $ENV{REPO_NAME}/;
 	s/dws-plugin-template/$ENV{SLUG}/g;
+	s/dws_plugin_template/$ENV{HOOK_ROOT}/g;
 	s/dws_tpl/$ENV{PREFIX}/g;
 	s/DWS_TPL/$ENV{SCREAMING_PREFIX}/g;
 	s/PluginTemplate/$ENV{NS}/g;
@@ -104,7 +106,7 @@ npm ci --ignore-scripts --no-audit --no-fund
 node_modules/.bin/wp-scripts format '{blocks/src,assets/src,tests/EndToEnd}/**/*.{js,jsx,ts,tsx}'
 
 status=0
-if git grep -n -I -E 'dws-plugin-template|dws_tpl|DWS_TPL|PluginTemplate|DWS Plugin Template|wordpress-plugin-template' -- . ':!.github/scripts/fill-in-scaffold.sh'; then
+if git grep -n -I -E 'dws-plugin-template|dws_plugin_template|dws_tpl|DWS_TPL|PluginTemplate|DWS Plugin Template|wordpress-plugin-template' -- . ':!.github/scripts/fill-in-scaffold.sh'; then
 	echo "::error::The fill-in left the template's names above."
 	status=1
 fi

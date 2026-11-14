@@ -2,6 +2,7 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
+use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RunsRequestsTrait;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -23,12 +24,17 @@ final class MultisiteTest extends TestCase {
 		self::assertIsInt( $site_id );
 
 		try {
-			$request = self::request( 'echo did_action( "dws_tpl/boot/succeeded" );', '--url=' . get_home_url( $site_id, '/' ) );
+			// WooCommerce queries two of its tables during a new site's first init, before its version check installs them, so a request without the plugin installs WooCommerce first.
+			$installed = self::request_provoking( 'WordPress database error', 'echo (int) function_exists( "dws_tpl_plugin" );', '--url=' . get_home_url( $site_id, '/' ), '--skip-plugins=' . Plugin::SLUG );
+			self::assertSame( 0, $installed['status'], $installed['output'] );
+			self::assertSame( '0', $installed['last'], $installed['output'] );
+
+			$request = self::request( 'echo did_action( "dws_plugin_template/boot/succeeded" );', '--url=' . get_home_url( $site_id, '/' ) );
 
 			self::assertSame( '1', $request['last'], $request['output'] );
-			self::assertSame( 'no', get_blog_option( $site_id, DWS_TPL_OPTION_DELETE_DATA ) );
-			self::assertTrue( update_blog_option( $site_id, DWS_TPL_OPTION_DELETE_DATA, 'yes' ) );
-			self::assertSame( 'no', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
+			self::assertSame( 'no', get_blog_option( $site_id, Options::DELETE_DATA ) );
+			self::assertTrue( update_blog_option( $site_id, Options::DELETE_DATA, 'yes' ) );
+			self::assertSame( 'no', get_option( Options::DELETE_DATA ) );
 		} finally {
 			wp_delete_site( $site_id );
 		}

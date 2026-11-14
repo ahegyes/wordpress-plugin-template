@@ -2,10 +2,12 @@
 
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
+use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Uninstall\Uninstaller;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RunsRequestsTrait;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
@@ -13,119 +15,71 @@ use PHPUnit\Framework\TestCase;
 final class PartialDeployTest extends TestCase {
 	use RunsRequestsTrait;
 
-	public function test_the_build_notice_says_the_features_stay_off_until_the_plugin_is_reinstalled(): void {
-		wp_set_current_user( 1 );
-		\ob_start();
-		try {
-			dws_tpl_render_build_notice();
-		} finally {
-			$notice = (string) \ob_get_clean();
-			wp_set_current_user( 0 );
-		}
+	protected const string NOTICE = 'DWS Plugin Template is missing some of its files, so its features stay off until the plugin is reinstalled.';
 
-		$sentence = \Dom\HTMLDocument::createFromString( '<!DOCTYPE html><html><body>' . $notice . '</body></html>', \LIBXML_NOERROR )->querySelector( '.notice-error p' );
+	// Finds the notice the entry hooks for an incomplete build, and prints whether the plugin booted and what an administrator and a visitor see of the notice.
+	protected const string PROBE = '$notice = null; foreach ( isset( $GLOBALS["wp_filter"]["all_admin_notices"] ) ? $GLOBALS["wp_filter"]["all_admin_notices"]->callbacks : array() as $callbacks ) { foreach ( $callbacks as $callback ) { if ( $callback["function"] instanceof Closure && DWS_TPL_FILE === new ReflectionFunction( $callback["function"] )->getFileName() ) { $notice = $callback["function"]; } } } $seen = array(); foreach ( array( 1, 0 ) as $user ) { wp_set_current_user( $user ); ob_start(); if ( $notice instanceof Closure ) { $notice(); } $seen[] = trim( wp_strip_all_tags( (string) ob_get_clean() ) ); } echo wp_json_encode( array( did_action( "dws_plugin_template/boot/succeeded" ), $seen ) );';
 
-		self::assertSame( 'DWS Plugin Template is missing some of its files, so its features stay off until the plugin is reinstalled.', $sentence?->textContent ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- A DOM property.
+	public static function missing_build_files(): array {
+		return array(
+			'bootstrap-package' => array( 'vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php', '' ),
+			'blocks-manifest'   => array( 'blocks/build/blocks-manifest.php', '' ),
+			'assets-build'      => array( 'assets/build/editor.asset.php', '' ),
+			'autoloader'        => array( 'vendor/autoload.php', 'Failed to open stream' ),
+		);
 	}
 
-	public function test_a_missing_blocks_manifest_shows_the_build_notice_and_loads_nothing_built(): void {
-		$manifest = \dirname( DWS_TPL_FILE ) . '/blocks/build/blocks-manifest.php';
-		\rename( $manifest, "$manifest.hidden" );
+	public function test_a_complete_build_boots_and_shows_no_build_notice(): void {
+		$request = self::request( self::PROBE );
+
+		self::assertSame( 0, $request['status'], $request['output'] );
+		self::assertSame( wp_json_encode( array( 1, array( '', '' ) ) ), $request['last'] );
+	}
+
+	#[DataProvider( 'missing_build_files' )]
+	public function test_a_missing_build_file_shows_the_build_notice_to_plugin_managers_and_boots_nothing( string $file, string $diagnostic ): void {
+		$path = \dirname( DWS_TPL_FILE ) . "/$file";
+		\rename( $path, "$path.hidden" );
 		try {
-			$request = self::request( 'echo wp_json_encode( array( function_exists( "dws_tpl_boot" ), false !== has_action( "all_admin_notices", "dws_tpl_render_build_notice" ) ) );' );
+			$request = self::request_provoking( $diagnostic, self::PROBE );
 		} finally {
-			\rename( "$manifest.hidden", $manifest );
+			\rename( "$path.hidden", $path );
 		}
 
 		self::assertSame( 0, $request['status'], $request['output'] );
-		self::assertSame( '[false,true]', $request['last'] );
+		self::assertSame( wp_json_encode( array( 0, array( self::NOTICE, '' ) ) ), $request['last'] );
 	}
 
-	public function test_a_missing_assets_build_shows_the_build_notice_and_loads_nothing_built(): void {
-		$asset = \dirname( DWS_TPL_FILE ) . '/assets/build/editor.asset.php';
-		\rename( $asset, "$asset.hidden" );
-		try {
-			$request = self::request( 'echo wp_json_encode( array( function_exists( "dws_tpl_boot" ), false !== has_action( "all_admin_notices", "dws_tpl_render_build_notice" ) ) );' );
-		} finally {
-			\rename( "$asset.hidden", $asset );
-		}
-
-		self::assertSame( 0, $request['status'], $request['output'] );
-		self::assertSame( '[false,true]', $request['last'] );
-	}
-
-	public function test_a_missing_bootstrap_package_shows_the_build_notice_and_loads_nothing_built(): void {
-		$bootstrap = \dirname( DWS_TPL_FILE ) . '/vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php';
-		\rename( $bootstrap, "$bootstrap.hidden" );
-		try {
-			$request = self::request( 'echo wp_json_encode( array( function_exists( "dws_tpl_boot" ), false !== has_action( "all_admin_notices", "dws_tpl_render_build_notice" ) ) );' );
-		} finally {
-			\rename( "$bootstrap.hidden", $bootstrap );
-		}
-
-		self::assertSame( 0, $request['status'], $request['output'] );
-		self::assertSame( '[false,true]', $request['last'] );
-	}
-
-	public function test_an_include_that_throws_shows_the_build_notice_and_boots_nothing(): void {
+	public function test_an_include_that_throws_shows_the_build_notice_and_boots_nothing_without_a_log_line(): void {
 		$include = \dirname( DWS_TPL_FILE ) . '/includes/zz-throws.php';
 		\file_put_contents( $include, "<?php\nthrow new RuntimeException( 'A partial deploy.' );\n" );
 		try {
-			$request = self::request( 'echo wp_json_encode( array( false !== has_action( "plugins_loaded", "dws_tpl_boot" ), false !== has_action( "all_admin_notices", "dws_tpl_render_build_notice" ) ) );' );
+			$request = self::request( self::PROBE );
 		} finally {
 			\unlink( $include );
 		}
 
 		self::assertSame( 0, $request['status'], $request['output'] );
-		self::assertSame( '[false,true]', $request['last'] );
-	}
-
-	public function test_a_build_error_is_logged_with_its_location_once_an_hour(): void {
-		$message = 'A partial deploy ' . \uniqid() . '.';
-		$include = \dirname( DWS_TPL_FILE ) . '/includes/zz-throws.php';
-		\file_put_contents( $include, "<?php\nthrow new RuntimeException( '$message' );\n" );
-		try {
-			$first  = self::request( 'echo 1;' );
-			$second = self::request( 'echo 1;' );
-		} finally {
-			\unlink( $include );
-			delete_transient( Plugin::PREFIX . '_build_error_' . \md5( $message ) );
-		}
-
-		self::assertStringContainsString( "did not finish loading: $message in $include:2", $first['output'] );
-		self::assertStringNotContainsString( 'did not finish loading', $second['output'] );
+		self::assertSame( wp_json_encode( array( 0, array( self::NOTICE, '' ) ) ), $request['last'] );
 	}
 
 	public function test_the_peer_getters_a_partial_deploy_defines_still_answer(): void {
 		$include = \dirname( DWS_TPL_FILE ) . '/includes/metadata_zz-throws.php'; // Sorts right after metadata.php, so no later include loads.
 		\file_put_contents( $include, "<?php\nthrow new RuntimeException( 'A partial deploy.' );\n" );
 		try {
-			$request = self::request( 'echo wp_json_encode( array( false !== has_action( "plugins_loaded", "dws_tpl_boot" ), dws_tpl_get_plugin_slug(), dws_tpl_get_plugin_name(), dws_tpl_get_plugin_version() ) );' );
+			$request = self::request( 'echo wp_json_encode( array( did_action( "dws_plugin_template/boot/succeeded" ), dws_tpl_get_plugin_slug(), dws_tpl_get_plugin_name(), dws_tpl_get_plugin_version() ) );' );
 		} finally {
 			\unlink( $include );
 		}
 
 		self::assertSame( 0, $request['status'], $request['output'] );
-		self::assertSame( wp_json_encode( array( false, dws_tpl_get_plugin_slug(), dws_tpl_get_plugin_name(), dws_tpl_get_plugin_version() ) ), $request['last'] );
-	}
-
-	public function test_a_deactivation_whose_composition_root_cannot_be_built_is_reported_as_a_build_error(): void {
-		$root = \dirname( DWS_TPL_FILE ) . '/vendor-prefixed/ahegyes/wp-framework-core/src/PluginBoot.php'; // The composition root constructs it, and no include reads it.
-		\rename( $root, "$root.hidden" );
-		try {
-			$request = self::request( 'remove_action( "all_admin_notices", "dws_tpl_render_build_notice" ); do_action( "deactivate_" . plugin_basename( DWS_TPL_FILE ), false ); echo false !== has_action( "all_admin_notices", "dws_tpl_render_build_notice" ) ? "reported" : "silent";' );
-		} finally {
-			\rename( "$root.hidden", $root );
-		}
-
-		self::assertSame( 0, $request['status'], $request['output'] );
-		self::assertSame( 'reported', $request['last'] );
+		self::assertSame( wp_json_encode( array( 0, dws_tpl_get_plugin_slug(), dws_tpl_get_plugin_name(), dws_tpl_get_plugin_version() ) ), $request['last'] );
 	}
 
 	#[RunInSeparateProcess]
 	public function test_an_uninstall_whose_engine_is_missing_keeps_the_data_and_lets_the_web_delete_the_files(): void {
-		$consent = get_option( DWS_TPL_OPTION_DELETE_DATA );
-		update_option( DWS_TPL_OPTION_DELETE_DATA, 'yes' );
+		$consent = get_option( Options::DELETE_DATA );
+		update_option( Options::DELETE_DATA, 'yes' );
 		$log = (string) \tempnam( \sys_get_temp_dir(), \str_replace( '_', '-', Plugin::PREFIX ) . '-uninstall-' );
 		\ini_set( 'error_log', $log ); // phpcs:ignore WordPress.PHP.IniSet.Risky -- The child process's stderr would fail the test.
 		\spl_autoload_register(
@@ -140,11 +94,11 @@ final class PartialDeployTest extends TestCase {
 
 		try {
 			self::assertTrue( uninstall_plugin( plugin_basename( DWS_TPL_FILE ) ) );
-			self::assertSame( 'yes', get_option( DWS_TPL_OPTION_DELETE_DATA ) );
+			self::assertSame( 'yes', get_option( Options::DELETE_DATA ) );
 			self::assertStringContainsString( 'kept its data on uninstall', (string) \file_get_contents( $log ) );
 		} finally {
 			\unlink( $log );
-			false === $consent ? delete_option( DWS_TPL_OPTION_DELETE_DATA ) : update_option( DWS_TPL_OPTION_DELETE_DATA, $consent );
+			false === $consent ? delete_option( Options::DELETE_DATA ) : update_option( Options::DELETE_DATA, $consent );
 		}
 	}
 }

@@ -12,7 +12,7 @@ on:
         required: true
         type: string
       plugin-slug:
-        description: 'Kebab-case slug, also the text domain and the entry file name, such as "acme-orders"'
+        description: 'Kebab-case slug, also the text domain, the hook root and the entry file name, such as "acme-orders"'
         required: true
         type: string
       php-namespace:
@@ -20,7 +20,7 @@ on:
         required: true
         type: string
       prefix:
-        description: 'Prefix of the global functions, constants, options and hooks, dws_ plus one segment, such as "dws_ao"'
+        description: 'Prefix of the global functions, constants and stored data, dws_ plus one segment of up to 28 lowercase letters and digits, such as "dws_ao"'
         required: true
         type: string
       wp-env-port:
@@ -76,7 +76,7 @@ jobs:
         env:
           SLUG: ${{ inputs.plugin-slug }}
         run: |
-          for file in "$SLUG.php" uninstall.php includes/*.php; do
+          for file in "$SLUG.php" uninstall.php Safeguards.php; do
             php -l "$file"
           done
 

@@ -2,6 +2,7 @@
 
 namespace DeepWebSolutions\PluginTemplate\Greeting;
 
+use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\CompositeComponentInterface;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\ConditionalComponentInterface;
 
@@ -24,7 +25,7 @@ final class GreetingFeature implements CompositeComponentInterface, ConditionalC
 	 */
 	#[\Override]
 	public static function should_load(): bool {
-		return dws_tpl_get_bool_option( DWS_TPL_OPTION_GREETING_ENABLED );
+		return Options::get_bool( Options::GREETING_ENABLED );
 	}
 
 	/**

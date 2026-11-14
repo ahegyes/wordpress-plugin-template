@@ -57,7 +57,7 @@ jobs:
     uses: ahegyes/wordpress-configs/.github/workflows/reusable-php-syntax-check.yml@b107001cce9f2960495d9d50481c8540d228f60c
     with:
       php-versions: '["7.4"]'
-      paths: ${{ format('["{0}.php", "uninstall.php", "includes"]', needs.slug.outputs.slug) }}
+      paths: ${{ format('["{0}.php", "uninstall.php", "Safeguards.php"]', needs.slug.outputs.slug) }}
 
   scaffold:
     name: Scaffold rehearsal
@@ -87,8 +87,8 @@ jobs:
           DESCRIPTION: 'Acme Orders keeps a store''s "orders" in one place, C:\ included.'
           SLUG: acme-orders
           NS: AcmeOrders
-          # The rehearsal fills in the longest prefix the script accepts, so its PHPCS run fails once the cap stops passing.
-          PREFIX: dws_acmeextraordinarysales
+          # The rehearsal fills in the longest prefix the script accepts, so its Unit run fails once the framework refuses it.
+          PREFIX: dws_acmeextraordinarysalesorders
           PORT: '8831'
           REPO: acme/acme-orders
         run: .github/scripts/fill-in-scaffold.sh
@@ -112,6 +112,6 @@ jobs:
           tools: none
       - name: Check the PHP 7.4 syntax
         run: |
-          for file in acme-orders.php uninstall.php includes/*.php; do
+          for file in acme-orders.php uninstall.php Safeguards.php; do
             php -l "$file"
           done

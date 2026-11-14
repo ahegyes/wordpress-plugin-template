@@ -12,9 +12,9 @@ Create the plugin's repository from this template with GitHub's **Use this templ
 | --- | --- | --- |
 | `plugin-name` | `Acme Orders for WooCommerce` | the display name in the plugin header, the strings and the docs |
 | `description` | `Acme Orders keeps every order a store takes in one place.` | the entry's `Description` header, `composer.json`'s and `package.json`'s `description` and the README's opening sentence; set the repository's GitHub description to the same sentence |
-| `plugin-slug` | `acme-orders-for-woocommerce` | the text domain and the names of the entry file and the release zip |
+| `plugin-slug` | `acme-orders-for-woocommerce` | the text domain, the root of the hook names in snake case, and the names of the entry file and the release zip |
 | `php-namespace` | `AcmeOrders` | the namespace segment after `DeepWebSolutions\` |
-| `prefix` | `dws_aowc` | the prefix of every global function, constant, option and hook |
+| `prefix` | `dws_aowc` | the prefix of the global functions and constants, and of the names the plugin stores its data under |
 | `wp-env-port` | `8831` | the development site's port; the tests and multisite sites take the next two |
 
 The workflow:
@@ -28,7 +28,7 @@ Then turn on private vulnerability reporting and Dependabot alerts in the new re
 ## Naming
 
 - A WooCommerce plugin's display name reads `X for WooCommerce`, as WooCommerce's trademark guidelines ask, and its slug ends in `-for-woocommerce`.
-- The prefix is `dws_` and one segment of up to 22 lowercase letters and digits, such as `dws_lpmwc`, so no plugin's `{prefix}_` starts with another's and the template's longest constants still pass PHPCS; the framework's admin notices refuse `dws_network` and `dws_hidden`; a WooCommerce plugin's segment ends in `wc`.
+- The prefix is `dws_` and one segment of up to 28 lowercase letters and digits, such as `dws_lpmwc`, so no plugin's `{prefix}_` starts with another's and the framework's identity, which takes at most 32 characters, accepts it; the framework's admin notices refuse `dws_network` and `dws_hidden`; a WooCommerce plugin's segment ends in `wc`.
 - The namespace is flat: `DeepWebSolutions\<Name>\`, with no segment in between.
 - The repository is `wc-<name>` for a WooCommerce plugin and `wp-<name>` otherwise, as the plugin mirrors are named, and the fill-in names the Composer package `<owner>/<repository>` and the npm package `@<owner>/<repository>` after it.
 - Each plugin takes its own three consecutive wp-env ports, for its development, tests and multisite sites, apart from 8888 and 8889, which wp-env uses by default, and the template's own 8811, 8812 and 8813.

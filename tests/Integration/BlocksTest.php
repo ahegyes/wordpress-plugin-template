@@ -4,6 +4,8 @@ namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
 use DeepWebSolutions\PluginTemplate\Blocks;
 use DeepWebSolutions\PluginTemplate\Plugin;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Asset\Assets;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginIdentity;
 use PHPUnit\Framework\Attributes\After;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
@@ -51,7 +53,7 @@ final class BlocksTest extends TestCase {
 	}
 
 	public function test_the_block_editor_gets_the_editor_script_with_its_generated_dependencies(): void {
-		$blocks = new Blocks();
+		$blocks = new Blocks( self::make_assets() );
 		$blocks->register_hooks();
 		self::assertSame( 10, has_action( 'enqueue_block_editor_assets', array( $blocks, 'enqueue_editor_script' ) ) );
 		remove_action( 'init', array( $blocks, 'register_blocks' ) );
@@ -68,8 +70,12 @@ final class BlocksTest extends TestCase {
 	public function test_the_block_editor_gets_only_an_editor_script_the_plugin_registered(): void {
 		wp_register_script( Plugin::SLUG . '-editor', 'https://example.org/other.js', array(), '1', true );
 
-		new Blocks()->enqueue_editor_script();
+		new Blocks( self::make_assets() )->enqueue_editor_script();
 
 		self::assertFalse( wp_script_is( Plugin::SLUG . '-editor', 'enqueued' ) );
+	}
+
+	protected static function make_assets(): Assets {
+		return new Assets( new PluginIdentity( DWS_TPL_FILE, Plugin::SLUG, Plugin::PREFIX ) );
 	}
 }

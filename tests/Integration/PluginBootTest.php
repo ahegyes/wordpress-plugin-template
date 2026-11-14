@@ -3,8 +3,10 @@
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration;
 
 use DeepWebSolutions\PluginTemplate\Greeting\GreetingFeature;
+use DeepWebSolutions\PluginTemplate\Migrations;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migration\MigrationRunner;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginIdentity;
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\WooCommerce\Logging\WooCommerceLogger;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RunsRequestsTrait;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -14,6 +16,8 @@ use PHPUnit\Framework\TestCase;
 #[CoversNothing]
 final class PluginBootTest extends TestCase {
 	use RunsRequestsTrait;
+
+	protected const string REVISION = Plugin::PREFIX . '_revision';
 
 	public function test_the_plugin_boots_and_skips_the_greeting_while_its_gate_is_off(): void {
 		$plugin = dws_tpl_plugin();
@@ -28,7 +32,7 @@ final class PluginBootTest extends TestCase {
 		self::assertContains( $includes . 'index.php', \get_included_files() );
 		self::assertIsInt( \file_put_contents( $includes . '_skipped-include.php', "<?php\nconst DWS_TPL_SKIPPED_INCLUDE = true;\n" ) );
 		try {
-			$request = self::request( 'echo 0 < did_action( "dws_tpl/boot/succeeded" ) ? ( defined( "DWS_TPL_SKIPPED_INCLUDE" ) ? "loaded" : "skipped" ) : "not booted";' );
+			$request = self::request( 'echo 0 < did_action( "dws_plugin_template/boot/succeeded" ) ? ( defined( "DWS_TPL_SKIPPED_INCLUDE" ) ? "loaded" : "skipped" ) : "not booted";' );
 		} finally {
 			\unlink( $includes . '_skipped-include.php' );
 		}
@@ -37,22 +41,9 @@ final class PluginBootTest extends TestCase {
 		self::assertSame( 'skipped', $request['last'], $request['output'] );
 	}
 
-	public function test_a_boot_listener_that_throws_is_not_reported_as_an_incomplete_build(): void {
-		$include = \dirname( DWS_TPL_FILE ) . '/includes/zz-boot-listener.php';
-		\file_put_contents( $include, "<?php\nadd_action( 'dws_tpl/boot/succeeded', static function (): void { throw new RuntimeException( 'A boot listener failed.' ); } );\n" );
-		try {
-			$request = self::request( 'echo 1;' );
-		} finally {
-			\unlink( $include );
-		}
-
-		self::assertStringContainsString( 'A boot listener failed.', $request['output'] );
-		self::assertStringNotContainsString( 'did not finish loading', $request['output'] );
-	}
-
 	public function test_the_entry_loads_its_safeguards_before_the_bootstrap_package_and_its_floor_gate(): void {
 		$root       = \dirname( DWS_TPL_FILE );
-		$safeguards = \array_search( $root . '/includes/safeguards.php', \get_included_files(), true );
+		$safeguards = \array_search( $root . '/Safeguards.php', \get_included_files(), true );
 		$bootstrap  = \array_search( $root . '/vendor-prefixed/ahegyes/wp-framework-bootstrap/load.php', \get_included_files(), true );
 
 		self::assertIsInt( $safeguards );
@@ -66,20 +57,20 @@ final class PluginBootTest extends TestCase {
 		$logger = new \ReflectionProperty( Plugin::class, 'logger' )->getValue( new Plugin() );
 
 		self::assertInstanceOf( WooCommerceLogger::class, $logger );
-		self::assertSame( self::get_threshold( new WooCommerceLogger( Plugin::SLUG, 'debug' ) ), self::get_threshold( $logger ) );
+		self::assertSame( self::get_threshold( new WooCommerceLogger( new PluginIdentity( DWS_TPL_FILE, Plugin::SLUG, Plugin::PREFIX ), 'debug' ) ), self::get_threshold( $logger ) );
 	}
 
 	public function test_a_request_brings_the_stored_data_to_the_revision_of_the_code(): void {
-		update_option( DWS_TPL_OPTION_REVISION, 0 );
+		update_option( self::REVISION, 0 );
 		try {
-			$request = self::request( 'echo ' . MigrationRunner::class . '::get_revision( "' . DWS_TPL_OPTION_REVISION . '" );' );
+			$request = self::request( 'echo ' . MigrationRunner::class . '::get_revision( "' . self::REVISION . '" );' );
 		} finally {
 			wp_cache_flush(); // The request wrote the revision behind this process's cache.
-			update_option( DWS_TPL_OPTION_REVISION, \count( dws_tpl_get_migration_steps() ) );
+			update_option( self::REVISION, \count( Migrations::get_steps() ) );
 		}
 
 		self::assertSame( 0, $request['status'], $request['output'] );
-		self::assertSame( (string) \count( dws_tpl_get_migration_steps() ), $request['last'] );
+		self::assertSame( (string) \count( Migrations::get_steps() ), $request['last'] );
 	}
 
 	protected static function get_threshold( WooCommerceLogger $logger ): mixed {

@@ -3,7 +3,10 @@
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration\Greeting;
 
 use DeepWebSolutions\PluginTemplate\Greeting\AccountDashboardGreeting;
+use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Asset\Assets;
+use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginIdentity;
 use DeepWebSolutions\PluginTemplate\Tests\Support\OrderStorageTrait;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
 use PHPUnit\Framework\Attributes\After;
@@ -16,7 +19,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 	use OrderStorageTrait;
 	use RestoresOptionsTrait;
 
-	protected const array OPTIONS = array( DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS );
+	protected const array OPTIONS = array( Options::GREETING, Options::GREETING_ORDERS );
 
 	protected const string TRANSLATION = 'Translated greeting';
 
@@ -29,8 +32,9 @@ final class AccountDashboardGreetingTest extends TestCase {
 
 	public static function untouched_greetings(): array {
 		return array(
-			'unsaved' => array( null ),
-			'empty'   => array( '' ),
+			'unsaved'      => array( null ),
+			'empty'        => array( '' ),
+			'not-a-string' => array( array( 'Hello' ) ),
 		);
 	}
 
@@ -66,7 +70,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 	}
 
 	public function test_the_greeting_hooks_the_account_dashboard_and_its_style(): void {
-		$detail = new AccountDashboardGreeting();
+		$detail = new AccountDashboardGreeting( self::make_assets() );
 		$detail->register_hooks();
 
 		self::assertSame( 10, has_action( 'woocommerce_account_dashboard', array( $detail, 'print_greeting' ) ) );
@@ -76,12 +80,12 @@ final class AccountDashboardGreetingTest extends TestCase {
 	}
 
 	public function test_the_greeting_style_loads_on_the_account_dashboard_only(): void {
-		new AccountDashboardGreeting()->enqueue_style();
+		new AccountDashboardGreeting( self::make_assets() )->enqueue_style();
 		self::assertFalse( wp_style_is( 'dws-plugin-template-greeting' ) );
 
 		add_filter( 'woocommerce_is_account_page', '__return_true' );
 		try {
-			new AccountDashboardGreeting()->enqueue_style();
+			new AccountDashboardGreeting( self::make_assets() )->enqueue_style();
 		} finally {
 			remove_filter( 'woocommerce_is_account_page', '__return_true' );
 		}
@@ -96,7 +100,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 		add_filter( 'woocommerce_is_account_page', '__return_true' );
 		$wp->query_vars['orders'] = '';
 		try {
-			new AccountDashboardGreeting()->enqueue_style();
+			new AccountDashboardGreeting( self::make_assets() )->enqueue_style();
 		} finally {
 			unset( $wp->query_vars['orders'] );
 			remove_filter( 'woocommerce_is_account_page', '__return_true' );
@@ -109,7 +113,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 		wp_set_current_user( 0 );
 		add_filter( 'woocommerce_is_account_page', '__return_true' );
 		try {
-			new AccountDashboardGreeting()->enqueue_style();
+			new AccountDashboardGreeting( self::make_assets() )->enqueue_style();
 		} finally {
 			remove_filter( 'woocommerce_is_account_page', '__return_true' );
 		}
@@ -121,7 +125,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 		wp_register_style( 'dws-plugin-template-greeting', 'https://example.org/other.css', array(), '1' );
 		add_filter( 'woocommerce_is_account_page', '__return_true' );
 		try {
-			new AccountDashboardGreeting()->enqueue_style();
+			new AccountDashboardGreeting( self::make_assets() )->enqueue_style();
 		} finally {
 			remove_filter( 'woocommerce_is_account_page', '__return_true' );
 		}
@@ -130,8 +134,8 @@ final class AccountDashboardGreetingTest extends TestCase {
 	}
 
 	public function test_a_customer_whose_orders_reach_the_set_number_is_greeted_as_text(): void {
-		update_option( DWS_TPL_OPTION_GREETING, 'Hi & <b>welcome</b>' );
-		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '2' );
+		update_option( Options::GREETING, 'Hi & <b>welcome</b>' );
+		update_option( Options::GREETING_ORDERS, '2' );
 		$this->place_orders( 2 );
 
 		$notice = \Dom\HTMLDocument::createFromString( '<!DOCTYPE html><html><body>' . $this->print() . '</body></html>', \LIBXML_NOERROR )->querySelector( '[role="status"]' );
@@ -142,7 +146,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 	}
 
 	public function test_a_customer_below_the_set_number_is_not_greeted(): void {
-		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '2' );
+		update_option( Options::GREETING_ORDERS, '2' );
 		$this->place_orders( 1 );
 
 		self::assertSame( '', $this->print() );
@@ -151,7 +155,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 	#[DataProvider( 'storages' )]
 	public function test_paid_orders_count_towards_the_set_number_on_every_order_storage( bool $hpos, bool $sync ): void {
 		$this->use_storage( $hpos, $sync );
-		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '2' );
+		update_option( Options::GREETING_ORDERS, '2' );
 		$this->place_orders( 1 );
 		$this->place_orders( 1, 'failed' );
 
@@ -164,7 +168,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 
 	#[DataProvider( 'unpaid_statuses' )]
 	public function test_orders_that_are_not_paid_do_not_count_towards_the_set_number( string $status ): void {
-		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '2' );
+		update_option( Options::GREETING_ORDERS, '2' );
 		$this->place_orders( 1 );
 		$this->place_orders( 2, $status );
 
@@ -172,9 +176,9 @@ final class AccountDashboardGreetingTest extends TestCase {
 	}
 
 	#[DataProvider( 'untouched_greetings' )]
-	public function test_an_untouched_greeting_prints_its_translated_default( ?string $stored ): void {
-		\is_null( $stored ) ? delete_option( DWS_TPL_OPTION_GREETING ) : update_option( DWS_TPL_OPTION_GREETING, $stored );
-		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '1' );
+	public function test_an_untouched_greeting_prints_its_translated_default( mixed $stored ): void {
+		\is_null( $stored ) ? delete_option( Options::GREETING ) : update_option( Options::GREETING, $stored );
+		update_option( Options::GREETING_ORDERS, '1' );
 		$this->place_orders( 1 );
 		$translate = static fn (): string => self::TRANSLATION;
 		add_filter( 'gettext_' . Plugin::SLUG, $translate );
@@ -199,7 +203,11 @@ final class AccountDashboardGreetingTest extends TestCase {
 
 	protected function print(): string {
 		\ob_start();
-		new AccountDashboardGreeting()->print_greeting();
+		new AccountDashboardGreeting( self::make_assets() )->print_greeting();
 		return (string) \ob_get_clean();
+	}
+
+	protected static function make_assets(): Assets {
+		return new Assets( new PluginIdentity( DWS_TPL_FILE, Plugin::SLUG, Plugin::PREFIX ) );
 	}
 }

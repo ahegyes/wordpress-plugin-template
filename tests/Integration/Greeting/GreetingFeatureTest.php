@@ -3,6 +3,7 @@
 namespace DeepWebSolutions\PluginTemplate\Tests\Integration\Greeting;
 
 use DeepWebSolutions\PluginTemplate\Greeting\GreetingFeature;
+use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Tests\Support\OrderStorageTrait;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
@@ -16,7 +17,7 @@ final class GreetingFeatureTest extends TestCase {
 	use OrderStorageTrait;
 	use RestoresOptionsTrait;
 
-	protected const array OPTIONS = array( DWS_TPL_OPTION_GREETING_ENABLED, DWS_TPL_OPTION_GREETING, DWS_TPL_OPTION_GREETING_ORDERS );
+	protected const array OPTIONS = array( Options::GREETING_ENABLED, Options::GREETING, Options::GREETING_ORDERS );
 
 	public static function stored_toggles(): array {
 		return array(
@@ -27,19 +28,20 @@ final class GreetingFeatureTest extends TestCase {
 	}
 
 	#[DataProvider( 'stored_toggles' )]
-	public function test_the_greeting_loads_only_where_a_site_switches_it_on( ?string $stored, bool $expected ): void {
-		\is_null( $stored ) ? delete_option( DWS_TPL_OPTION_GREETING_ENABLED ) : update_option( DWS_TPL_OPTION_GREETING_ENABLED, $stored );
+	public function test_the_greeting_loads_and_the_api_reports_it_on_only_where_a_site_switches_it_on( ?string $stored, bool $expected ): void {
+		\is_null( $stored ) ? delete_option( Options::GREETING_ENABLED ) : update_option( Options::GREETING_ENABLED, $stored );
 
 		self::assertSame( $expected, GreetingFeature::should_load() );
+		self::assertSame( $expected, dws_tpl_is_greeting_enabled() );
 	}
 
 	#[RunInSeparateProcess]
 	public function test_with_the_greeting_switched_on_the_boot_greets_a_customer_on_the_account_dashboard(): void {
 		require_once ABSPATH . 'wp-admin/includes/user.php';
 		add_filter( 'pre_wp_mail', '__return_false' ); // A completed order emails its customer, and the mailer's stderr fails a row in a separate process.
-		update_option( DWS_TPL_OPTION_GREETING_ENABLED, 'yes' );
-		update_option( DWS_TPL_OPTION_GREETING, 'Welcome back.' );
-		update_option( DWS_TPL_OPTION_GREETING_ORDERS, '1' );
+		update_option( Options::GREETING_ENABLED, 'yes' );
+		update_option( Options::GREETING, 'Welcome back.' );
+		update_option( Options::GREETING_ORDERS, '1' );
 		$customer = wp_insert_user(
 			array(
 				'user_login' => Plugin::PREFIX . '_customer_' . wp_generate_password( 8, false ),
