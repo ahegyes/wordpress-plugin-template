@@ -337,8 +337,8 @@ A stored option's name is part of the plugin's contract, since other plugins rea
 			return;
 		}
 
-		if ( get_option( Options::RECORD_LIMIT ) !== $stored && ! update_option( Options::RECORD_LIMIT, $stored, true ) ) {
-			throw new \RuntimeException( 'The option ' . Options::RECORD_LIMIT . ' could not be stored.' ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Developer-facing, never rendered.
+		if ( get_option( 'dws_tpl_record_limit' ) !== $stored && ! update_option( 'dws_tpl_record_limit', $stored, true ) ) {
+			throw new \RuntimeException( 'The option dws_tpl_record_limit could not be stored.' );
 		}
 		if ( ! delete_option( 'dws_tpl_max_records' ) ) {
 			throw new \RuntimeException( 'The option dws_tpl_max_records could not be deleted.' );
