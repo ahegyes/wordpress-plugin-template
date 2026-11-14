@@ -65,11 +65,11 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 				'title'             => __( 'Orders before the greeting', 'dws-plugin-template' ),
 				'desc'              => __( 'Customers see the greeting once this many of their orders are paid.', 'dws-plugin-template' ),
 				'default'           => Options::DEFAULTS[ Options::GREETING_ORDERS ],
+				'placeholder'       => Options::DEFAULTS[ Options::GREETING_ORDERS ],
 				'custom_attributes' => array(
 					'min'  => '1',
 					'step' => '1',
 				),
-				'validate'          => self::validate_greeting_orders( ... ),
 			),
 			array(
 				'type' => 'sectionend',
@@ -118,31 +118,6 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 			$this
 		);
 		return $pages;
-	}
-
-	// endregion
-
-	// region HELPERS
-
-	/**
-	 * Returns the number of orders before the greeting shows as the digits WooCommerce stores, or an error when the submission is not a whole number of at least 1.
-	 *
-	 * The number input sends a whole number in any form a browser accepts, such as 03 or 3.0, so the submission parses as a float.
-	 *
-	 * @since   1.0.0
-	 * @version 1.0.0
-	 *
-	 * @param   mixed $submitted The submitted value.
-	 *
-	 * @return  string|\WP_Error
-	 */
-	protected static function validate_greeting_orders( mixed $submitted ): string|\WP_Error {
-		$orders = \is_string( $submitted ) ? \filter_var( $submitted, \FILTER_VALIDATE_FLOAT ) : false;
-		if ( false === $orders || $orders < 1 || $orders >= \PHP_INT_MAX || \floor( $orders ) !== $orders ) {
-			return new \WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) );
-		}
-
-		return (string) (int) $orders;
 	}
 
 	// endregion
