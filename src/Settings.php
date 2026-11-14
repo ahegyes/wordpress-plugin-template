@@ -49,14 +49,14 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 				'id'      => Options::GREETING_ENABLED,
 				'title'   => __( 'Show the greeting', 'dws-plugin-template' ),
 				'desc'    => __( 'Greet returning customers', 'dws-plugin-template' ),
-				'default' => wc_bool_to_string( Options::DEFAULTS[ Options::GREETING_ENABLED ] ),
+				'default' => Options::DEFAULTS[ Options::GREETING_ENABLED ],
 			),
 			array(
 				'type'        => 'text',
 				'id'          => Options::GREETING,
 				'title'       => __( 'Message', 'dws-plugin-template' ),
 				'desc'        => __( 'Leave empty to show the default greeting in each customer\'s language.', 'dws-plugin-template' ),
-				'default'     => '',
+				'default'     => Options::DEFAULTS[ Options::GREETING ],
 				'placeholder' => AccountDashboardGreeting::get_default_message(), // A default would be saved in the admin's language with the first save of the tab.
 			),
 			array(
@@ -64,7 +64,7 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 				'id'                => Options::GREETING_ORDERS,
 				'title'             => __( 'Orders before the greeting', 'dws-plugin-template' ),
 				'desc'              => __( 'Customers see the greeting once this many of their orders are paid.', 'dws-plugin-template' ),
-				'default'           => (string) Options::DEFAULTS[ Options::GREETING_ORDERS ],
+				'default'           => Options::DEFAULTS[ Options::GREETING_ORDERS ],
 				'custom_attributes' => array(
 					'min'  => '1',
 					'step' => '1',
@@ -85,7 +85,7 @@ final class Settings implements ComponentInterface, SectionFieldsDefinitionInter
 				'id'      => Options::DELETE_DATA,
 				'title'   => __( 'Remove all data on uninstallation', 'dws-plugin-template' ),
 				'desc'    => __( 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later', 'dws-plugin-template' ),
-				'default' => wc_bool_to_string( Options::DEFAULTS[ Options::DELETE_DATA ] ),
+				'default' => Options::DEFAULTS[ Options::DELETE_DATA ],
 			),
 			array(
 				'type' => 'sectionend',
