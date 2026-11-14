@@ -189,12 +189,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ahegyes/wp-framework-core.git",
-                "reference": "6f191fb51f2887ce704a2c0248d9881839bea6e5"
+                "reference": "16a409b9f3503ac21dbd7225916d27cd4bf6cc5f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ahegyes/wp-framework-core/zipball/6f191fb51f2887ce704a2c0248d9881839bea6e5",
-                "reference": "6f191fb51f2887ce704a2c0248d9881839bea6e5",
+                "url": "https://api.github.com/repos/ahegyes/wp-framework-core/zipball/16a409b9f3503ac21dbd7225916d27cd4bf6cc5f",
+                "reference": "16a409b9f3503ac21dbd7225916d27cd4bf6cc5f",
                 "shasum": ""
             },
             "require": {
@@ -229,7 +229,7 @@
             "support": {
                 "source": "https://github.com/ahegyes/wp-framework-core/tree/trunk"
             },
-            "time": "2026-11-12T22:21:17+00:00"
+            "time": "2026-11-14T10:07:01+00:00"
         },
         {
             "name": "ahegyes/wp-framework-settings",
@@ -237,12 +237,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ahegyes/wp-framework-settings.git",
-                "reference": "1aff9aa8c65550bb744950ed7bcd2362f37ffae0"
+                "reference": "bcdb7184554d6c7d8a2f2a0f4a8362f5303308ab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ahegyes/wp-framework-settings/zipball/1aff9aa8c65550bb744950ed7bcd2362f37ffae0",
-                "reference": "1aff9aa8c65550bb744950ed7bcd2362f37ffae0",
+                "url": "https://api.github.com/repos/ahegyes/wp-framework-settings/zipball/bcdb7184554d6c7d8a2f2a0f4a8362f5303308ab",
+                "reference": "bcdb7184554d6c7d8a2f2a0f4a8362f5303308ab",
                 "shasum": ""
             },
             "require": {
@@ -271,7 +271,7 @@
             "support": {
                 "source": "https://github.com/ahegyes/wp-framework-settings/tree/trunk"
             },
-            "time": "2026-11-12T20:06:51+00:00"
+            "time": "2026-11-14T11:10:00+00:00"
         },
         {
             "name": "ahegyes/wp-framework-shared",
@@ -318,12 +318,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ahegyes/wp-framework-woocommerce.git",
-                "reference": "01df7fb0739cdee77b356d7af6b085a8da5711bb"
+                "reference": "d01e17bb381a9d2e25d621901246382b2e0868af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ahegyes/wp-framework-woocommerce/zipball/01df7fb0739cdee77b356d7af6b085a8da5711bb",
-                "reference": "01df7fb0739cdee77b356d7af6b085a8da5711bb",
+                "url": "https://api.github.com/repos/ahegyes/wp-framework-woocommerce/zipball/d01e17bb381a9d2e25d621901246382b2e0868af",
+                "reference": "d01e17bb381a9d2e25d621901246382b2e0868af",
                 "shasum": ""
             },
             "require": {
@@ -359,7 +359,7 @@
             "support": {
                 "source": "https://github.com/ahegyes/wp-framework-woocommerce/tree/trunk"
             },
-            "time": "2026-11-12T20:06:51+00:00"
+            "time": "2026-11-14T11:10:00+00:00"
         },
         {
             "name": "automattic/jetpack-changelogger",
