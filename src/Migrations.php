@@ -44,9 +44,9 @@ final class Migrations {
 	// region HELPERS
 
 	/**
-	 * Stores the defaults of the settings that need no translation.
+	 * Stores each setting's default in an autoloaded row of its own and leaves a stored setting as it is.
 	 *
-	 * A translated default is never stored, because it would keep the language the site had when the step ran.
+	 * Each release that adds settings lists this step again, so that existing sites store the new defaults.
 	 *
 	 * @since   1.0.0
 	 * @version 1.0.0
@@ -56,13 +56,8 @@ final class Migrations {
 	 * @return  void
 	 */
 	protected static function add_settings(): void {
-		$defaults = array(
-			Options::GREETING_ENABLED => wc_bool_to_string( Options::DEFAULTS[ Options::GREETING_ENABLED ] ),
-			Options::GREETING_ORDERS  => (string) Options::DEFAULTS[ Options::GREETING_ORDERS ],
-			Options::DELETE_DATA      => wc_bool_to_string( Options::DEFAULTS[ Options::DELETE_DATA ] ),
-		);
-
-		foreach ( $defaults as $key => $value ) {
+		wp_prime_option_caches( \array_keys( Options::DEFAULTS ) );
+		foreach ( Options::DEFAULTS as $key => $value ) {
 			if ( false === get_option( $key ) && ! add_option( $key, $value, '', true ) ) {
 				throw new \RuntimeException( "The option $key could not be stored." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Developer-facing, never rendered.
 			}

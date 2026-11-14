@@ -4,6 +4,9 @@ These are the changes most plugins built from this template make, each as the fi
 
 - [A safeguard](#a-safeguard)
 - [A one-time notice](#a-one-time-notice)
+- [A setting](#a-setting)
+- [Where stored data lives](#where-stored-data-lives)
+- [Renaming a stored setting](#renaming-a-stored-setting)
 - [A WordPress settings page](#a-wordpress-settings-page)
 - [A product data tab](#a-product-data-tab)
 - [A form on an edit screen](#a-form-on-an-edit-screen)
@@ -12,7 +15,9 @@ These are the changes most plugins built from this template make, each as the fi
 - [Rewrite rules after activation](#rewrite-rules-after-activation)
 - [A script module](#a-script-module)
 - [A setting another plugin reads](#a-setting-another-plugin-reads)
+- [A filter at a decision point](#a-filter-at-a-decision-point)
 - [Renaming a public hook](#renaming-a-public-hook)
+- [Retiring an @api function or constant](#retiring-an-api-function-or-constant)
 - [Distribution through wordpress.org](#distribution-through-wordpressorg)
 - [Without WooCommerce](#without-woocommerce)
 
@@ -237,66 +242,139 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Admin
 
 The notice's scope defaults to the current user and its message is HTML, so escape it. A notice for every administrator of the site takes `NoticeScope::Site`, a capability and `per_viewer: true`, since without it the first administrator's viewing consumes it for everyone; one that stays until dismissed takes `persistent: true`.
 
-## A WordPress settings page
+## A setting
 
-An options page adds a screen under a WordPress admin menu and stores each tab's fields in one option through the Settings API. WooCommerce settings belong on a WooCommerce tab, as `src/Settings.php` does.
+A setting holds one value per site, which only a settings screen saves. Whatever the number of settings, each is one autoloaded option, declared once on `Options`, shown by a field and stored by the migrations.
 
-Add the option, its field, its default and a reader that guards the field to `src/Options.php`. The non-WooCommerce recipe below uses the same names, with the uninstall consent as a second field:
+1. In `src/Options.php`, add the key beside its feature's other keys, with a docblock, and its default to `DEFAULTS` in the form the option stores it: `'yes'` or `'no'` for a checkbox, digits for a number, a list for a multiselect, and `''` for text whose default is translated, which the component that shows the setting supplies after `init`, as the greeting's message does:
 
 ```php
 	/**
-	 * The option that holds the settings page's fields, keyed by field id.
+	 * The option that holds the number of days after a customer's last paid order during which the greeting shows.
 	 *
-	 * @since   1.0.0
-	 * @version 1.0.0
-	 *
-	 * @var     string
-	 */
-	public const string SETTINGS = 'dws_tpl_settings';
-
-	/**
-	 * The settings field that holds the limit.
-	 *
-	 * @since   1.0.0
-	 * @version 1.0.0
+	 * @since   1.1.0
+	 * @version 1.1.0
 	 *
 	 * @var     string
 	 */
-	public const string SETTING_LIMIT = 'limit';
-
-	/**
-	 * The value each settings field reads as while nothing valid is stored.
-	 *
-	 * @since   1.0.0
-	 * @version 1.0.0
-	 *
-	 * @var     array<string, int>
-	 */
-	public const array SETTING_DEFAULTS = array(
-		self::SETTING_LIMIT => 1,
-	);
+	public const string GREETING_DAYS = 'dws_tpl_greeting_days';
 
 	// ...
 
+	public const array DEFAULTS = array(
+		// ...
+		self::GREETING_DAYS    => '30',
+	);
+```
+
+2. Add the field to its feature's fields class, here `src/Greeting/GreetingSettings.php`. Its `default` reads `DEFAULTS`, and a number field states its bounds in `custom_attributes`, with a `min` beside any `step`, since the browser and the save both count the steps from it:
+
+```php
+			array(
+				'type'              => 'number',
+				'id'                => Options::GREETING_DAYS,
+				'title'             => __( 'Days since the last order', 'dws-plugin-template' ),
+				'desc'              => __( 'Customers see the greeting for this many days after their last paid order.', 'dws-plugin-template' ),
+				'default'           => Options::DEFAULTS[ Options::GREETING_DAYS ],
+				'placeholder'       => Options::DEFAULTS[ Options::GREETING_DAYS ],
+				'custom_attributes' => array(
+					'min'  => '1',
+					'step' => '1',
+				),
+			),
+```
+
+- The framework holds a number field to its bounds and stores an emptied one as empty, which the reader takes as the default the placeholder shows.
+- A field that needs a rule the framework does not apply takes a `validate` callable, a protected static of the fields class handed over as `self::validate_…( ... )`.
+- `Settings` keeps the WooCommerce tab's plugin-level fields, such as the consent to delete data, and spreads in the fields each feature's fields class returns. A fields class is final, with a protected constructor and a public static `get_settings_fields()`, as `GreetingSettings` is.
+- A feature gated on another plugin spreads its fields only while that plugin is active; its keys and defaults stay on `Options`, so its settings are still stored and uninstalled.
+
+3. Read the setting through `Options`' typed readers, such as `Options::get_int( Options::GREETING_DAYS )`, which return the default while nothing valid is stored.
+
+4. In the release that adds the setting, append `self::add_settings( ... )` to `Migrations::get_steps()`, after the release's rename steps, so that existing sites store the new default. The Unit `MigrationsTest` then names the fingerprint to append to its `SEEDED_KEY_SETS`. Until the plugin's first release, the first step stores the default already, and the new fingerprint replaces the last one.
+
+## Where stored data lives
+
+Each value the plugin stores is one of these kinds, the first that fits, and each kind has one home:
+
+- **A setting** holds one value per site, which the plugin declares and only a settings save writes: one autoloaded option, its key on `Options` and its default in `DEFAULTS`, as [A setting](#a-setting) adds. A setting never stores code or the name of a function to run, which would let anyone who saves the settings make the plugin run any function; a choice that leaves a decision to code is decided by a filter, as [A filter at a decision point](#a-filter-at-a-decision-point) shows.
+- **A per-object override** is a setting's value for one product, order, user or term: one meta key, a constant on the class that stores it, as the product data tab and edit-screen recipes show.
+- **A list setting** is a list edited on the settings screen whose entries pass none of the entity tests below: one option holding the list, as the Payments-tab recipe's multiselect stores its chosen keys.
+- **An entity** is a record whose id another record stores, one written outside a settings save, or one that needs its own capability or REST route: a post type with meta, or a table of its own, which the footprint's `post_types`, `meta` and `tables` kinds remove.
+- **Runtime state** is a value the plugin's code writes outside a form save, such as a sequence counter: an option of its own, written through core's `OptionRows`, whose conditional writes keep two requests from losing an update, never autoloaded and never in `DEFAULTS`. Its key is a constant on the class that owns it, under the plugin's prefix, and `FootprintTest`, which reads only `Options`' keys, gains a row for it:
+
+```php
+	public function test_it_covers_the_request_counter(): void {
+		self::assertTrue( \array_any( Plugin::FOOTPRINT['option_prefixes'], static fn ( string $prefix ): bool => \str_starts_with( RequestNumbers::COUNTER, $prefix ) ) );
+	}
+```
+
+- **A marker that only spares repeated work for a while** is a transient with an expiry, its name a constant on the class that sets it, which the footprint's `_transient_` prefixes cover, as the recurring-jobs recipe's repair gate is.
+
+No setting is written through `OptionRows`, whose writes take a row out of autoload.
+
+## Renaming a stored setting
+
+A stored option's name is part of the plugin's contract, since other plugins read it with `get_option()`, so a rename ships in a major release:
+
+1. Change the key's value in `src/Options.php`; its readers, its field and `DEFAULTS` follow.
+2. Add a plain step to `src/Migrations.php` that copies the old row over the new one and deletes the old row. The old row wins, so a value the site stored outlives a default that a seeding step, or a settings save, stored under the new name before the step ran. Append it after the steps earlier releases shipped, which keep their places, and before the release's own batched steps and its `self::add_settings( ... )`, which the changed keys call for, as [A setting](#a-setting) says:
+
+```php
 	/**
-	 * Returns a settings field as an integer.
+	 * Moves the stored record limit from its 1.x name to its 2.0 name, letting the old row win.
+	 *
+	 * @since   2.0.0
+	 * @version 2.0.0
+	 *
+	 * @throws  \RuntimeException Thrown when the limit could not be moved.
+	 *
+	 * @return  void
+	 */
+	protected static function rename_record_limit(): void {
+		$stored = get_option( 'dws_tpl_max_records' );
+		if ( false === $stored ) {
+			return;
+		}
+
+		if ( get_option( 'dws_tpl_record_limit' ) !== $stored && ! update_option( 'dws_tpl_record_limit', $stored, true ) ) {
+			throw new \RuntimeException( 'The option dws_tpl_record_limit could not be stored.' );
+		}
+		if ( ! delete_option( 'dws_tpl_max_records' ) ) {
+			throw new \RuntimeException( 'The option dws_tpl_max_records could not be deleted.' );
+		}
+	}
+```
+
+3. Keep the name of a setting that hides or restricts something, whose default is less restrictive than a value a site may have stored. Gates read settings on `plugins_loaded`, before the migrations run on `wp_loaded`, so on the first request after the update the new name would read its default and show what the site chose to hide.
+4. Add a changelog fragment with `composer changelog:add` that names the old and the new option, with a major significance.
+
+## A WordPress settings page
+
+An options page adds a screen under a WordPress admin menu and stores each field in its own option through the Settings API, as WooCommerce's settings tabs do, so a setting stores and reads alike on either screen. WooCommerce settings belong on a WooCommerce tab, as `src/Settings.php` does.
+
+Add the setting to `src/Options.php` as [A setting](#a-setting) does. The non-WooCommerce recipe below uses the same names:
+
+```php
+	/**
+	 * The option that holds the most records the plugin keeps.
 	 *
 	 * @since   1.0.0
 	 * @version 1.0.0
 	 *
-	 * @param   string $field The field's id.
-	 *
-	 * @return  int
+	 * @var     string
 	 */
-	public static function get_int_setting( string $field ): int {
-		$default = self::SETTING_DEFAULTS[ $field ] ?? null;
-		$stored  = get_option( self::SETTINGS );
-		$stored  = \is_array( $stored ) && \array_key_exists( $field, $stored ) ? $stored[ $field ] : $default;
-		return \filter_var( $stored, \FILTER_VALIDATE_INT, \FILTER_NULL_ON_FAILURE ) ?? ( \is_int( $default ) ? $default : 0 );
-	}
+	public const string LIMIT = 'dws_tpl_limit';
+
+	// ...
+
+	public const array DEFAULTS = array(
+		// ...
+		self::LIMIT => '1',
+	);
 ```
 
-Add the page as a component, `src/SettingsPage.php`, with its validator, and list it in `Plugin::COMPONENTS`. The page takes the plugin's identity, which the container provides:
+Add the page as a component, `src/SettingsPage.php`, and list it in `Plugin::COMPONENTS`. The page takes the plugin's identity, which the container provides. Its definition names the page and its tabs and gives each tab's fields apart, so the page asks only for the fields of the tab it shows or saves:
 
 ```php
 <?php declare( strict_types=1 );
@@ -361,57 +439,49 @@ final class SettingsPage implements ComponentInterface, OptionsPageDefinitionInt
 			'menu_title' => __( 'DWS Plugin Template', 'dws-plugin-template' ),
 			'tabs'       => array(
 				array(
-					'slug'   => 'general',
-					'title'  => __( 'General', 'dws-plugin-template' ),
-					'option' => Options::SETTINGS,
-					'fields' => array(
-						array(
-							'type'              => 'number',
-							'id'                => Options::SETTING_LIMIT,
-							'title'             => __( 'Limit', 'dws-plugin-template' ),
-							'default'           => (string) Options::SETTING_DEFAULTS[ Options::SETTING_LIMIT ],
-							'custom_attributes' => array(
-								'min'  => '1',
-								'step' => '1',
-							),
-							'validate'          => self::validate_limit( ... ),
-						),
-					),
+					'slug'  => 'general',
+					'title' => __( 'General', 'dws-plugin-template' ),
 				),
 			),
 		);
 	}
 
-	// endregion
-
-	// region HELPERS
-
 	/**
-	 * Returns the limit as the settings page stores it, or an error when the submission is not a whole number of at least 1.
-	 *
-	 * The number input sends a whole number in any form a browser accepts, such as 03 or 3.0, so the submission parses as a float.
+	 * {@inheritDoc}
 	 *
 	 * @since   1.0.0
 	 * @version 1.0.0
-	 *
-	 * @param   mixed $submitted The submitted value.
-	 *
-	 * @return  int|\WP_Error
 	 */
-	protected static function validate_limit( mixed $submitted ): int|\WP_Error {
-		$limit = \is_string( $submitted ) ? \filter_var( $submitted, \FILTER_VALIDATE_FLOAT ) : false;
-		if ( false === $limit || $limit < 1 || $limit >= \PHP_INT_MAX || \floor( $limit ) !== $limit ) {
-			return new \WP_Error( 'invalid_number', __( 'Enter a whole number of 1 or more, such as 3.', 'dws-plugin-template' ) );
-		}
-
-		return (int) $limit;
+	#[\Override]
+	public function get_tab_fields( string $page_id, string $tab_slug ): array {
+		return match ( $tab_slug ) {
+			'general' => array(
+				array(
+					'type'              => 'number',
+					'id'                => Options::LIMIT,
+					'title'             => __( 'Limit', 'dws-plugin-template' ),
+					'default'           => Options::DEFAULTS[ Options::LIMIT ],
+					'placeholder'       => Options::DEFAULTS[ Options::LIMIT ],
+					'custom_attributes' => array(
+						'min'  => '1',
+						'step' => '1',
+					),
+				),
+			),
+			default   => array(),
+		};
 	}
 
 	// endregion
 }
 ```
 
-Read the limit with `Options::get_int_setting( Options::SETTING_LIMIT )`, which returns the default until a valid limit is stored. The option is under the plugin's prefix, so the footprint covers it; a migration step that stores `Options::SETTING_DEFAULTS` autoloaded saves the first request's query, as the non-WooCommerce recipe's step does.
+- Each tab saves as the settings group named by the page's id and the tab's slug, here `dws_tpl_general`.
+- A field's id is the option it stores, which starts with `dws_tpl_`, since the page's capability writes it; the page leaves out any other field and reports it through `_doing_it_wrong()`.
+- The framework holds the limit to its `min` and `step` and stores it as plain digits. A rejected value keeps the stored one, and its message shows among the page's notices.
+- Another plugin adds tabs through `dws_plugin_template/options_page/tabs`, and fields through `dws_plugin_template/options_page/fields`, which passes each tab's slug; a tab another plugin adds gets none of the definition's fields, since `get_tab_fields()` returns none for a slug it does not name.
+
+Read the limit with `Options::get_int( Options::LIMIT )`, which returns the default until a valid limit is stored.
 
 ## A product data tab
 
@@ -675,7 +745,7 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 				'id'      => Options::PAYMENT_NOTES,
 				'title'   => __( 'Payment notes', 'dws-plugin-template' ),
 				'desc'    => __( 'Add a note to each order when its payment completes', 'dws-plugin-template' ),
-				'default' => wc_bool_to_string( Options::DEFAULTS[ Options::PAYMENT_NOTES ] ),
+				'default' => Options::DEFAULTS[ Options::PAYMENT_NOTES ],
 			),
 			array(
 				'type'    => 'multiselect',
@@ -684,6 +754,7 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 				'desc'    => __( 'Add the note only to orders paid with these methods', 'dws-plugin-template' ),
 				'class'   => 'wc-enhanced-select',
 				'options' => $methods,
+				'default' => Options::DEFAULTS[ Options::PAYMENT_METHODS ],
 			),
 			array(
 				'type' => 'sectionend',
@@ -738,7 +809,7 @@ final class PaymentSettings implements ComponentInterface, SectionFieldsDefiniti
 }
 ```
 
-WooCommerce stores each field in its own option under its id, flat rather than in a group: a checkbox stores `yes` or `no`, which `Options::get_bool()` reads, and a multiselect the list of the chosen keys, which a list reader reads. Add each key to `src/Options.php` with its default in `DEFAULTS`, `false` for the checkbox and an empty array for the multiselect, whose `@var` then allows `list<string>`, and the list reader beside the other typed readers:
+WooCommerce stores each field in its own option under its id, flat rather than in a group: a checkbox stores `yes` or `no`, which `Options::get_bool()` reads, and a multiselect the list of the chosen keys, which a list reader reads. Add each key to `src/Options.php` as [A setting](#a-setting) does, with its default in `DEFAULTS`, `'no'` for the checkbox and an empty array for the multiselect, whose `@var` then reads `array<string, string|list<string>>`, and the list reader beside the other typed readers:
 
 ```php
 	/**
@@ -787,21 +858,7 @@ WooCommerce's save drops a multiselect key of `'0'` or `''`, so each key stays t
 
 A recurring job runs a hook at an interval through the plugin's scheduler, which uses Action Scheduler where it is loaded and WP-Cron otherwise. Either can run an invocation twice or skip one, so the job's callback leaves its data consistent after a duplicate or a missed run.
 
-Add the repair gate's option to `src/Options.php`, with its default `0` in `DEFAULTS`:
-
-```php
-	/**
-	 * The option that holds when the plugin last ensured its recurring jobs, which lets a request skip ensuring them for an hour.
-	 *
-	 * @since   1.0.0
-	 * @version 1.0.0
-	 *
-	 * @var     string
-	 */
-	public const string RECURRING_ENSURED_AT = 'dws_tpl_recurring_ensured_at';
-```
-
-Add the job as a component, `src/Pruning.php`, and list it in `Plugin::COMPONENTS`. It ensures the schedule on `wp_loaded` at most once an hour, and again when Action Scheduler asks every day. Writing the time first narrows the window in which two requests both ensure it, and `ensure_recurring()` repairs a duplicate chain on its next pass:
+Add the job as a component, `src/Pruning.php`, and list it in `Plugin::COMPONENTS`. It ensures the schedule on `wp_loaded` at most once an hour, behind a transient that lives an hour, and again when Action Scheduler asks every day. Setting the transient first narrows the window in which two requests both ensure it, and `ensure_recurring()` repairs a duplicate chain on its next pass:
 
 ```php
 <?php declare( strict_types=1 );
@@ -834,6 +891,16 @@ final class Pruning implements ComponentInterface {
 	 * @var     string
 	 */
 	public const string HOOK = 'dws_plugin_template/records/prune';
+
+	/**
+	 * The transient that marks the daily prune as ensured within the last hour.
+	 *
+	 * @since   1.0.0
+	 * @version 1.0.0
+	 *
+	 * @var     string
+	 */
+	public const string ENSURED = 'dws_tpl_prune_ensured';
 
 	// endregion
 
@@ -883,12 +950,11 @@ final class Pruning implements ComponentInterface {
 	 * @return  void
 	 */
 	public function repair_schedule(): void {
-		$ensured_at = Options::get_int( Options::RECURRING_ENSURED_AT );
-		if ( \time() - $ensured_at < HOUR_IN_SECONDS ) {
+		if ( false !== get_transient( self::ENSURED ) ) {
 			return;
 		}
 
-		update_option( Options::RECURRING_ENSURED_AT, \time(), true );
+		set_transient( self::ENSURED, 1, HOUR_IN_SECONDS );
 		$this->ensure_schedule();
 	}
 
@@ -932,7 +998,7 @@ final class Pruning implements ComponentInterface {
 
 Then:
 - Add `Pruning::HOOK` to `cron_hooks` in `Plugin::FOOTPRINT`. Deactivation unschedules every hook there through the plugin's scheduler, and uninstall clears WP-Cron's copies, while Action Scheduler's are in the footprint's `as_groups` already.
-- Delete the repair gate's option on activation, so the next request ensures the jobs: register an activation closure in `functions.php` beside the deactivation hook, as the rewrite-rules recipe shows, that calls `delete_option( Options::RECURRING_ENSURED_AT )`. A plugin that also takes the rewrite-rules recipe keeps one activation closure that does both.
+- Delete the repair gate's transient on activation, so the next request ensures the jobs: register an activation closure in `functions.php` beside the deactivation hook, as the rewrite-rules recipe shows, that calls `delete_transient( Pruning::ENSURED )`. The footprint's `_transient_` prefixes already cover the transient. A plugin that also takes the rewrite-rules recipe keeps one activation closure that does both.
 - Change an interval in code only: `ensure_recurring()` replaces a schedule whose interval differs on the next pass of the repair gate. A "run now" schedules the same hook with an argument that sets it apart, or calls `prune()` directly.
 
 ## Rewrite rules after activation
@@ -1001,7 +1067,7 @@ Another plugin can always read the plugin's options through `get_option()`, sinc
  * @return  int
  */
 function dws_tpl_get_limit(): int {
-	return Options::get_int_setting( Options::SETTING_LIMIT );
+	return Options::get_int( Options::LIMIT );
 }
 ```
 
@@ -1010,6 +1076,32 @@ function dws_tpl_get_limit(): int {
 - Apply a filter only where the plugin's own code reads the setting through the same filter, so both read the same value.
 - Another plugin calls the function from `plugins_loaded` on and behind `function_exists()`, as AGENTS.md's add-on convention asks of every `@api` function, since the plugin may load later or stay active below its floors without defining it.
 - Tag the function `@api`, which `GlobalsTest` checks. It is contract from its first release, so a break of it ships as the next major, as AGENTS.md's Contract section says.
+
+## A filter at a decision point
+
+Where other plugins should be able to change what the plugin decides, apply a filter at that decision and pass it the object the decision is for, so a listener changes only the cases it means. For a greeting that other code may hold back from some customers, `AccountDashboardGreeting::print_greeting()` decides through a filter once it has counted the paid orders:
+
+```php
+		$shown = \is_array( $paid ) && \count( $paid ) >= $threshold;
+
+		/**
+		 * Filters whether a customer sees the account dashboard greeting.
+		 *
+		 * @since   1.1.0
+		 * @version 1.1.0
+		 *
+		 * @param   bool     $shown    Whether the customer has enough paid orders to see the greeting.
+		 * @param   \WP_User $customer The customer.
+		 */
+		if ( true !== apply_filters( 'dws_plugin_template/greeting/should_show', $shown, wp_get_current_user() ) ) {
+			return;
+		}
+```
+
+- Name the filter by AGENTS.md's hook rules, a predicate for a yes-or-no decision, and keep the strict comparison at the call site, so a listener that returns anything but `true` leaves the greeting out.
+- A choice that leaves the decision to code, such as "custom", is answered by such a filter, which a site fills with its own code; no setting stores code or the name of a function to run.
+- Apply no filter to every read of a setting: it would fire for every setting with no context, while WordPress's `pre_option_{$option}` and `option_{$option}` filters already override one stored value where a site needs that. A plugin whose v1 filtered each settings read keeps that filter, with v1's field ids, through any change to how its settings are stored.
+- The filter's name and arguments are contract from the release that adds it, as every hook the plugin fires.
 
 ## Renaming a public hook
 
@@ -1037,6 +1129,48 @@ $restricted = apply_filters( 'dws_plugin_template/data_export/should_restrict', 
 3. Add a changelog fragment with `composer changelog:add` that names the old and the new hook, with a minor significance and the Deprecated type.
 4. Migrate stored data that holds the name, such as a scheduled job's hook, in a migration step that converges from any partial state: unschedule the old name, then ensure the new one.
 5. In the next major, delete the deprecated call, with a major fragment that names the old hook as removed.
+
+## Retiring an @api function or constant
+
+An `@api` function or constant that a tagged release shipped is contract until the next major, so it keeps working until then; one that no release has shipped is deleted outright. To retire one in a released plugin:
+
+1. Keep it, delegating to its replacement where it has one, with a `@deprecated` tag that names the release and the replacement. A function raises WordPress's deprecation notice through `_deprecated_function()`, and a constant declared with `const` raises PHP's through the `#[\Deprecated]` attribute; a constant set with `define()` takes the tag alone, since nothing raises a notice for it:
+
+```php
+/**
+ * Returns the most records the plugin keeps.
+ *
+ * @api
+ *
+ * @since       1.0.0
+ * @version     1.1.0
+ * @deprecated  1.1.0 Use dws_tpl_get_record_limit().
+ *
+ * @return      int
+ */
+function dws_tpl_get_limit(): int {
+	_deprecated_function( __FUNCTION__, '1.1.0', 'dws_tpl_get_record_limit()' );
+	return dws_tpl_get_record_limit();
+}
+
+/**
+ * The most records the plugin keeps.
+ *
+ * @api
+ *
+ * @since       1.0.0
+ * @version     1.1.0
+ * @deprecated  1.1.0 Use DWS_TPL_RECORD_LIMIT.
+ *
+ * @var         int
+ */
+#[\Deprecated( 'use DWS_TPL_RECORD_LIMIT', since: '1.1.0' )]
+const DWS_TPL_LIMIT = 10;
+```
+
+2. Move the plugin's own calls to the replacement in the same release; PHPStan reports each use that remains.
+3. Add a changelog fragment with `composer changelog:add` that names the old symbol and its replacement, with a minor significance and the Deprecated type.
+4. In the next major, delete it, with a major fragment that names it as removed.
 
 ## Distribution through wordpress.org
 
@@ -1212,88 +1346,36 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 "start:assets": "wp-scripts start editor=./assets/src/editor.ts --output-path=assets/build"
 ```
 
-7. Delete `src/Settings.php`, and add the settings page from [A WordPress settings page](#a-wordpress-settings-page), with the consent to delete the plugin's data as a second field of its tab:
+7. Delete `src/Settings.php`, and add the settings page from [A WordPress settings page](#a-wordpress-settings-page), with the consent to delete the plugin's data as a second field of its tab, under the option `uninstall.php` already reads:
 
 ```php
-						array(
-							'type'  => 'checkbox',
-							'id'    => Options::SETTING_DELETE_DATA,
-							'title' => __( 'Remove all data on uninstallation', 'dws-plugin-template' ),
-							'desc'  => __( 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later', 'dws-plugin-template' ),
-						),
+			'general' => array(
+				// ... the limit ...
+				array(
+					'type'    => 'checkbox',
+					'id'      => Options::DELETE_DATA,
+					'title'   => __( 'Remove all data on uninstallation', 'dws-plugin-template' ),
+					'desc'    => __( 'Delete the plugin\'s data when it is uninstalled, so it must be configured again if it is installed later', 'dws-plugin-template' ),
+					'default' => Options::DEFAULTS[ Options::DELETE_DATA ],
+				),
+			),
 ```
 
-8. In `src/Options.php`, delete the greeting's three keys with their defaults, and `DELETE_DATA`. The typed option readers stay for a standalone option, such as the recurring-jobs recipe's, with its default in `DEFAULTS`; while the plugin has none, delete them with `DEFAULTS` and `get_default()`, since PHPStan refuses a lookup in an empty array. Add the settings-page recipe's settings option, field, default and reader, then the consent field, its default `false` in `SETTING_DEFAULTS`, whose `@var` then reads `array<string, bool|int>`, and a reader for it:
+8. In `src/Options.php`, delete the greeting's three keys with their defaults, and add the settings page's limit with its default. `src/Migrations.php` stays as it is, since its first step stores every default in `DEFAULTS`. In `tests/Unit/MigrationsTest.php`, the fingerprint in `SEEDED_KEY_SETS` becomes the one the suite's failure names, since no release has stored the old keys.
+
+9. In `uninstall.php`, delete the `MetaTypes` import and `$dws_tpl_meta_types`, so the engine runs without WooCommerce's meta types:
 
 ```php
-	/**
-	 * The settings field that holds 'yes' where the site consents to uninstall removing the plugin's data.
-	 *
-	 * @since   1.0.0
-	 * @version 1.0.0
-	 *
-	 * @var     string
-	 */
-	public const string SETTING_DELETE_DATA = 'delete_data';
-
-	// ...
-
-	/**
-	 * Returns a settings field as a boolean, which reads checkbox values such as 'yes' and 'no'.
-	 *
-	 * @since   1.0.0
-	 * @version 1.0.0
-	 *
-	 * @param   string $field The field's id.
-	 *
-	 * @return  bool
-	 */
-	public static function get_bool_setting( string $field ): bool {
-		$default = self::SETTING_DEFAULTS[ $field ] ?? null;
-		$stored  = get_option( self::SETTINGS );
-		$stored  = \is_array( $stored ) && \array_key_exists( $field, $stored ) ? $stored[ $field ] : $default;
-		return \filter_var( $stored, \FILTER_VALIDATE_BOOL, \FILTER_NULL_ON_FAILURE ) ?? ( true === $default );
-	}
-```
-
-9. In `src/Migrations.php`, the first step stores the defaults as they are. A stored `false` renders as an unchecked checkbox, the readers guard it, and uninstall consents only on `'yes'`:
-
-```php
-	/**
-	 * Stores the settings' defaults, autoloaded, so a site that never saved the settings page reads them without a query.
-	 *
-	 * @since   1.0.0
-	 * @version 1.0.0
-	 *
-	 * @throws  \RuntimeException Thrown when the defaults could not be stored.
-	 *
-	 * @return  void
-	 */
-	protected static function add_settings(): void {
-		if ( false === get_option( Options::SETTINGS ) && ! add_option( Options::SETTINGS, Options::SETTING_DEFAULTS, '', true ) ) {
-			throw new \RuntimeException( 'The option ' . Options::SETTINGS . ' could not be stored.' ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Developer-facing, never rendered.
-		}
-	}
-```
-
-10. In `uninstall.php`, delete the `MetaTypes` import and `$dws_tpl_meta_types`, and take consent from the settings row's `delete_data` key, read inside the `try` as the footprint is:
-
-```php
-	$dws_tpl_footprint = Plugin::FOOTPRINT;
-	$dws_tpl_consent   = array(
-		'option' => Options::SETTINGS,
-		'key'    => Options::SETTING_DELETE_DATA,
-	);
-// ...
-
 	Uninstaller::run(
 		$dws_tpl_identity,
 		$dws_tpl_footprint,
-		array( 'consent' => $dws_tpl_consent )
+		array(
+			'consent' => array( 'option' => $dws_tpl_consent ),
+		)
 	);
 ```
 
-11. In `.wp-env.json`, `.wp-env.tests.json` and `.wp-env.multisite.json`, delete the WooCommerce mapping, and let `afterStart` only activate the plugin, network-wide in the multisite one; `.wp-env.json`'s command takes no `--config`:
+10. In `.wp-env.json`, `.wp-env.tests.json` and `.wp-env.multisite.json`, delete the WooCommerce mapping, and let `afterStart` only activate the plugin, network-wide in the multisite one; `.wp-env.json`'s command takes no `--config`:
 
 ```json
 "mappings": {
@@ -1304,43 +1386,12 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 }
 ```
 
-12. Adapt the tests:
+11. Adapt the tests:
 - Delete `tests/EndToEnd/without-woocommerce.spec.ts` and `tests/Support/OrderStorageTrait.php`.
-- `OptionsTest` reads through `Options::get_bool_setting()` and `Options::get_int_setting()` from an `Options::SETTINGS` row, and a malformed limit reads its default 1; the option readers' rows go if step 8 deleted the readers.
-- `MigrationsTest` expects `Options::SETTING_DEFAULTS` stored autoloaded, a stored row kept as it is, and the throw when that option's `INSERT` fails.
-- `UninstallTest` consents through `array( Options::SETTING_DELETE_DATA => 'yes' )`, seeds and asserts no Action Scheduler action, and expects the defaults stored again afterwards.
-- `PartialDeployTest`'s missing-engine row seeds and asserts consent through `array( Options::SETTING_DELETE_DATA => 'yes' )` in `Options::SETTINGS`, and restores the row it read.
-- `MultisiteTest` reads the second site's consent from its `Options::SETTINGS` row.
+- `OptionsTest` and the Integration `MigrationsTest` read and seed `Options::LIMIT` where they read the greeting's keys, and a malformed limit reads its default 1.
+- `UninstallTest`, `PartialDeployTest` and `MultisiteTest` keep their consent rows, since the consent keeps its option; `UninstallTest` seeds and asserts no Action Scheduler action.
 - `PluginBootTest` expects nothing in `$plugin->kernel->skipped`, and drops the `DWS_TPL_DEBUG` row with its `get_threshold()` helper and the `WooCommerceLogger` and `RunInSeparateProcess` imports.
-- `SettingsTest` builds `new OptionsPage( $identity, Plugin::PREFIX, new SettingsPage( $identity ) )` over `new PluginIdentity( DWS_TPL_FILE, Plugin::SLUG, Plugin::PREFIX )` and calls its `register_settings()` in `setUpBeforeClass()`, which first requires `wp-admin/includes/template.php`. `tearDownAfterClass()` removes the page's `pre_update_option_` and `option_page_capability_` filters and calls `unregister_setting()`. Each test resets `$GLOBALS['wp_settings_errors']`, renders through `render_page()` and saves as `options.php` does:
+- `SettingsTest` builds `new OptionsPage( $identity, Plugin::PREFIX, new SettingsPage( $identity ) )` over `new PluginIdentity( DWS_TPL_FILE, Plugin::SLUG, Plugin::PREFIX )` and renders it through `render_page()`, which first needs `wp-admin/includes/template.php`. It saves as `options.php` does: with `$GLOBALS['pagenow']` set to `options.php` and `$_REQUEST['option_page']` to `dws_tpl_general`, it calls `register_settings()`, then `update_option()` for each of the tab's options, with null for one the form did not post. `tearDownAfterClass()` removes each field's `pre_update_option_` filter and the group's `option_page_capability_` filter, and unregisters each setting.
+- `tests/EndToEnd/settings.spec.ts` drives the page's limit field at `options-general.php?page=dws_tpl` with the same keyboard checks, scoping axe to `form[action="options.php"]`, and expects WordPress's "Settings saved." after each save.
 
-```php
-	// options.php saves a submission through update_option(), whose filter the page hooks for its own option page only.
-	protected function save( array $posted ): void {
-		$GLOBALS['pagenow']      = 'options.php';
-		$_REQUEST['option_page'] = Options::SETTINGS;
-
-		try {
-			update_option( Options::SETTINGS, $posted );
-		} finally {
-			unset( $GLOBALS['pagenow'], $_REQUEST['option_page'] );
-		}
-	}
-```
-
-- `tests/EndToEnd/settings.spec.ts` drives the page's limit field with the same checks: it focuses `page.getByLabel( 'Limit' )`, tabs to the `Save Changes` button and scopes axe to the form:
-
-```ts
-const SAVED = 'Settings saved.';
-const REJECTED =
-	'Limit was not saved and keeps its previous value. The other changes were saved. Enter a whole number of 1 or more, such as 3.';
-const FORM = 'form[action="options.php"]';
-
-// ...
-
-	test.beforeEach( async ( { admin } ) => {
-		await admin.visitAdminPage( 'options-general.php', 'page=dws_tpl' );
-	} );
-```
-
-13. Update `AGENTS.md`, `README.md` and `docs/ARCHITECTURE.md` wherever they name WooCommerce, the greeting, the settings tab or the order-tables declaration.
+12. Update `AGENTS.md`, `README.md` and `docs/ARCHITECTURE.md` wherever they name WooCommerce, the greeting, the settings tab or the order-tables declaration.

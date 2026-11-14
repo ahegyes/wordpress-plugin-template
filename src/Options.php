@@ -54,17 +54,20 @@ final class Options {
 	public const string GREETING_ORDERS = 'dws_tpl_greeting_orders';
 
 	/**
-	 * The value each option reads as while nothing valid is stored.
+	 * The default of each option, in the form the option stores it.
+	 *
+	 * An empty string stands in for a translated default, which the component that shows the option supplies.
 	 *
 	 * @since   1.0.0
 	 * @version 1.0.0
 	 *
-	 * @var     array<string, bool|int|string>
+	 * @var     array<string, string>
 	 */
 	public const array DEFAULTS = array(
-		self::DELETE_DATA      => false,
-		self::GREETING_ENABLED => false,
-		self::GREETING_ORDERS  => 1,
+		self::DELETE_DATA      => 'no',
+		self::GREETING         => '',
+		self::GREETING_ENABLED => 'no',
+		self::GREETING_ORDERS  => '1',
 	);
 
 	// endregion
@@ -95,7 +98,7 @@ final class Options {
 	 */
 	public static function get_bool( string $key ): bool {
 		$default = self::get_default( $key );
-		return \filter_var( get_option( $key, $default ), \FILTER_VALIDATE_BOOL, \FILTER_NULL_ON_FAILURE ) ?? ( true === $default );
+		return \filter_var( get_option( $key, $default ), \FILTER_VALIDATE_BOOL, \FILTER_NULL_ON_FAILURE ) ?? \filter_var( $default, \FILTER_VALIDATE_BOOL );
 	}
 
 	/**
@@ -110,7 +113,7 @@ final class Options {
 	 */
 	public static function get_int( string $key ): int {
 		$default = self::get_default( $key );
-		return \filter_var( get_option( $key, $default ), \FILTER_VALIDATE_INT, \FILTER_NULL_ON_FAILURE ) ?? ( \is_int( $default ) ? $default : 0 );
+		return \filter_var( get_option( $key, $default ), \FILTER_VALIDATE_INT, \FILTER_NULL_ON_FAILURE ) ?? \filter_var( $default, \FILTER_VALIDATE_INT, \FILTER_NULL_ON_FAILURE ) ?? 0;
 	}
 
 	/**
