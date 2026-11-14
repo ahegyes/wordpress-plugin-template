@@ -27,8 +27,9 @@ final class MigrationsTest extends TestCase {
 
 	// The runner's time budget lasts for its request, and this process's bootstrap spends it when it migrates a new site, so the row runs as a request of its own.
 	#[RunInSeparateProcess]
-	public function test_the_runner_brings_a_new_site_to_revision_one_with_the_untranslated_defaults_autoloaded(): void {
+	public function test_the_runner_brings_a_new_site_to_revision_one_with_every_default_autoloaded(): void {
 		global $wpdb;
+		self::assertEqualsCanonicalizing( \array_keys( Options::DEFAULTS ), self::OPTIONS, 'OPTIONS lists every key in Options::DEFAULTS.' );
 		foreach ( self::OPTIONS as $key ) {
 			delete_option( $key );
 		}
@@ -37,11 +38,8 @@ final class MigrationsTest extends TestCase {
 		dws_tpl_plugin()->migrations?->run();
 
 		self::assertSame( 1, MigrationRunner::get_revision( self::REVISION ) );
-		self::assertSame( 'no', get_option( Options::GREETING_ENABLED ) );
-		self::assertSame( '1', get_option( Options::GREETING_ORDERS ) );
-		self::assertSame( 'no', get_option( Options::DELETE_DATA ) );
-		self::assertFalse( get_option( Options::GREETING ) );
-		foreach ( array( Options::GREETING_ENABLED, Options::GREETING_ORDERS, Options::DELETE_DATA ) as $key ) {
+		foreach ( Options::DEFAULTS as $key => $default ) {
+			self::assertSame( $default, get_option( $key ) );
 			self::assertSame( 'on', $wpdb->get_var( $wpdb->prepare( "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s", $key ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Reads the stored autoload flag.
 		}
 	}

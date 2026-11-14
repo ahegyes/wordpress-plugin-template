@@ -68,7 +68,7 @@ final class OptionsTest extends TestCase {
 	public function test_a_missing_option_reads_its_default(): void {
 		delete_option( Options::DELETE_DATA );
 
-		self::assertSame( Options::DEFAULTS[ Options::DELETE_DATA ], Options::get_bool( Options::DELETE_DATA ) );
+		self::assertFalse( Options::get_bool( Options::DELETE_DATA ) );
 	}
 
 	#[DataProvider( 'stored_ints' )]
@@ -81,7 +81,7 @@ final class OptionsTest extends TestCase {
 	public function test_an_int_that_is_not_a_whole_number_reads_its_default(): void {
 		update_option( Options::GREETING_ORDERS, 'seven' );
 
-		self::assertSame( Options::DEFAULTS[ Options::GREETING_ORDERS ], Options::get_int( Options::GREETING_ORDERS ) );
+		self::assertSame( 1, Options::get_int( Options::GREETING_ORDERS ) );
 	}
 
 	#[DataProvider( 'stored_strings' )]

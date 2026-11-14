@@ -97,6 +97,17 @@ final class SettingsTest extends TestCase {
 		self::assertFalse( $form->getElementById( Options::DELETE_DATA )?->hasAttribute( 'checked' ) );
 	}
 
+	// WooCommerce stores each field's default whenever its own version changes, so a default other than the seeded one would win or lose by which write runs first.
+	public function test_each_field_defaults_to_the_value_the_migrations_seed(): void {
+		$fields = \array_filter( self::$tab->get_settings_for_section( '' ), static fn ( array $field ): bool => ! \in_array( $field['type'], array( 'title', 'sectionend' ), true ) );
+
+		self::assertNotSame( array(), $fields );
+		foreach ( $fields as $field ) {
+			self::assertArrayHasKey( $field['id'], Options::DEFAULTS );
+			self::assertSame( Options::DEFAULTS[ $field['id'] ], $field['default'] ?? null, "The field {$field['id']} defaults to another value than Options::DEFAULTS holds." );
+		}
+	}
+
 	#[DataProvider( 'field_texts' )]
 	public function test_the_tab_words_each_field_by_what_it_does( string $key, string $title, string $description ): void {
 		$row = (string) $this->render()->getElementById( $key )?->closest( 'tr' )?->textContent; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- A DOM property.
