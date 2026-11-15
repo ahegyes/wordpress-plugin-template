@@ -9,6 +9,7 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Asset
 use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\PluginIdentity;
 use DeepWebSolutions\PluginTemplate\Tests\Support\OrderStorageTrait;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
+use DeepWebSolutions\PluginTemplate\Tests\Support\RunsRequestsTrait;
 use PHPUnit\Framework\Attributes\After;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -18,6 +19,7 @@ use PHPUnit\Framework\TestCase;
 final class AccountDashboardGreetingTest extends TestCase {
 	use OrderStorageTrait;
 	use RestoresOptionsTrait;
+	use RunsRequestsTrait;
 
 	protected const array OPTIONS = array( Options::GREETING_ENABLED, Options::GREETING, Options::GREETING_ORDERS );
 
@@ -149,6 +151,38 @@ final class AccountDashboardGreetingTest extends TestCase {
 		}
 
 		self::assertSame( 0, $asked );
+	}
+
+	public function test_the_decision_answers_no_until_the_plugin_has_booted(): void {
+		global $wp_actions;
+
+		update_option( Options::GREETING_ORDERS, '1' );
+		$this->place_orders( 1 );
+		$asked  = 0;
+		$listen = static function () use ( &$asked ): bool {
+			++$asked;
+			return true;
+		};
+		add_filter( 'dws_plugin_template/greeting/should_show', $listen );
+		self::assertGreaterThan( 0, did_action( 'dws_plugin_template/boot/succeeded' ) );
+		$fired = $wp_actions['dws_plugin_template/boot/succeeded'];
+		unset( $wp_actions['dws_plugin_template/boot/succeeded'] );
+
+		try {
+			self::assertFalse( dws_tpl_should_show_greeting( $this->customer ) );
+		} finally {
+			$wp_actions['dws_plugin_template/boot/succeeded'] = $fired;
+			remove_filter( 'dws_plugin_template/greeting/should_show', $listen );
+		}
+
+		self::assertSame( 0, $asked );
+	}
+
+	public function test_with_woocommerce_inactive_the_decision_answers_no(): void {
+		$request = self::request( 'echo (int) dws_tpl_should_show_greeting( ' . $this->customer . ' );', '--skip-plugins=woocommerce' );
+
+		self::assertSame( 0, $request['status'], $request['output'] );
+		self::assertSame( '0', $request['last'], $request['output'] );
 	}
 
 	public function test_the_greeting_style_loads_on_the_account_dashboard_only(): void {
