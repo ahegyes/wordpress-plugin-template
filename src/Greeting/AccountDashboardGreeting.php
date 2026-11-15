@@ -64,12 +64,52 @@ final class AccountDashboardGreeting implements ComponentInterface {
 		return __( 'Welcome back, and thank you for shopping with us again.', 'dws-plugin-template' );
 	}
 
+	/**
+	 * Returns whether a customer sees the greeting on their account dashboard.
+	 *
+	 * It answers no while the greeting's gate is closed or the id names no user, before any listener is asked, so a listener cannot turn on a greeting the site has switched off. Callers ask from wp_loaded on, where WooCommerce is active, since WooCommerce registers its order types and statuses on init.
+	 *
+	 * @since   1.0.0
+	 * @version 1.0.0
+	 *
+	 * @param   int $user_id The customer's user id.
+	 *
+	 * @return  bool
+	 */
+	public static function should_show( int $user_id ): bool {
+		$customer = get_userdata( $user_id );
+		if ( ! GreetingFeature::should_load() || ! $customer instanceof \WP_User ) {
+			return false;
+		}
+
+		$threshold = Options::get_int( Options::GREETING_ORDERS );
+		$paid      = wc_get_orders(
+			array(
+				'customer_id' => $user_id,
+				'status'      => wc_get_is_paid_statuses(),
+				'limit'       => $threshold,
+				'return'      => 'ids',
+			)
+		);
+
+		/**
+		 * Filters whether a customer sees the account dashboard greeting.
+		 *
+		 * @since   1.0.0
+		 * @version 1.0.0
+		 *
+		 * @param   bool     $shown    Whether the customer's paid orders reach the set number.
+		 * @param   \WP_User $customer The customer.
+		 */
+		return true === apply_filters( 'dws_plugin_template/greeting/should_show', \is_array( $paid ) && \count( $paid ) >= $threshold, $customer );
+	}
+
 	// endregion
 
 	// region HOOKS
 
 	/**
-	 * Prints the greeting as a WooCommerce notice to a customer whose paid orders reach the set number.
+	 * Prints the greeting as a WooCommerce notice where the current customer should see it.
 	 *
 	 * @since   1.0.0
 	 * @version 1.0.0
@@ -77,16 +117,7 @@ final class AccountDashboardGreeting implements ComponentInterface {
 	 * @return  void
 	 */
 	public function print_greeting(): void {
-		$threshold = Options::get_int( Options::GREETING_ORDERS );
-		$paid      = wc_get_orders(
-			array(
-				'customer_id' => get_current_user_id(),
-				'status'      => wc_get_is_paid_statuses(),
-				'limit'       => $threshold,
-				'return'      => 'ids',
-			)
-		);
-		if ( ! \is_array( $paid ) || \count( $paid ) < $threshold ) {
+		if ( ! self::should_show( get_current_user_id() ) ) {
 			return;
 		}
 

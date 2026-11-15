@@ -7,11 +7,12 @@
 	<exclude-pattern>*/blocks/build/*</exclude-pattern>
 	<exclude-pattern>*/assets/build/*</exclude-pattern>
 
-	<!-- Every global the plugin declares starts with its prefix or sits in its namespace. -->
+	<!-- Every global the plugin declares starts with its prefix or sits in its namespace, and every hook it fires starts with its slug's root. -->
 	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
 		<properties>
 			<property name="prefixes" type="array">
 				<element value="dws_tpl"/>
+				<element value="dws_plugin_template"/>
 				<element value="DeepWebSolutions\PluginTemplate"/>
 			</property>
 		</properties>
