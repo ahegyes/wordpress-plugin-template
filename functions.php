@@ -49,7 +49,7 @@ register_deactivation_hook(
 /**
  * Returns the plugin's composition root, built on first use.
  *
- * Only the function is contract: the root's members stay internal unless tagged @api.
+ * Only the function is contract, not the composition root it returns.
  *
  * @api
  *
