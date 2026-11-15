@@ -14,8 +14,10 @@ These are the changes most plugins built from this template make, each as the fi
 - [Recurring jobs](#recurring-jobs)
 - [Rewrite rules after activation](#rewrite-rules-after-activation)
 - [A script module](#a-script-module)
-- [A setting another plugin reads](#a-setting-another-plugin-reads)
+- [A decision another plugin asks about](#a-decision-another-plugin-asks-about)
 - [A filter at a decision point](#a-filter-at-a-decision-point)
+- [An action after a change](#an-action-after-a-change)
+- [An extensible concept](#an-extensible-concept)
 - [Renaming a public hook](#renaming-a-public-hook)
 - [Retiring an @api function or constant](#retiring-an-api-function-or-constant)
 - [Distribution through wordpress.org](#distribution-through-wordpressorg)
@@ -1051,57 +1053,160 @@ Build the blocks' modules with their scripts, by adding `--experimental-modules`
 
 The build writes `view.js` with a `view.asset.php` whose `type` is `module`, and `src/Blocks.php`'s registration from the manifest picks it up.
 
-## A setting another plugin reads
+## A decision another plugin asks about
 
-Another plugin can always read the plugin's options through `get_option()`, since their names are contract. Where an integration needs one setting as the plugin reads it, add one `@api` function for it to a file in `includes/` named for its topic, which imports `Options`, as `includes/greeting.php` does. For the settings page's limit:
+Other plugins integrate only through the plugin's global functions, its models in `models/`, its hooks and WordPress's and WooCommerce's APIs on the names AGENTS.md's Contract section lists, never through `src/` or `Safeguards.php`. A function, model method or hook enters that surface without a named caller when its signature holds only scalars, WordPress and WooCommerce types and the plugin's models, and when it:
 
-```php
-/**
- * Returns the limit the plugin applies.
- *
- * @api
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @return  int
- */
-function dws_tpl_get_limit(): int {
-	return Options::get_int( Options::LIMIT );
-}
-```
+- exposes a noun or verb the plugin's screens give an admin, a decision the plugin makes, an event when it changes its data, or the inverse of an operation it exposes;
+- guards what the literal's direct use would skip, such as a lock, a per-site key, a list's read-modify-write or paired keys;
+- runs the implementation the plugin's own code runs, an exception taking the owner's ruling.
 
-- Name the function for the one thing it answers and type its return. A generic `dws_tpl_get_option( $key )` would make every setting's type and default contract at once.
-- Delegate to `Options`, which the plugin's own code keeps calling, so the read has one implementation.
-- Apply a filter only where the plugin's own code reads the setting through the same filter, so both read the same value.
-- Another plugin calls the function from `plugins_loaded` on and behind `function_exists()`, as AGENTS.md's add-on convention asks of every `@api` function, since the plugin may load later or stay active below its floors without defining it.
-- Tag the function `@api`, which `GlobalsTest` checks. It is contract from its first release, so a break of it ships as the next major, as AGENTS.md's Contract section says.
+The surface keeps one model per noun, a new capability of a concept being a method on its model; puts an open set of interchangeable behaviours behind one interface, as [An extensible concept](#an-extensible-concept) shows; gives a setting no reader, exposing the decision it feeds instead; fires an action for each change to the plugin's data, as [An action after a change](#an-action-after-a-change) shows; and admits nothing lock-bound or php-scoper-typed.
+
+A decision is the usual first entry. `includes/greeting.php` declares `dws_tpl_should_show_greeting()`, a one-line delegate to `AccountDashboardGreeting::should_show()`, which the greeting's render also calls:
+
+- Make the decision once, in a public static on the `src/` class that makes it, and have the plugin's own code and the `@api` function both call it, so the two give one answer. Put the function in a file in `includes/` named for its topic.
+- Name it for the decision with the hook rules' predicates, `should_` for a decision a listener can change, `is_`, `has_` or `are_` for a state and `can_` for a capability, and type its return.
+- Answer the decision, not whether the plugin booted: the function's docblock names `dws_plugin_template/boot/succeeded`, which another plugin checks with `did_action()` where it needs to know.
+- Expose no reader for a setting the decision reads, nor a generic `dws_tpl_get_option( $key )`, which would make every key, type and default contract. Another plugin that needs a stored value reads it through `get_option()` on the option's name.
+- Another plugin calls the function no earlier than `plugins_loaded`, or than the hook its docblock names, such as `wp_loaded` for the greeting's, and behind `function_exists()`, as AGENTS.md's add-on convention asks of every `@api` function, since the plugin may load later or stay active below its floors without defining it.
+- Tag the function `@api`, which `GlobalsTest` checks, and give it an Integration row. It is contract from its first release, so a break of it ships as the next major, as AGENTS.md's Contract section says.
 
 ## A filter at a decision point
 
-Where other plugins should be able to change what the plugin decides, apply a filter at that decision and pass it the object the decision is for, so a listener changes only the cases it means. For a greeting that other code may hold back from some customers, `AccountDashboardGreeting::print_greeting()` decides through a filter once it has counted the paid orders:
+Where other plugins should be able to change what the plugin decides, apply a filter at that decision and pass it the object the decision is for, so a listener changes only the cases it means. `AccountDashboardGreeting::should_show()` decides through a filter once it has counted the customer's paid orders:
 
 ```php
-		$shown = \is_array( $paid ) && \count( $paid ) >= $threshold;
-
 		/**
 		 * Filters whether a customer sees the account dashboard greeting.
+		 *
+		 * @since   1.0.0
+		 * @version 1.0.0
+		 *
+		 * @param   bool     $shown    Whether the customer's paid orders reach the set number.
+		 * @param   \WP_User $customer The customer.
+		 */
+		return true === apply_filters( 'dws_plugin_template/greeting/should_show', \is_array( $paid ) && \count( $paid ) >= $threshold, $customer );
+```
+
+- Name the filter by AGENTS.md's hook rules, a predicate for a yes-or-no decision, and keep the strict comparison at the call site, so a listener that returns anything but `true` leaves the greeting out.
+- Ask the filter only where the plugin acts at all: the greeting answers no while it is switched off or the id names no user, before the filter, so no listener can show a greeting that never prints.
+- A choice that leaves the decision to code, such as "custom", is answered by such a filter, which a site fills with its own code; no setting stores code or the name of a function to run.
+- Apply no filter to every read of a setting: it would fire for every setting with no context, while WordPress's `pre_option_{$option}` and `option_{$option}` filters already override one stored value where a site needs that. A plugin whose v1 filtered each settings read keeps that filter, with v1's field ids, through any change to how its settings are stored.
+- The filter's name and arguments are contract from the release that adds it, as every hook the plugin fires.
+
+## An action after a change
+
+Each change the plugin makes to its data fires an action, so other plugins react to it without hooking WordPress's lower-level writes, which fire for every plugin's data and before the change is whole. For a record the plugin stores:
+
+```php
+		/**
+		 * Fires after the plugin stores a customer's record.
 		 *
 		 * @since   1.1.0
 		 * @version 1.1.0
 		 *
-		 * @param   bool     $shown    Whether the customer has enough paid orders to see the greeting.
-		 * @param   \WP_User $customer The customer.
+		 * @param   int $record_id   The record's id.
+		 * @param   int $customer_id The customer's user id.
 		 */
-		if ( true !== apply_filters( 'dws_plugin_template/greeting/should_show', $shown, wp_get_current_user() ) ) {
-			return;
-		}
+		do_action( 'dws_plugin_template/record/stored', $record_id, $customer_id );
 ```
 
-- Name the filter by AGENTS.md's hook rules, a predicate for a yes-or-no decision, and keep the strict comparison at the call site, so a listener that returns anything but `true` leaves the greeting out.
-- A choice that leaves the decision to code, such as "custom", is answered by such a filter, which a site fills with its own code; no setting stores code or the name of a function to run.
-- Apply no filter to every read of a setting: it would fire for every setting with no context, while WordPress's `pre_option_{$option}` and `option_{$option}` filters already override one stored value where a site needs that. A plugin whose v1 filtered each settings read keeps that filter, with v1's field ids, through any change to how its settings are stored.
-- The filter's name and arguments are contract from the release that adds it, as every hook the plugin fires.
+- Name it under the area it concerns, its last level a past participle, as AGENTS.md's hook rules say, with one action per kind of change, such as `record/stored` and `record/deleted`.
+- Fire it after the write has succeeded and after any lock the write held is released, so a listener sees the finished change and can write in turn.
+- Pass ids, and what a listener cannot read back afterwards, such as the previous value; a listener loads the rest through the plugin's functions and models.
+- Fire it from the one place that makes the change, so every path to the change, the plugin's screens and its `@api` functions alike, announces it.
+- The action's name and arguments are contract from the release that adds it.
+
+## An extensible concept
+
+Where the plugin decides through an open set of interchangeable behaviours, such as the rules that unlock a payment method, each behaviour is an instance of one global interface, registered and looked up through exactly three `@api` functions, so a new behaviour adds no function. The template ships no such set. For export formats a site chooses from:
+
+1. Declare the interface in `models/`, which Composer's classmap loads, and tag it `@api`:
+
+```php
+<?php declare( strict_types=1 );
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Writes a customer's records in one export format.
+ *
+ * @api
+ *
+ * @since   1.1.0
+ * @version 1.1.0
+ */
+interface DWS_TPL_Export_Format {
+	/**
+	 * Returns the format's id, unique among the registered formats.
+	 *
+	 * @since   1.1.0
+	 * @version 1.1.0
+	 *
+	 * @return  string
+	 */
+	public function get_id(): string;
+
+	/**
+	 * Returns the format's name, translated, which callers read from init on.
+	 *
+	 * @since   1.1.0
+	 * @version 1.1.0
+	 *
+	 * @return  string
+	 */
+	public function get_label(): string;
+
+	/**
+	 * Returns a customer's records written in the format.
+	 *
+	 * @since   1.1.0
+	 * @version 1.1.0
+	 *
+	 * @param   int $customer_id The customer's user id.
+	 *
+	 * @return  string
+	 */
+	public function write( int $customer_id ): string;
+}
+```
+
+A released interface freezes, since a new method breaks every implementer, so a later capability is a sub-interface that extends it.
+
+2. Hold the registered formats for the request in a final class in `src/` named for the set, here `ExportFormats`, whose `get()` returns `self::$formats[ $id ] ?? null` and whose `get_all()` returns them all:
+
+```php
+	/**
+	 * Registers a format, unless one with its id is registered already.
+	 *
+	 * @since   1.1.0
+	 * @version 1.1.0
+	 *
+	 * @param   \DWS_TPL_Export_Format $format The format.
+	 *
+	 * @return  bool
+	 */
+	public static function register( \DWS_TPL_Export_Format $format ): bool {
+		$id = $format->get_id();
+		if ( isset( self::$formats[ $id ] ) ) {
+			_doing_it_wrong( __METHOD__, esc_html( "The export format '$id' is registered already." ), '1.1.0' );
+			return false;
+		}
+
+		self::$formats[ $id ] = $format;
+		return true;
+	}
+```
+
+3. In `includes/export-formats.php`, declare `dws_tpl_register_export_format( DWS_TPL_Export_Format $format ): bool`, `dws_tpl_get_export_format( string $id ): ?DWS_TPL_Export_Format` and `dws_tpl_get_export_formats(): array`, each tagged `@api` and a one-line delegate to `ExportFormats`.
+
+4. Register and decide:
+
+- A built-in format registers itself in its component's `register_hooks()`, so a format whose component is gated off never registers and its lookup returns `null`. Another plugin registers its own on `dws_plugin_template/boot/succeeded`, once every component has registered, adding that callback before `plugins_loaded` reaches priority 15, where this plugin boots and fires the action.
+- Read the set only when deciding or rendering, never in `register_hooks()`, where later components and other plugins have not registered yet. Nothing seals it, so a late registration takes part in every later decision.
+- One callback decides through the set, here the export, which writes in the format the site chose, `ExportFormats::get( $chosen )?->write( $customer_id )`, so a new format needs no callback of its own. Log a `Throwable` from another plugin's format and treat it as no format.
+- Never add a function per format: the three functions serve every format the set will hold.
 
 ## Renaming a public hook
 
