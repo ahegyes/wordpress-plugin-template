@@ -19,7 +19,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 	use OrderStorageTrait;
 	use RestoresOptionsTrait;
 
-	protected const array OPTIONS = array( Options::GREETING, Options::GREETING_ORDERS );
+	protected const array OPTIONS = array( Options::GREETING_ENABLED, Options::GREETING, Options::GREETING_ORDERS );
 
 	protected const string TRANSLATION = 'Translated greeting';
 
@@ -35,6 +35,18 @@ final class AccountDashboardGreetingTest extends TestCase {
 			'unsaved'      => array( null ),
 			'empty'        => array( '' ),
 			'not-a-string' => array( array( 'Hello' ) ),
+		);
+	}
+
+	public static function decisions(): array {
+		return array(
+			'switched-off'                    => array( 'no', 1, null, false ),
+			'below-the-set-number'            => array( 'yes', 0, null, false ),
+			'at-the-set-number'               => array( 'yes', 1, null, true ),
+			'held-back-by-a-listener'         => array( 'yes', 1, false, false ),
+			'shown-by-a-listener'             => array( 'yes', 0, true, true ),
+			'switched-off-despite-a-listener' => array( 'no', 1, true, false ),
+			'a-listener-returning-a-non-bool' => array( 'yes', 1, 1, false ),
 		);
 	}
 
@@ -59,6 +71,7 @@ final class AccountDashboardGreetingTest extends TestCase {
 		self::assertIsInt( $customer );
 		$this->customer = $customer;
 		wp_set_current_user( $customer );
+		update_option( Options::GREETING_ENABLED, 'yes' );
 	}
 
 	#[After]
@@ -77,6 +90,65 @@ final class AccountDashboardGreetingTest extends TestCase {
 		self::assertSame( 10, has_action( 'wp_enqueue_scripts', array( $detail, 'enqueue_style' ) ) );
 		remove_action( 'woocommerce_account_dashboard', array( $detail, 'print_greeting' ) );
 		remove_action( 'wp_enqueue_scripts', array( $detail, 'enqueue_style' ) );
+	}
+
+	#[DataProvider( 'decisions' )]
+	public function test_the_decision_function_and_the_greeting_give_one_answer( string $enabled, int $paid, mixed $listener, bool $expected ): void {
+		update_option( Options::GREETING_ENABLED, $enabled );
+		update_option( Options::GREETING_ORDERS, '1' );
+		$this->place_orders( $paid );
+		$decide = static fn (): mixed => $listener;
+		if ( ! \is_null( $listener ) ) {
+			add_filter( 'dws_plugin_template/greeting/should_show', $decide );
+		}
+
+		try {
+			self::assertSame( $expected, dws_tpl_should_show_greeting( $this->customer ) );
+			self::assertSame( $expected, '' !== $this->print() );
+		} finally {
+			remove_filter( 'dws_plugin_template/greeting/should_show', $decide );
+		}
+	}
+
+	public function test_a_listener_receives_whether_the_paid_orders_reach_the_set_number_and_the_customer(): void {
+		update_option( Options::GREETING_ORDERS, '2' );
+		$this->place_orders( 1 );
+		$received = array();
+		$record   = static function ( bool $shown, \WP_User $customer ) use ( &$received ): bool {
+			$received[] = array( $shown, $customer->ID );
+			return $shown;
+		};
+		add_filter( 'dws_plugin_template/greeting/should_show', $record, 10, 2 );
+
+		try {
+			dws_tpl_should_show_greeting( $this->customer );
+		} finally {
+			remove_filter( 'dws_plugin_template/greeting/should_show', $record );
+		}
+
+		self::assertSame( array( array( false, $this->customer ) ), $received );
+	}
+
+	public function test_a_user_id_that_names_no_user_is_never_greeted(): void {
+		update_option( Options::GREETING_ORDERS, '1' );
+		$this->place_orders( 1 );
+		$this->create_order( array( 'status' => 'completed' ) );
+		wp_delete_user( $this->customer );
+		$asked  = 0;
+		$listen = static function () use ( &$asked ): bool {
+			++$asked;
+			return true;
+		};
+		add_filter( 'dws_plugin_template/greeting/should_show', $listen );
+
+		try {
+			self::assertFalse( dws_tpl_should_show_greeting( $this->customer ) );
+			self::assertFalse( dws_tpl_should_show_greeting( 0 ) );
+		} finally {
+			remove_filter( 'dws_plugin_template/greeting/should_show', $listen );
+		}
+
+		self::assertSame( 0, $asked );
 	}
 
 	public function test_the_greeting_style_loads_on_the_account_dashboard_only(): void {
