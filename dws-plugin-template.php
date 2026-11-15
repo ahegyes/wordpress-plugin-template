@@ -32,6 +32,14 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Bootstrap\
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * The path of the plugin's main file.
+ *
+ * @api
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ */
 define( 'DWS_TPL_FILE', __FILE__ );
 load_plugin_textdomain( 'dws-plugin-template', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' ); // phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- WordPress registers languages/ itself only for plugins it does not network-activate.
 
