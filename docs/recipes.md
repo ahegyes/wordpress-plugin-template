@@ -1067,7 +1067,7 @@ A decision is the usual first entry. `includes/greeting.php` declares `dws_tpl_s
 
 - Make the decision once, in a public static on the `src/` class that makes it, and have the plugin's own code and the `@api` function both call it, so the two give one answer. Put the function in a file in `includes/` named for its topic.
 - Name it for the decision with the hook rules' predicates, `should_` for a decision a listener can change, `is_`, `has_` or `are_` for a state and `can_` for a capability, and type its return.
-- Answer the decision, not whether the plugin booted: the function's docblock names `dws_plugin_template/boot/succeeded`, which another plugin checks with `did_action()` where it needs to know.
+- Keep the function defined and have the static answer no until the plugin has booted, as `should_show()` does until `dws_plugin_template/boot/succeeded` has fired, so the function never reaches WooCommerce where it is inactive or where the boot failed.
 - Expose no reader for a setting the decision reads, nor a generic `dws_tpl_get_option( $key )`, which would make every key, type and default contract. Another plugin that needs a stored value reads it through `get_option()` on the option's name.
 - Another plugin calls the function no earlier than `plugins_loaded`, or than the hook its docblock names, such as `wp_loaded` for the greeting's, and behind `function_exists()`, as AGENTS.md's add-on convention asks of every `@api` function, since the plugin may load later or stay active below its floors without defining it.
 - Tag the function `@api`, which `GlobalsTest` checks, and give it an Integration row. It is contract from its first release, so a break of it ships as the next major, as AGENTS.md's Contract section says.
@@ -1090,7 +1090,7 @@ Where other plugins should be able to change what the plugin decides, apply a fi
 ```
 
 - Name the filter by AGENTS.md's hook rules, a predicate for a yes-or-no decision, and keep the strict comparison at the call site, so a listener that returns anything but `true` leaves the greeting out.
-- Ask the filter only where the plugin acts at all: the greeting answers no while it is switched off or the id names no user, before the filter, so no listener can show a greeting that never prints.
+- Ask the filter only where the plugin acts at all: the greeting answers no until the plugin has booted, while it is switched off or where the id names no user, before the filter, so a listener cannot turn on a greeting the site has switched off.
 - A choice that leaves the decision to code, such as "custom", is answered by such a filter, which a site fills with its own code; no setting stores code or the name of a function to run.
 - Apply no filter to every read of a setting: it would fire for every setting with no context, while WordPress's `pre_option_{$option}` and `option_{$option}` filters already override one stored value where a site needs that. A plugin whose v1 filtered each settings read keeps that filter, with v1's field ids, through any change to how its settings are stored.
 - The filter's name and arguments are contract from the release that adds it, as every hook the plugin fires.

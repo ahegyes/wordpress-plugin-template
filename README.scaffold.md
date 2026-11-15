@@ -14,7 +14,7 @@ Download `dws-plugin-template.zip` from the repository's latest release, then up
 
 Other plugins integrate through the plugin's functions, its hooks and WordPress's and WooCommerce's APIs on the names below, never through its classes. They call its functions no earlier than `plugins_loaded`, or than the hook a function's docblock names, and behind `function_exists()`, since the plugin may load later or stay active below its floors without defining them, and register their extensions on `dws_plugin_template/boot/succeeded`, hooked before `plugins_loaded` reaches priority 15, where the plugin boots.
 
-- `dws_tpl_should_show_greeting( $user_id )` answers, from `wp_loaded` on and where WooCommerce is active, whether a customer sees the account dashboard greeting, and the `dws_plugin_template/greeting/should_show` filter changes that answer, receiving it and the customer's `WP_User`.
+- `dws_tpl_should_show_greeting( $user_id )`, asked from `wp_loaded` on, answers whether a customer sees the account dashboard greeting. It answers no until the plugin has booted, and the `dws_plugin_template/greeting/should_show` filter changes its answer, receiving it and the customer's `WP_User`.
 - `dws_tpl_get_plugin_slug()`, `dws_tpl_get_plugin_name()` and `dws_tpl_get_plugin_version()` read the plugin's header.
 - `dws_plugin_template/boot/succeeded`, `dws_plugin_template/boot/blocked` and `dws_plugin_template/boot/failed` fire once the plugin's boot has an outcome.
 - The settings are the options `dws_tpl_greeting_enabled`, `dws_tpl_greeting`, `dws_tpl_greeting_orders` and `dws_tpl_delete_data`, which `get_option()` reads.
