@@ -67,7 +67,7 @@ final class AccountDashboardGreeting implements ComponentInterface {
 	/**
 	 * Returns whether a customer sees the greeting on their account dashboard.
 	 *
-	 * It answers no while the greeting's gate is closed or the id names no user, before any listener is asked, so a listener cannot turn on a greeting the site has switched off. Callers ask from wp_loaded on, where WooCommerce is active, since WooCommerce registers its order types and statuses on init.
+	 * It answers no until the plugin has booted, while the greeting's gate is closed, or where the id names no user, before any listener is asked, so a listener cannot turn on a greeting the site has switched off. Callers ask from wp_loaded on, since WooCommerce registers its order types and statuses on init.
 	 *
 	 * @since   1.0.0
 	 * @version 1.0.0
@@ -77,8 +77,12 @@ final class AccountDashboardGreeting implements ComponentInterface {
 	 * @return  bool
 	 */
 	public static function should_show( int $user_id ): bool {
+		if ( 0 === did_action( 'dws_plugin_template/boot/succeeded' ) || ! GreetingFeature::should_load() ) {
+			return false;
+		}
+
 		$customer = get_userdata( $user_id );
-		if ( ! GreetingFeature::should_load() || ! $customer instanceof \WP_User ) {
+		if ( ! $customer instanceof \WP_User ) {
 			return false;
 		}
 

@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Returns whether a customer sees the account dashboard greeting.
  *
- * It answers as the greeting does when it prints, while the greeting loads only where the site switched it on at boot, so a setting written later in the same request can make the two differ. It does not tell whether the plugin booted, which the dws_plugin_template/boot/succeeded action announces. Callers ask from wp_loaded on, where WooCommerce is active, since WooCommerce registers its order types and statuses on init.
+ * It answers as the greeting does when it prints, while the greeting loads only where the site switched it on at boot, so a setting written later in the same request can make the two differ. It answers no until the plugin has booted, which the dws_plugin_template/boot/succeeded action announces. Callers ask from wp_loaded on, since WooCommerce registers its order types and statuses on init.
  *
  * @api
  *
