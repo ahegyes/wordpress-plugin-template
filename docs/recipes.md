@@ -1372,7 +1372,7 @@ In `phpstan.safeguards.neon`, delete the whole `scanFiles` key, which lists only
 
 3. In `dws-plugin-template.php`, delete the `Requires Plugins`, `WC requires at least` and `WC tested up to` headers, and in `tests/Unit/EntryHeadersTest.php` the row that ties `WC tested up to` to the locked WooCommerce.
 
-4. In `functions.php`, delete the `FeaturesUtil` import and the `before_woocommerce_init` closure, so the hooks after the includes loop read:
+4. In `functions.php`, delete the `FeaturesUtil` import, the `before_woocommerce_init` closure and the file docblock's clause on WooCommerce feature compatibility, so the hooks after the includes loop read:
 
 ```php
 // ... the includes loop ...
@@ -1495,8 +1495,8 @@ use DeepWebSolutions\PluginTemplate\Scoped\DeepWebSolutions\Framework\Core\Migra
 - Delete `tests/EndToEnd/without-woocommerce.spec.ts` and `tests/Support/OrderStorageTrait.php`.
 - `OptionsTest` and the Integration `MigrationsTest` read and seed `Options::LIMIT` where they read the greeting's keys, and a malformed limit reads its default 1.
 - `UninstallTest`, `PartialDeployTest` and `MultisiteTest` keep their consent rows, since the consent keeps its option; `UninstallTest` seeds and asserts no Action Scheduler action.
-- `PluginBootTest` expects nothing in `$plugin->kernel->skipped`, and drops the `DWS_TPL_DEBUG` row with its `get_threshold()` helper and the `WooCommerceLogger` and `RunInSeparateProcess` imports.
-- `SettingsTest` builds `new OptionsPage( $identity, Plugin::PREFIX, new SettingsPage( $identity ) )` over `new PluginIdentity( DWS_TPL_FILE, Plugin::SLUG, Plugin::PREFIX )` and renders it through `render_page()`, which first needs `wp-admin/includes/template.php`. It saves as `options.php` does: with `$GLOBALS['pagenow']` set to `options.php` and `$_REQUEST['option_page']` to `dws_tpl_general`, it calls `register_settings()`, then `update_option()` for each of the tab's options, with null for one the form did not post. `tearDownAfterClass()` removes each field's `pre_update_option_` filter and the group's `option_page_capability_` filter, and unregisters each setting.
+- `PluginBootTest` expects nothing in `$plugin->kernel->skipped`, and drops the compatibility declaration's row, the `DWS_TPL_DEBUG` row with its `get_threshold()` helper, and the `GreetingFeature`, `PluginIdentity`, `WooCommerceLogger` and `RunInSeparateProcess` imports.
+- `SettingsTest` covers `SettingsPage` in place of `Settings` and builds `new OptionsPage( $identity, Plugin::PREFIX, new SettingsPage( $identity ) )` over `new PluginIdentity( DWS_TPL_FILE, Plugin::SLUG, Plugin::PREFIX )` and renders it through `render_page()`, which first needs `wp-admin/includes/template.php`. It saves as `options.php` does: with `$GLOBALS['pagenow']` set to `options.php` and `$_REQUEST['option_page']` to `dws_tpl_general`, it calls `register_settings()`, then `update_option()` for each of the tab's options, with null for one the form did not post. `tearDownAfterClass()` removes each field's `pre_update_option_` filter and the group's `option_page_capability_` filter, and unregisters each setting.
 - `tests/EndToEnd/settings.spec.ts` drives the page's limit field at `options-general.php?page=dws_tpl` with the same keyboard checks, scoping axe to `form[action="options.php"]`, and expects WordPress's "Settings saved." after each save.
 
 12. Update `AGENTS.md`, `README.md` and `docs/ARCHITECTURE.md` wherever they name WooCommerce, the greeting, the settings tab or the order-tables declaration.

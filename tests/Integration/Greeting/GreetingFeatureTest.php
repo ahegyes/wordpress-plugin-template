@@ -7,12 +7,12 @@ use DeepWebSolutions\PluginTemplate\Options;
 use DeepWebSolutions\PluginTemplate\Plugin;
 use DeepWebSolutions\PluginTemplate\Tests\Support\OrderStorageTrait;
 use DeepWebSolutions\PluginTemplate\Tests\Support\RestoresOptionsTrait;
-use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
-#[CoversNothing]
+#[CoversClass( GreetingFeature::class )]
 final class GreetingFeatureTest extends TestCase {
 	use OrderStorageTrait;
 	use RestoresOptionsTrait;
